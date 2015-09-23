@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web.Http;
+using Newtonsoft.Json;
 using try_cb_dotnet.Models;
 using try_cb_dotnet.Storage.Couchbase;
+using JWT;
 
 namespace try_cb_dotnet.Controllers
 {
@@ -10,30 +12,66 @@ namespace try_cb_dotnet.Controllers
     {
         [HttpGet]
         [ActionName("Login")]
-        public object Login()
+        public object Login(string password, string user)
         {
-            // HACK : Only allows guest/guest 
-            // Missing JWT .net implementation.
+            try
+            {
+                var result = CouchbaseStorageHelper.Instance.Get("profile::" + user, "default");
+                if (result.Success && result.Status == Couchbase.IO.ResponseStatus.Success && result.Exception == null && result.Value != null)
+                {
+                    var jsonDecodedTokenString =
+                        JsonWebToken
+                        .Decode(result.Value, CouchbaseConfigHelper.Instance.JWTTokenSecret, false);
 
-            /*
-            Implement JwtSecurityTokenHandler();
-            */
+                    var jwtToken = JsonConvert.DeserializeAnonymousType(jsonDecodedTokenString, new { user = "", iat = "" });
 
-            return new { success = FakeUserModel.GetFakeUser.JWTToken };
+                    if (jwtToken.iat == password)
+                    {
+                        return new { success = result.Value };
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Silence the Exception
+            }
+
+            return new { success = false };
         }
 
         [HttpPost]
         [ActionName("Login")]
         public object CreateLogin([FromBody] UserModel user)
         {
-            // HACK : Only allows guest/guest 
-            // Missing JWT .net implementation.
+            try
+            {
+                if (CouchbaseStorageHelper.Instance.Exists("profile::" + user.User, "default"))
+                {
+                    throw new Exception("User already Exists!");
+                }
 
-            /*
-            Implement JwtSecurityTokenHandler();
-            */
+                string jsonToken =
+                    JsonWebToken
+                    .Encode(
+                        new { user = user.User, iat = user.Password },
+                        CouchbaseConfigHelper.Instance.JWTTokenSecret,
+                        JWT.JwtHashAlgorithm.HS256);
 
-            return new { success = FakeUserModel.GetFakeUser.JWTToken };
+                var result = CouchbaseStorageHelper.Instance.Upsert("profile::" + user.User, jsonToken, "default");
+
+                if (!result.Success || result.Exception != null)
+                {
+                    throw new Exception("could not save user to Couchbase");
+                }
+
+                return new { success = jsonToken };
+            }
+            catch (Exception)
+            {
+                // Silence the Exception
+            }
+
+            return new { success = false };
         }
 
         [HttpGet]
@@ -65,7 +103,7 @@ namespace try_cb_dotnet.Controllers
             // request.flights[0]._data.equipment.Value
             List<FlightModel> flights = new List<FlightModel>();
 
-            foreach(var flight in request.flights)
+            foreach (var flight in request.flights)
             {
                 flights.Add(new FlightModel
                 {
@@ -79,8 +117,7 @@ namespace try_cb_dotnet.Controllers
 
             CouchbaseStorageHelper
                 .Instance
-                .Upsert("bookings::"+request.token, flights);
-
+                .Upsert("bookings::" + request.token, flights);
 
             return new { added = flights.Count };
 

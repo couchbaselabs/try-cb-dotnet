@@ -49,5 +49,13 @@ namespace try_cb_dotnet
                 return ConfigurationManager.AppSettings["couchbaseUser"];
             }
         }
+
+        public string JWTTokenSecret
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["JWTTokenSecret"];
+            }
+        }
     }
 }
