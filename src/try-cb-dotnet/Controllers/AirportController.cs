@@ -1,4 +1,5 @@
 ﻿using System.Web.Http;
+using Couchbase.N1QL;
 using try_cb_dotnet.Storage.Couchbase;
 
 namespace try_cb_dotnet.Controllers
@@ -15,23 +16,33 @@ namespace try_cb_dotnet.Controllers
             //    new {airportname = "San Francisco Intl"}
             //};
 
-            string queryStr = search;
-            string queryPrep;
-            if (queryStr.Length == 3)
+            if (search.Length == 3)
             {
-                queryPrep = "SELECT airportname FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE faa ='" + queryStr.ToUpper() + "'";
+                // LAX
+                var query = 
+                    new QueryRequest("SELECT airportname FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE faa=$1")
+                    .AddPositionalParameter(search.ToUpper());
+
+                return CouchbaseStorageHelper.Instance.ExecuteQuery(query).Rows;
             }
-            else if (queryStr.Length == 4 && (queryStr == queryStr.ToUpper() || queryStr == queryStr.ToLower()))
+            else if (search.Length == 4)
             {
-                queryPrep = "SELECT airportname FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE icao ='" + queryStr.ToUpper() + "'";
+                // KLAX
+                var query =
+                    new QueryRequest("SELECT airportname FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE icao = '$1'")
+                    .AddPositionalParameter(search.ToUpper());
+
+                return CouchbaseStorageHelper.Instance.ExecuteQuery(query).Rows;
             }
             else
             {
-                queryPrep = "SELECT airportname FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE airportname LIKE '" + queryStr + "%'";
-            }
+                // Los Angeles
+                var query =
+                    new QueryRequest("SELECT airportname FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE airportname LIKE $1")
+                    .AddPositionalParameter("%" + search + "%");
 
-            var result = CouchbaseStorageHelper.Instance.ExecuteQuery(queryPrep);
-            return result.Rows;
+                return CouchbaseStorageHelper.Instance.ExecuteQuery(query).Rows;
+            }
         }
     }
 }

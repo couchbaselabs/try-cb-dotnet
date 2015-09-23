@@ -55,7 +55,7 @@ namespace try_cb_dotnet.Controllers
                     .Encode(
                         new { user = user.User, iat = user.Password },
                         CouchbaseConfigHelper.Instance.JWTTokenSecret,
-                        JWT.JwtHashAlgorithm.HS256);
+                        JwtHashAlgorithm.HS512);
 
                 var result = CouchbaseStorageHelper.Instance.Upsert("profile::" + user.User, jsonToken, "default");
 

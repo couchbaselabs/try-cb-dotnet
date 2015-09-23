@@ -11,7 +11,6 @@ namespace try_cb_dotnet.Storage.Couchbase
     {
         public CouchbaseStorageHelper()
         {
-            Initialize();
         }
 
         private static CouchbaseStorageHelper instance = null;
@@ -29,40 +28,24 @@ namespace try_cb_dotnet.Storage.Couchbase
             }
         }
 
-        public void Initialize()
+        public IQueryResult<dynamic> ExecuteQuery(IQueryRequest query)
         {
-            var config = new ClientConfiguration();
-            config.Servers = new List<Uri>(new Uri[] { new Uri(CouchbaseConfigHelper.Instance.Server) });
-            config.BucketConfigs.Clear();
-            config.BucketConfigs.Add(
-                CouchbaseConfigHelper.Instance.Bucket, 
-                new BucketConfiguration
-                {
-                    BucketName = CouchbaseConfigHelper.Instance.Bucket,
-                    Username = CouchbaseConfigHelper.Instance.User,
-                    Password = CouchbaseConfigHelper.Instance.Password
-                });
-
-            config.BucketConfigs.Add(
-                "default",
-                new BucketConfiguration
-                {
-                    BucketName = "default",
-                    Username = CouchbaseConfigHelper.Instance.User,
-                    Password = CouchbaseConfigHelper.Instance.Password
-                });
-
-            ClusterHelper.Initialize(config);
+            return ClusterHelper
+                .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
+                .Query<dynamic>(query);
         }
 
         public IQueryResult<dynamic> ExecuteQuery(string query)
         {
-            return ClusterHelper
-                .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
-                .Query<dynamic>(new QueryRequest(query));
+            return ExecuteQuery(new QueryRequest(query));
         }
 
         public string ExecuteQuery(string query, Formatting format)
+        {
+            return JsonConvert.SerializeObject(ExecuteQuery(query), format);
+        }
+
+        public string ExecuteQuery(IQueryRequest query, Formatting format)
         {
             return JsonConvert.SerializeObject(ExecuteQuery(query), format);
         }
