@@ -4,6 +4,7 @@ using Couchbase.N1QL;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using Couchbase.Core;
 
 namespace try_cb_dotnet.Storage.Couchbase
 {
@@ -26,6 +27,16 @@ namespace try_cb_dotnet.Storage.Couchbase
 
                 return instance;
             }
+        }
+
+        public IBucket Bucket(string bucketName)
+        {
+            return ClusterHelper.GetBucket(bucketName);
+        }
+
+        public IBucket Bucket()
+        {
+            return Bucket(CouchbaseConfigHelper.Instance.Bucket);
         }
 
         public IQueryResult<dynamic> ExecuteQuery(IQueryRequest query)

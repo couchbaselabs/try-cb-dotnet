@@ -6,6 +6,10 @@ using System.Net.Http;
 using System.Web.Http;
 using try_cb_dotnet.Models;
 using try_cb_dotnet.Storage.Couchbase;
+using Couchbase.N1QL;
+using Couchbase.Linq.Extensions;
+using Couchbase.Linq.SampleBuckets.Documents.TravelDocuments;
+using Newtonsoft.Json.Linq;
 
 namespace try_cb_dotnet.Controllers
 {
@@ -22,30 +26,73 @@ namespace try_cb_dotnet.Controllers
             //    new { destinationairport="SFO",equipment=738,flight="AA907",id=5746,name="American Airlines",sourceairport="LAX",utc="00:29:00",flighttime=1,price=53}
             //};
 
-            string queryFrom = from;
-            string queryTo = to;
-            string queryLeave = ((int)leave.DayOfWeek + 1).ToString();
+            // query syntax
+            var airlinesQuerySyntax
+                = (from fromAirport in CouchbaseStorageHelper.Instance.Bucket().Queryable<Airport>()
+                   where fromAirport.Airportname == @from
+                   select new { fromAirport = fromAirport.Faa, geo = fromAirport.Geo })
+                            .ToList() // need to execute the first part of the select before call to Union
+                           .Union<dynamic>(
+                                    from toAirport in CouchbaseStorageHelper.Instance.Bucket().Queryable<Airport>()
+                                    where toAirport.Airportname == to
+                                    select new { toAirport = toAirport.Faa, geo = toAirport.Geo });
 
-            /* Translate airport name to abrivation */
-            var queryPrep1 = "SELECT faa as fromAirport,geo FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE airportname = '" + from +
-        "' UNION SELECT faa as toAirport,geo FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE airportname = '" + to + "'";
-            var result1 = CouchbaseStorageHelper.Instance.ExecuteQuery(queryPrep1);
-            if (result1.Rows.Any())
+            // lambda syntax
+            var airlinesLambdaSyntaxt
+                = CouchbaseStorageHelper.Instance.Bucket().Queryable<Airport>()
+                .Where(airline => airline.Airportname == @from)
+                .Select(airline => new { fromAirport = airline.Faa, geo = airline.Geo })
+                .ToList()
+                .Union<dynamic>(
+                        CouchbaseStorageHelper.Instance.Bucket().Queryable<Airport>()
+                        .Where(airline => airline.Airportname == to)
+                        .Select(airline => new { toAirport = airline.Faa, geo = airline.Geo })
+                        ).ToList();
+
+            string queryFrom = null;
+            string queryTo = null;
+            var queryLeave = (int)leave.DayOfWeek + 1;
+
+            // raw query
+            var query1 =
+                   new QueryRequest(
+                       "SELECT faa as fromAirport, geo FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` " +
+                       "WHERE airportname = $from " +
+                       "UNION SELECT faa as toAirport, geo FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` " +
+                       "WHERE airportname = $to")
+                   .AddNamedParameter("from", from)
+                   .AddNamedParameter("to", to);
+
+            var partialResult1 = CouchbaseStorageHelper.Instance.ExecuteQuery(query1);
+
+            if (partialResult1.Rows.Any())
             {
-                foreach (var row in result1.Rows)
+                foreach (dynamic row in partialResult1.Rows)
                 {
                     if (row.fromAirport != null) queryFrom = row.fromAirport;
                     if (row.toAirport != null) queryTo = row.toAirport;
                 }
             }
 
-            var queryPrep = "SELECT r.id, a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment " +
-            "FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` r UNNEST r.schedule s JOIN `" +
-            CouchbaseConfigHelper.Instance.Bucket + "` a ON KEYS r.airlineid WHERE r.sourceairport='" + queryFrom +
-            "' AND r.destinationairport='" + queryTo + "' AND s.day=" + queryLeave + " ORDER BY a.name";
+            // raw query
+            var query2 =
+                   new QueryRequest(
+                       "SELECT r.id, a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment FROM " +
+                       "`" + CouchbaseConfigHelper.Instance.Bucket + "` r " +
+                       "UNNEST r.schedule s JOIN " +
+                       "`" + CouchbaseConfigHelper.Instance.Bucket + "` " +
+                       "a ON KEYS r.airlineid WHERE r.sourceairport=$from " +
+                       "AND r.destinationairport=$to " +
+                       "AND s.day=$leave " +
+                       "ORDER BY a.name")
+                   .AddNamedParameter("from", queryFrom)
+                   .AddNamedParameter("to", queryTo)
+                   .AddNamedParameter("leave", queryLeave);
 
-            var result = CouchbaseStorageHelper.Instance.ExecuteQuery(queryPrep);
-            return result.Rows;
+            return CouchbaseStorageHelper
+                .Instance
+                .ExecuteQuery(query2)
+                .Rows;
         }
     }
 }

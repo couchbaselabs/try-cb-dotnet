@@ -208,9 +208,11 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\Airport.cs" />
     <Compile Include="Models\FakeUserModel.cs" />
     <Compile Include="Models\FlightBookingModel.cs" />
     <Compile Include="Models\FlightModel.cs" />
+    <Compile Include="Models\Geo.cs" />
     <Compile Include="Models\TokenModel.cs" />
     <Compile Include="Models\UserModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
