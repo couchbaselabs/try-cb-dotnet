@@ -12,7 +12,10 @@ Date selection uses date time pickers and then searches for applicable air fligh
 # Installation and Configuration
 Copy the source code to a folder of your choice and open the solution file (.sln) in Visual Studio 2015, compile and run.
 
+# New in this commit
+* Added support for JWT Tokens during login and Create new user.
+* Added sample for N1QL Lanbda + Query Syntax usage.
+* Refactor and polish of code for better readability.
+
 # Open Issues and missing features
-* Missing JWT token implementation to support login.
-* Only valid user is guest/guest
-* Using Linq2Couchbase for queries.
+* None
