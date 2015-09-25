@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Couchbase;
 using Couchbase.Configuration.Client;
-using try_cb_dotnet.Storage.Couchbase;
 
 namespace try_cb_dotnet.App_Start
 {

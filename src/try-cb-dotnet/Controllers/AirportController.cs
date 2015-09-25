@@ -10,12 +10,6 @@ namespace try_cb_dotnet.Controllers
         [ActionName("findAll")]
         public object FindAll(string search, string token)
         {
-            // [{"airportname":"San Francisco Intl"}]
-            //return new List<dynamic>()
-            //{
-            //    new {airportname = "San Francisco Intl"}
-            //};
-
             if (search.Length == 3)
             {
                 // LAX
