@@ -13,7 +13,9 @@ namespace try_cb_dotnet
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
-            routes.IgnoreRoute(""); // needed to allow index.html to be default start page.
+            /// This code is added to allow as.net to redirect to index.html in 
+            /// case there is no paramters in the query.
+            routes.IgnoreRoute("");
 
             routes.MapRoute(
                 name: "Default",
