@@ -11,11 +11,41 @@ namespace try_cb_dotnet.Controllers
         [ActionName("findAll")]
         public object FindAll(string search, string token)
         {
-            /// [{"airportname":"San Francisco Intl"}]
-            return new List<dynamic>()
+            IQueryRequest query = null;
+
+            if (search.Length == 3)
             {
-                new {airportname = "San Francisco Intl"}
-            };
+                string sql = "SELECT airportname FROM `travel-sample` WHERE faa = $1";
+
+                query = new QueryRequest(sql)
+                   .AddPositionalParameter(search.ToUpper());
+            }
+            else if (search.Length == 4)
+            {
+
+                string sql = "SELECT airportname FROM `travel-sample` WHERE icao = $1";
+
+                query = new QueryRequest(sql)
+                   .AddPositionalParameter(search.ToUpper());
+            }
+            else
+            {
+                string sql = "SELECT DISTINCT(airportname) FROM `travel-sample` WHERE LOWER(airportname) LIKE $search OR LOWER(country) LIKE $search AND LOWER(country) != 'undefined' AND type = 'airport' LIMIT 10";
+
+                query = new QueryRequest(sql)
+                   .AddNamedParameter("search", "%" + search.ToLower() + "%");
+            }
+
+            var result = ClusterHelper.GetBucket("travel-sample")
+                    .Query<dynamic>(query);
+
+            return result.Rows;
+
+            /// [{"airportname":"San Francisco Intl"}]
+            //return new List<dynamic>()
+            //{
+            //    new {airportname = "San Francisco Intl"}
+            //};
         }
     }
 }
