@@ -30,7 +30,7 @@ namespace try_cb_dotnet.Controllers
             }
             else
             {
-                string sql = "SELECT DISTINCT(airportname) FROM `travel-sample` WHERE LOWER(airportname) LIKE $search OR LOWER(country) LIKE $search AND LOWER(country) != 'undefined' AND type = 'airport' LIMIT 10";
+                string sql = "SELECT airportname FROM `travel-sample` WHERE type='airport' AND airportname IS NOT NULL AND (LOWER(airportname) LIKE $search OR LOWER(city) LIKE $search)";
 
                 query = new QueryRequest(sql)
                    .AddNamedParameter("search", "%" + search.ToLower() + "%");
