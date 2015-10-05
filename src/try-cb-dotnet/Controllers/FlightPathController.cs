@@ -19,31 +19,15 @@ namespace try_cb_dotnet.Controllers
         [ActionName("findAll")]
         public object FindAll(string from, DateTime leave, string to, string token)
         {
-            // query syntax
-            var airlinesQuerySyntax
-                = (from fromAirport in ClusterHelper.GetBucket(CouchbaseConfigHelper.Instance.Bucket).Queryable<Airport>()
-                   where fromAirport.Airportname == @from
-                   select new { fromAirport = fromAirport.Faa, geo = fromAirport.Geo })
-                            .ToList() // need to execute the first part of the select before call to Union
-                           .Union<dynamic>(
-                                    from toAirport in ClusterHelper.GetBucket(CouchbaseConfigHelper.Instance.Bucket).Queryable<Airport>()
-                                    where toAirport.Airportname == to
-                                    select new { toAirport = toAirport.Faa, geo = toAirport.Geo });
+            //var airlinenames = ...
 
-            // lambda syntax
-            var airlinesLambdaSyntaxt
-                = ClusterHelper.GetBucket(CouchbaseConfigHelper.Instance.Bucket).Queryable<Airport>()
-                .Where(airline => airline.Airportname == @from)
-                .Select(airline => new { fromAirport = airline.Faa, geo = airline.Geo })
-                .ToList() // need to execute the first part of the select before call to Union
-                .Union<dynamic>(
-                        ClusterHelper.GetBucket(CouchbaseConfigHelper.Instance.Bucket).Queryable<Airport>()
-                        .Where(airline => airline.Airportname == to)
-                        .Select(airline => new { toAirport = airline.Faa, geo = airline.Geo })
-                        );
+            List<dynamic> airlinenames = 
+                new List<object>{
+                    new { fromAirport = "SFO" },
+                    new { toAirport = "LAX" },
+                };
 
-            //var airlinesResult = airlinesLambdaSyntaxt.ToList();
-            var airlinesResult = airlinesQuerySyntax.ToList();
+            var airlinesResult = airlinenames.ToList();
 
             string queryFrom = null;
             string queryTo = null;
