@@ -295,24 +295,53 @@ Later we will use Couchbase to do the look-up but for now a "constant" is return
 You should now be able to run and browse the application in your browser. All data is static but never the less it "works". In Step 2 we will update the static JSON returned to actual data.    
 
 ### Step 2 - Understand Couchbase, Couchbase .NET SDK & N1QL
-> Part 1 of the tutorial is not using Couchbase Server, it's only included in the tutorial to show how web api works and to emphasise that we are working with JSON. The only task of the backend API is to return JSON. This is an important understanding that will help you not only with this tutorial but whenever working with an API.
- 
-> Implementing the API is al about returning the right JSON. Couchbase stores all it's documents in JSON and therefore is a very good match for an API that returns JSON.
+In this step we will update all WEB API methods to return data from Couchbase. This is the first step that uses Couchbase and therefore we need to add references to the Couchbase Client and LINQ extensions.
 
->Feel free to skip this step and go directly to step 2, to start learning how to use Couchbase and the Couchbase SDK in your .NET Apps.
+####Step 2.0 - Bootstrapping the Couchbase Client.
 
-In this step we will update all WEB API methods to return static JSON (string values). This will allow you to run and browse the web application and get an understanding of how the code is organised.
+**Where:** `Solution` (this is a solution wide update)
+
+**Goals:** Add a reference to: [CouchbaseNetClient](https://www.nuget.org/packages/CouchbaseNetClient) and [Linq2Couchbase](https://www.nuget.org/packages/Linq2Couchbase) the later is the LINQ to N1QL extensions. 
+When the references are in place we need to bootstrap the Couchbase SDK and make it globally available in the solution/web application.
+
+**Relevant Documentation Topics:** 
+
+* [N1QL intro](http://developer.couchbase.com/documentation/server/4.0/n1ql/n1ql-intro/data-access-using-n1ql.html)
+* [Couchbase .NET Client - github](https://github.com/couchbase/couchbase-net-client)
+* [Couchbase .NET Client - docs](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/getting-started.html)
+* [Linq2Couchbase - github](https://github.com/couchbaselabs/Linq2Couchbase)
+* [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
+
+**Task:**
+For every release, we package the binaries and store the latest version in NuGet. If you are not familiar with NuGet, it’s the official and most widely supported package manager for Microsoft Visual Studio and .NET in general. NuGet is a centralized repository for package authors and consumers, and it also defines a suite of tools for authoring and consuming packages.
+
+Using Visual Studio 2015 or later, follow these steps to get started with the Couchbase .NET SDK:
+
+1. From the IDE, right-click the solution/project to which you want to add the dependency.
+2. In the context menu, click Manage NuGet Packages. The NuGet package manager modal dialog opens.
+3. In the search box at the top right-hand side of the dialog, type CouchbaseNetClient and then press enter on your keyboard.
+4. In the search results, select the `CouchbaseNetClient` package and then click Install.
+5. Repeat step 3-4 to install `Linq2Couchbase`.
+
+*Bootstrap*
+
+
+That’s it! NuGet will pull in all required dependencies and reference them. You're ready to start coding!
+
+**Solution:**
+
+
 
 ####Step 2.1 
 
-**Where:** `UserController.cs` -> **method:** `Login(string password, string user)`
+**Where:** `.cs` -> **method:** `method`
 
 **Goals:** Return live data from the Travel Sample data bucket in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
 
 **Relevant Documentation Topics:** 
 
-* [N1QL intro]()
-* [Couchbase .NET Client]()
+* [Linq2Couchbase - github](https://github.com/couchbaselabs/Linq2Couchbase)
+* [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
 
 **Task:**
 
