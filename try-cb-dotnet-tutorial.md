@@ -785,25 +785,354 @@ Implement the method to return the the number of successful bookings that where 
         }
 
 ### Step 2 - Summery
-...
+In part 2 we learned how to bootstrap the .NET Couchbase Client and query data with N1QL raw string queries. We have not used LINQ 2 Couchbase yet, we will come back to that in Step 4.
 
-### Step 3 - 
-In this step we will ...
+### Step 3 - Login credentials and authentications 
+In this step we will implement the login page to use JWT Tokens for new and exciting users.
 
 ####Step 3.1
 
-**Where:** `.cs` -> **method:** `method`
+**Where:** `UserController.cs` -> **method:** `Login(string password, string user)`
 
 **Goals:** 
+Update the Web Api method to return JWToken stored in Couchbase Server for then individual users.
 
 **Relevant Documentation Topics:** 
 
-* [N1QL intro](http://developer.couchbase.com/documentation/server/4.0/n1ql/n1ql-intro/data-access-using-n1ql.html)
-* [Couchbase .NET Client - github](https://github.com/couchbase/couchbase-net-client)
-* [Couchbase .NET Client - docs](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/getting-started.html)
-* [Linq2Couchbase - github](https://github.com/couchbaselabs/Linq2Couchbase)
-* [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
+* [JWT Token .NET](https://www.nuget.org/packages/JWT)
 
 **Task:**    
 
+This is a Web API call, a method that is called from the static html (index.html).
+The JS in the static html expects this "Login" web api call to return a
+"success" status code containing a JWT token. 
+The JWT token is used to reference and store data about the user's trips/bookings and login credentials.
+Response should be in a JSON format.
+
+Implement the method to return a "success" allowing the user to login.
+
+* 1:
+    Use ClusterHelper to look-up the user document and validate the login.
+    If the login is valid then return 
+    "Success" : token
+    If not, return 
+    "Success" : false
+    
+>hint:
+The user document is stored under the key: "profile::" + user in the "default" bucket.
+
 **Solution:**
+
+		[HttpGet]
+        [ActionName("Login")]
+        public object Login(string password, string user)
+        {
+            try
+            {
+                var result = ClusterHelper
+                    .GetBucket("default")
+                    .Get<dynamic>("profile::" + user);
+
+                if (result.Success && result.Status == Couchbase.IO.ResponseStatus.Success && result.Exception == null && result.Value != null)
+                {
+                    var jsonDecodedTokenString =
+                        JsonWebToken
+                        .Decode(result.Value, CouchbaseConfigHelper.Instance.JWTTokenSecret, false);
+
+                    var jwtToken = JsonConvert.DeserializeAnonymousType(jsonDecodedTokenString, new { user = "", iat = "" });
+
+                    if (jwtToken.iat == password)
+                    {
+                        return new { success = result.Value };
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Silence the Exception
+            }
+
+            return new { success = false };
+        }
+
+
+####Step 3.2
+
+**Where:** `UserController.cs` -> **method:** `CreateLogin([FromBody] UserModel user)`
+
+**Goals:** 
+Update the Web Api method to return JWToken stored in Couchbase Server for then individual users.
+
+**Relevant Documentation Topics:** 
+
+* [JWT Token .NET](https://www.nuget.org/packages/JWT)
+
+**Task:**    
+
+This is a Web API call, a method that is called from the static html (index.html).
+The JS in the static html expects this "Login" web api call to return a
+"success" status code containing a JWT token. 
+The JWT token is used to reference and store data about the user's trips/booking and login credentials.
+Response should be in a JSON format.
+
+Implement the method to create and return a valid JWT given the username and password.
+Be sure to check if a user already exists and fail in that case by returning "success" : false
+
+* 1: Add a reference to the nuget package [JWT Token .NET](https://www.nuget.org/packages/JWT). 
+
+* 2: 
+    Check if user document already exists and fail if it does.
+* 3:
+    Using this Nuget JWT library:
+    https://www.nuget.org/packages/JWT
+    Implement JWT token support:
+    The secret key to use for encryption and hashing is:
+    "UNSECURE_SECRET_TOKEN"
+    Store this key in Web.Config.
+* 4:
+    Store the generated JWT token under the user document key:
+    "profile::user" in the "default" bucket.
+* 5:
+    Update the method to return the actual JWT token created in step 2.
+
+>Hint: 
+Use `ClusterHelper` to store the document. 
+
+
+**Solution:**
+
+`UserController.cs`
+
+		[HttpPost]
+        [ActionName("Login")]
+        public object CreateLogin([FromBody] UserModel user)
+        {
+            try
+            {
+                if (ClusterHelper.GetBucket("default").Exists("profile::" + user.User))
+                {
+                    throw new Exception("User already Exists!");
+                }
+
+                string jsonToken =
+                    JsonWebToken
+                    .Encode(
+                        new { user = user.User, iat = user.Password },
+                        CouchbaseConfigHelper.Instance.JWTTokenSecret,
+                        JwtHashAlgorithm.HS512);
+
+                var result = ClusterHelper
+                    .GetBucket("default")
+                    .Upsert<dynamic>("profile::" + user.User, jsonToken);
+
+                if (!result.Success || result.Exception != null)
+                {
+                    throw new Exception("could not save user to Couchbase");
+                }
+
+                return new { success = jsonToken };
+            }
+            catch (Exception)
+            {
+                // Silence the Exception
+            }
+
+            return new { success = false };
+        }
+
+`CouchbaseConfigHelper.cs`
+
+		.
+		.
+		.
+		public string JWTTokenSecret
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["JWTTokenSecret"];
+            }
+        }
+        .
+        .
+        .
+
+`web.config`
+
+	<appSettings>
+    ...
+    <!-- COUCHBASE TRAVEL SAMPLE SETTINGS -->
+    ...
+    <add key="JWTTokenSecret" value="UNSECURE_SECRET_TOKEN" />
+    <!--END -->
+  </appSettings>
+
+### Step 3 - Summery
+In part 3 we added JWT Tokens and login credentials to the web site, allowing users to create profiles and store/retrieve their bookings.
+
+### Step 4 - Using LINQ with N1QL
+In this step we will update a query to use the LINQ extensions for N1QL to query the travel sample data.
+
+####Step 4.1
+
+**Where:** `FlightPathController.cs` -> **method:** `FindAll(string from, DateTime leave, string to, string token)`
+
+**Goals:** 
+Update the Web Api method to use LINQ with N1QL to query the data. 
+
+**Relevant Documentation Topics:** 
+
+* [LINQ 2 Couchbase - blog post](http://blog.couchbase.com/2015/august/introducing-linq2couchbase-developer-preview-1-the-linq-provider-for-couchbase-n1ql)
+
+**Task:**  
+This is a Web API call, a method that is called from the static html (index.html).
+The JS in the static html expects this "findAll" web api call to return a
+"trip" in a JSON format like this:
+
+Implement the method to use the `Linq2Couchbase` providers Query or Lambda syntax
+
+>HINT: LINQ requires a model to base it's query upon (needed for reflection). Therefore you will need to create a PoCo for every document you will query with LINQ.
+
+* 1: Create a PoCo Class for the LINQ query for "Airport"
+
+`Airport.cs`:
+
+        [EntityTypeFilter("airport")]
+        public class Airport
+        {
+            [JsonProperty("airportname")]
+            public string Airportname { get; set; }
+        
+            [JsonProperty("city")]
+            public string City { get; set; }
+        
+            [JsonProperty("country")]
+            public string Country { get; set; }
+        
+            [JsonProperty("faa")]
+            public string Faa { get; set; }
+        
+            [JsonProperty("geo")]
+            public Geo Geo { get; set; }
+        
+            [JsonProperty("icao")]
+            public string Icao { get; set; }
+        
+            [JsonProperty("id")]
+            public string Id { get; set; }
+        
+            [JsonProperty("type")]
+            public string Type { get; set; }
+        
+            [JsonProperty("tz")]
+            public string Tz { get; set; }
+        }
+
+`Geo.cs`:
+
+            [EntityTypeFilter("geo")]
+            public class Geo
+            {
+                [JsonProperty("alt")]
+                public double Alt { get; set; }
+            ///
+                [JsonProperty("lat")]
+                public double Lat { get; set; }
+            ///
+                [JsonProperty("lon")]
+                public double Lon { get; set; }
+            }
+
+* 2: Create the query using Lambda or Query syntax, read the [LINQ 2 Couchbase - blog post](http://blog.couchbase.com/2015/august/introducing-linq2couchbase-developer-preview-1-the-linq-provider-for-couchbase-n1ql) to get more information about how to query with the LINQ provider.
+
+**Solution:**    
+
+		public class FlightPathController : ApiController
+    {
+        [HttpGet]
+        [ActionName("findAll")]
+        public object FindAll(string from, DateTime leave, string to, string token)
+        {
+            // query syntax
+            var airlinesQuerySyntax
+                = (from fromAirport in ClusterHelper.GetBucket(CouchbaseConfigHelper.Instance.Bucket).Queryable<Airport>()
+                   where fromAirport.Airportname == @from
+                   select new { fromAirport = fromAirport.Faa, geo = fromAirport.Geo })
+                            .ToList() // need to execute the first part of the select before call to Union
+                           .Union<dynamic>(
+                                    from toAirport in ClusterHelper.GetBucket(CouchbaseConfigHelper.Instance.Bucket).Queryable<Airport>()
+                                    where toAirport.Airportname == to
+                                    select new { toAirport = toAirport.Faa, geo = toAirport.Geo });
+
+            // lambda syntax
+            var airlinesLambdaSyntaxt
+                = ClusterHelper.GetBucket(CouchbaseConfigHelper.Instance.Bucket).Queryable<Airport>()
+                .Where(airline => airline.Airportname == @from)
+                .Select(airline => new { fromAirport = airline.Faa, geo = airline.Geo })
+                .ToList() // need to execute the first part of the select before call to Union
+                .Union<dynamic>(
+                        ClusterHelper.GetBucket(CouchbaseConfigHelper.Instance.Bucket).Queryable<Airport>()
+                        .Where(airline => airline.Airportname == to)
+                        .Select(airline => new { toAirport = airline.Faa, geo = airline.Geo })
+                        );
+
+            //var airlinesResult = airlinesLambdaSyntaxt.ToList();
+            var airlinesResult = airlinesQuerySyntax.ToList();
+
+            string queryFrom = null;
+            string queryTo = null;
+            var queryLeave = (int)leave.DayOfWeek;
+
+            foreach (var row in airlinesResult)
+            {
+                try
+                {
+                    if (row.fromAirport != null) queryFrom = row.fromAirport;
+                }
+                catch (Exception)
+                {
+                    // silence the exception as this is known to throw one time,
+                    // for the row that does not contain toAirport. 
+                    // There is no easy way to test for the missing attribute on the 
+                    // dynamic type.
+                }
+
+                try
+                {
+                    if (row.toAirport != null) queryTo = row.toAirport;
+                }
+                catch (Exception)
+                {
+                    // silence the exception as this is known to throw one time,
+                    // for the row that does not contain fromAirport. 
+                    // There is no easy way to test for the missing attribute on the 
+                    // dynamic type.
+                }
+            }
+
+            // raw query
+            var query2 =
+                   new QueryRequest(
+                       "SELECT r.id, a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment FROM " +
+                       "`" + CouchbaseConfigHelper.Instance.Bucket + "` r " +
+                       "UNNEST r.schedule s JOIN " +
+                       "`" + CouchbaseConfigHelper.Instance.Bucket + "` " +
+                       "a ON KEYS r.airlineid WHERE r.sourceairport=$from " +
+                       "AND r.destinationairport=$to " +
+                       "AND s.day=$leave " +
+                       "ORDER BY a.name")
+                   .AddNamedParameter("from", queryFrom)
+                   .AddNamedParameter("to", queryTo)
+                   .AddNamedParameter("leave", queryLeave);
+
+            return ClusterHelper
+                    .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
+                    .Query<dynamic>(query2)
+                    .Rows;
+        }
+
+### Step 4 - Summery
+In part 4 you learned how to use LINQ with N1QL. The benefits of using LINQ with N1QL is code completion, type safety and compile time checks of you queries. On the other hand there is an ekstra step required when creating the PoCo classes.
+ 
+### Step 5 - Done
+This is the Travel sample in it's entirety, nothing needs to be updated or changed. Use this step as a reference when creating the previous steps or as a reference app. 
+
