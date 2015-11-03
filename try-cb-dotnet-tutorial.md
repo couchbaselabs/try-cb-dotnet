@@ -1134,5 +1134,9 @@ Implement the method to use the `Linq2Couchbase` providers Query or Lambda synta
 In part 4 you learned how to use LINQ with N1QL. The benefits of using LINQ with N1QL is code completion, type safety and compile time checks of you queries. On the other hand there is an ekstra step required when creating the PoCo classes.
  
 ### Step 5 - Done
-This is the Travel sample in it's entirety, nothing needs to be updated or changed. Use this step as a reference when creating the previous steps or as a reference app. 
+This is the Travel sample in it's entirety, nothing needs to be updated or changed. You can find the final version here:
+
+[Step 5/branch 5](https://github.com/couchbaselabs/try-cb-dotnet/tree/tutorial-part-5)
+
+Use this branch as a reference when creating the previous steps or as a reference app. 
 
