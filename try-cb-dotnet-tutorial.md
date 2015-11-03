@@ -783,4 +783,27 @@ Implement the method to return the the number of successful bookings that where 
 
             return new { added = flights.Count };
         }
-    
+
+### Step 2 - Summery
+...
+
+### Step 3 - 
+In this step we will ...
+
+####Step 3.1
+
+**Where:** `.cs` -> **method:** `method`
+
+**Goals:** 
+
+**Relevant Documentation Topics:** 
+
+* [N1QL intro](http://developer.couchbase.com/documentation/server/4.0/n1ql/n1ql-intro/data-access-using-n1ql.html)
+* [Couchbase .NET Client - github](https://github.com/couchbase/couchbase-net-client)
+* [Couchbase .NET Client - docs](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/getting-started.html)
+* [Linq2Couchbase - github](https://github.com/couchbaselabs/Linq2Couchbase)
+* [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
+
+**Task:**    
+
+**Solution:**
