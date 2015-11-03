@@ -297,7 +297,7 @@ You should now be able to run and browse the application in your browser. All da
 ### Step 2 - Understand Couchbase, Couchbase .NET SDK & N1QL
 In this step we will update all WEB API methods to return data from Couchbase. This is the first step that uses Couchbase and therefore we need to add references to the Couchbase Client and LINQ extensions.
 
-####Step 2.0 - Bootstrapping the Couchbase Client.
+####Step 2.0 - Referencing & Bootstrapping the Couchbase Client.
 
 **Where:** `Solution` (this is a solution wide update)
 
@@ -312,7 +312,7 @@ When the references are in place we need to bootstrap the Couchbase SDK and make
 * [Linq2Couchbase - github](https://github.com/couchbaselabs/Linq2Couchbase)
 * [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
 
-**Task:**
+**Task (Add references):**
 For every release, we package the binaries and store the latest version in NuGet. If you are not familiar with NuGet, it’s the official and most widely supported package manager for Microsoft Visual Studio and .NET in general. NuGet is a centralized repository for package authors and consumers, and it also defines a suite of tools for authoring and consuming packages.
 
 Using Visual Studio 2015 or later, follow these steps to get started with the Couchbase .NET SDK:
@@ -323,14 +323,172 @@ Using Visual Studio 2015 or later, follow these steps to get started with the Co
 4. In the search results, select the `CouchbaseNetClient` package and then click Install.
 5. Repeat step 3-4 to install `Linq2Couchbase`.
 
-*Bootstrap*
+That’s it! NuGet will pull in all required dependencies and reference them. 
 
+**Task (Bootstrap):**
+Before we can start using the Couchbase SDK it needs to be initialised and configured to point to the right cluster and buckets.
 
-That’s it! NuGet will pull in all required dependencies and reference them. You're ready to start coding!
+Bootstrapping is the process for initialising and configuring the Couchbase Client for use in the application.
 
-**Solution:**
+The Couchbase Client includes a helper class called `ClusterHelper`. This class is a singleton that can be shared globally in the application and should always be kept alive for the lifetime of the application. 
 
+The application we use is a web application and therefore it's most convenient to initialise the Couchbase Client in `Global.asax.cs` as this is run on application start.
 
+1. Create a new file in the folder `App_Start` called `CouchbaseConfig.cs`.
+2. Replace the content of `CouchbaseConfig.cs` with this code snippet:
+
+		using System;
+		using System.Collections.Generic;
+		using System.Linq;
+		using System.Text;
+		using System.Threading.Tasks;
+		using Couchbase;
+		using Couchbase.Configuration.Client;
+
+		namespace try_cb_dotnet.App_Start
+		{
+    		public static class CouchbaseConfig
+    		{
+        		public static void Initialize()
+        		{
+            		var config = new ClientConfiguration();
+            		config.BucketConfigs.Clear();
+
+            		config.Servers = new List<Uri>(new Uri[] { new Uri(CouchbaseConfigHelper.Instance.Server) });
+
+            		config.BucketConfigs.Add(
+                		CouchbaseConfigHelper.Instance.Bucket,
+	                new BucketConfiguration
+	                {
+	                    BucketName = CouchbaseConfigHelper.Instance.Bucket,
+	                    Username = CouchbaseConfigHelper.Instance.User,
+	                    Password = CouchbaseConfigHelper.Instance.Password
+	                });
+
+            		config.BucketConfigs.Add(
+                	"default",
+                	new BucketConfiguration
+                	{
+                    	BucketName = "default",
+                    	Username = CouchbaseConfigHelper.Instance.User,
+                    	Password = CouchbaseConfigHelper.Instance.Password
+                	});
+
+            		ClusterHelper.Initialize(config);
+        		}
+
+		       public static void Close()
+		       {
+		           ClusterHelper.Close();
+		       }
+      		}
+		}   
+3. The class `CouchbaseConfig` references a class called `CouchbaseConfigHelper`, the purpose of this class is to wrap calls to read `web.config` for application configurations and settings.
+4. In the project root create a new code files called: `CouchbaseConfigHelper.cs`.
+5. Replace the content of `CouchbaseConfigHelper.cs` with:
+
+		using System;
+		using System.Collections.Generic;
+		using System.Configuration;
+		using System.Linq;
+		using System.Web;
+		
+		namespace try_cb_dotnet
+		{
+		    public class CouchbaseConfigHelper
+		    {
+		        public CouchbaseConfigHelper()
+		        {
+		        }
+		
+		        private static CouchbaseConfigHelper instance = null;
+		        public static CouchbaseConfigHelper Instance
+		        {
+		            get { if (instance == null) { instance = new CouchbaseConfigHelper(); } return instance; }
+		        }
+		
+		        public string Bucket
+		        {
+		            get
+		            {
+		                return ConfigurationManager.AppSettings["couchbaseBucketName"];
+		            }
+		        }
+		
+		        public string Server
+		        {
+		            get
+		            {
+		                return ConfigurationManager.AppSettings["couchbaseServer"];
+		            }
+		        }
+		
+		        public string Password
+		        {
+		            get
+		            {
+		                return ConfigurationManager.AppSettings["couchbasePassword"];
+		            }
+		        }
+		
+		        public string User
+		        {
+		            get
+		            {
+		                return ConfigurationManager.AppSettings["couchbaseUser"];
+		            }
+		        }
+		    }
+		}
+6. Reading the code in `CouchbaseConfigHelper` reveals that it's referencing a bunch of application setting keys in `web.config`, that we have still to create.
+7. Open `web.config` and add the missing application setting keys:
+
+		<configuration>
+		  <configSections>
+		    ...
+		  </configSections>
+		  <connectionStrings>
+		    ....
+		  </connectionStrings>
+		  <appSettings>
+		    <add key="webpages:Version" value="3.0.0.0" />
+		    <add key="webpages:Enabled" value="false" />
+		    <add key="ClientValidationEnabled" value="true" />
+		    <add key="UnobtrusiveJavaScriptEnabled" value="true" />
+		    <!-- COUCHBASE TRAVEL SAMPLE SETTINGS -->
+		    <add key="couchbaseBucketName" value="travel-sample" />
+		    <add key="couchbaseServer" value="http://localhost:8091" />
+		    <add key="couchbasePassword" value="" />
+		    <add key="couchbaseUser" value="" />
+		    <!--END -->
+		  </appSettings>
+		  ...
+	  	</configuration>
+
+8. Change the settings in `web.config` to reflect your actual Couchbase setup. Add username and password if appropriate and correct the cluster url if needed.
+9. Open the file `Global.asax.cs` 
+10. Update the method `Application_Start()` with a call to `CouchbaseConfig.Initialize();` to initialise the Couchbasebase Client.
+
+		protected void Application_Start()
+    	{
+	        // Initialize Couchbase & ClusterHelper
+	        CouchbaseConfig.Initialize();
+	
+	        AreaRegistration.RegisterAllAreas();
+	        GlobalConfiguration.Configure(WebApiConfig.Register);
+	        FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
+	        RouteConfig.RegisterRoutes(RouteTable.Routes);
+	        BundleConfig.RegisterBundles(BundleTable.Bundles);
+	    }
+11. The only thing missing now is disposing of resources when the application stops.
+12. Update the `Application_End()` method to call the `Close()` method on `CouchbaseConfig`
+
+		protected void Application_End()
+		{
+			CouchbaseConfig.Close();
+		}
+		
+You're ready to start coding!
 
 ####Step 2.1 
 
