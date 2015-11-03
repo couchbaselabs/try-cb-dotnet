@@ -492,7 +492,7 @@ You're ready to start coding!
 
 ####Step 2.1 
 
-**Where:** `.cs` -> **method:** `method`
+**Where:** `AirportController.cs` -> **method:** `FindAll(string search, string token)`
 
 **Goals:** Return live data from the Travel Sample data bucket in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
 
@@ -502,6 +502,285 @@ You're ready to start coding!
 * [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
 
 **Task:**
+In the current implementation `FindAll(string search, string token)` returns static data, using the `travel-sample` bucket, Couchbase .NET Client and N1QL we will update the method to return actual data. 
+
+The intention of `FindAll(string search, string token)` is to return a airport name based on the `search` string passed to the method.
+
+This is a Web API call, a method that is called from the static html (index.html).
+The JS in the static html expects this "findAll" web api call to return a
+"airportname" in a JSON format like this:
+[{"airportname":"San Francisco Intl"}]
+
+Implement the method to return a list of airport names that match the "search" string
+and return the result list.
+The result list is used by the UI to show a drop-down of matching airport names the user can select from.
+
+>Hint: use N1QL to query the "travel-sample" bucket in Couchbase and return all matching airport names. 
 
 **Solution:**
+
+		[HttpGet]
+        [ActionName("findAll")]
+        public object FindAll(string search, string token)
+        {
+            if (search.Length == 3)
+            {
+                // LAX
+                var query = 
+                    new QueryRequest("SELECT airportname FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE faa=$1")
+                    .AddPositionalParameter(search.ToUpper());
+
+                return ClusterHelper
+                    .GetBucket("travel-sample")
+                    .Query<dynamic>(query)
+                    .Rows;
+            }
+            else if (search.Length == 4)
+            {
+                // KLAX
+                var query =
+                    new QueryRequest("SELECT airportname FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE icao = '$1'")
+                    .AddPositionalParameter(search.ToUpper());
+
+                return ClusterHelper
+                    .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
+                    .Query<dynamic>(query)
+                    .Rows;
+            }
+            else
+            {
+                // Los Angeles
+                var query =
+                    new QueryRequest("SELECT airportname FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE airportname LIKE $1")
+                    .AddPositionalParameter("%" + search + "%");
+
+                return ClusterHelper
+                    .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
+                    .Query<dynamic>(query)
+                    .Rows;
+            }
+        }    
+
+Test the application with various airport names and abbreviation forms: `SFO`, `KLAX`, `Los Angeles` etc.
+
+####Step 2.2 
+
+**Where:** `FlightPathController.cs` -> **method:** `FindAll(string from, DateTime leave, string to, string token)`
+
+**Goals:** Return live data from the Travel Sample data bucket in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
+
+**Relevant Documentation Topics:** 
+
+* [Linq2Couchbase - github](https://github.com/couchbaselabs/Linq2Couchbase)
+* [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
+
+**Task:**
+In the current implementation `FindAll(string from, DateTime leave, string to, string token)` returns static data, using the `travel-sample` bucket, Couchbase .NET Client and N1QL we will update the method to return actual data. 
+
+The intention of `FindAll(string from, DateTime leave, string to, string token)` is to search out and find actual route data. Trip data is create by joining `airport` documents with with `routes`.
+
+This is a Web API call, a method that is called from the static html (index.html).
+The JS in the static html expects this "findAll" web api call to return a
+"trip" in a JSON format.
+
+Implement the method to return all trips that match the selected source and destination airport for the given date interval.
+
+>HINT: Use N1QL to query the "travel-sample" bucket in Couchbase to find matching "trips"
+The travel sample does not contain any "trip" documents you will need to use "join" to build a matcing result-set.
+This is a two step proccess/query.
+
+* 1: 
+    This API method is called with the "from" and "to" values witch represent the full airport name.
+    The "join" that we will do in step 2, needs the FAA (3 letter abbreviation for the airport name)
+    Therefore the first step is to make a N1QL query to convert the airport name to a FAA 3 letter value 
+    for both from and to airport.
+
+* 2:
+    This is a bit tricky as we will create a N1QL query that will use both UNNEST and JOIN. 
+    Below you can find a "template" version of the query.
+    This will allow you to understand the query in it's full detail and exam the parameters needed for this query.
+
+>SELECT r.id, a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment FROM 
+    `travel-sample` r 
+    UNNEST r.schedule s 
+    JOIN `travel-sample` a 
+    ON KEYS r.airlineid 
+    WHERE r.sourceairport='LAX' 
+    AND r.destinationairport='SFO' 
+    AND s.day=1
+    ORDER BY a.name      
+    
+**Solution:**
+
+		[HttpGet]
+    	[ActionName("findAll")]
+        public object FindAll(string from, DateTime leave, string to, string token)
+        {
+            string queryFrom = null;
+            string queryTo = null;
+            var queryLeave = (int)leave.DayOfWeek;
+
+            // raw query
+            var query1 =
+                   new QueryRequest(
+                       "SELECT faa as fromAirport, geo FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` " +
+                       "WHERE airportname = $from " +
+                       "UNION SELECT faa as toAirport, geo FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` " +
+                       "WHERE airportname = $to")
+                   .AddNamedParameter("from", from)
+                   .AddNamedParameter("to", to);
+
+            var partialResult1 = ClusterHelper
+                    .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
+                    .Query<dynamic>(query1);
+
+            if (partialResult1.Rows.Any())
+            {
+                foreach (dynamic row in partialResult1.Rows)
+                {
+                    if (row.fromAirport != null) queryFrom = row.fromAirport;
+                    if (row.toAirport != null) queryTo = row.toAirport;
+                }
+            }
+
+            // raw query
+            var query2 =
+                   new QueryRequest(
+                       "SELECT r.id, a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment FROM " +
+                       "`" + CouchbaseConfigHelper.Instance.Bucket + "` r " +
+                       "UNNEST r.schedule s JOIN " +
+                       "`" + CouchbaseConfigHelper.Instance.Bucket + "` " +
+                       "a ON KEYS r.airlineid WHERE r.sourceairport=$from " +
+                       "AND r.destinationairport=$to " +
+                       "AND s.day=$leave " +
+                       "ORDER BY a.name")
+                   .AddNamedParameter("from", queryFrom)
+                   .AddNamedParameter("to", queryTo)
+                   .AddNamedParameter("leave", queryLeave);
+
+            return ClusterHelper
+                    .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
+                    .Query<dynamic>(query2)
+                    .Rows;
+        }
+    }    
+    
+####Step 2.3
+
+**Where:** `UserController.cs` -> **method:** `Flights(string token)`
+
+**Goals:** Return live data from about the user's travel bookings stored in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
+
+**Relevant Documentation Topics:** 
+
+* [Linq2Couchbase - github](https://github.com/couchbaselabs/Linq2Couchbase)
+* [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
+
+**Task:**
+In the current implementation `Flights(string token)` returns static data, using the `travel-sample` bucket, Couchbase .NET Client and N1QL we will update the method to return actual data stored about the users bookings. 
+
+The intention of `Flights(string token)` is to return a users actual travel bookings. 
+
+This is a Web API call, a method that is called from the static html (index.html).
+The JS in the static html expects this "flights" web api call to return a
+all bookings done by this user. 
+The JWT token is used to look-up the user and find all bookings.
+Response should be in a JSON format
+
+Implement the method to return all bookings for the logged-in user.
+
+* 1:
+    Use the token to look-up the "bookings" document for the user and return all bookings.
+    The document key is in the format
+    bookings::token
+    The great thing with using Couchbase (a JSON document store) is that we don't need to convert the value,
+    we can just return the actual document stored in Couchbase.
+ 
+>Hint: 
+    Use `ClusterHelper` to Get document in the "default" bucket and retur the value. 
+    
+**Solution:**
+
+		[HttpGet]
+        [ActionName("flights")]
+        public object Flights(string token)
+        {
+            return ClusterHelper
+                    .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
+                    .Get<dynamic>("bookings::" + token)
+                    .Value;
+        }    
+
+####Step 2.4
+
+**Where:** `UserController.cs` -> **method:** `BookFlights([FromBody] dynamic request)`
+
+**Goals:** Store live data about the user's travel bookings, persist them in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
+
+**Relevant Documentation Topics:** 
+
+* [Linq2Couchbase - github](https://github.com/couchbaselabs/Linq2Couchbase)
+* [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
+
+**Task:**
+In the current implementation `BookFlights([FromBody] dynamic request)` nothing is actually stored, we just return a constant that indicates how many line items where stored. 
+Using the `travel-sample` bucket, Couchbase .NET Client and N1QL we will update the method to store actual data about the users bookings. 
+
+The intention of `BookFlights([FromBody] dynamic request)` is to store information about a users actual travel bookings. 
+
+This is a Web API call, a method that is called from the static html (index.html).
+The JS in the static html expects this "flights" web api call to save the selected flight in a booking's document.
+
+The JWT token is used as a key to the users bookings.
+In this fake implementation we are not going to use the Token, nor store any data about the bookings.
+Instead we return a static value to indicate that the booking was successful.
+Response should be in a JSON format like this:
+Bookings:
+{"added":3}
+
+Implement the method to return the the number of successful bookings that where persisted in couchbase for the user (token)
+
+* 1:
+    First we need to get an understanding of the "dynamic request" value. 
+    Add a breakpoint to this method and use "immediate window" in Visual studio to investigate the request value.
+    "request" is a list of dynamic "JToken" values. It's therefore possible to "foreach" over the collection and "select" 
+    the the relevant values and store them directly in Couchbase.
+* 2:
+    Create a foreach loop to iterate over the request collection and store all bookings to Couchbase.
+    the bookings should be stored in a document with the compound key
+    bookings::{token}
+    The token is available in the request, request.token
+
+* 3:
+    Update the return value to reflect the actual number of stored bookings    
+
+>Hint: 
+    Use ClusterHelper to `Upsert(...)` the document in the "default" bucket. 
+    
+**Solution:**
+    
+    	[HttpPost]
+        [ActionName("flights")]
+        public object BookFlights([FromBody] dynamic request)
+        {
+            List<FlightModel> flights = new List<FlightModel>();
+
+            foreach (var flight in request.flights)
+            {
+                flights.Add(new FlightModel
+                {
+                    name = flight._data.name,
+                    bookedon = DateTime.Now.ToString(),
+                    date = flight._data.date,
+                    destinationairport = flight._data.destinationairport,
+                    sourceairport = flight._data.sourceairport
+                });
+            }
+
+             ClusterHelper
+                .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
+                .Upsert("bookings::" + request.token, flights);
+
+            return new { added = flights.Count };
+        }
     
