@@ -10,6 +10,8 @@ This tutorial makes use of the travel-sample data set that comes with Couchbase 
 
 The HTML/JS code that generates the web application is provided with the source code but it is not the scope of this tutorial to explain any details of the implementation. 
 
+![Application Screen shot](content/images/Screen Shot 2015-11-05 at 11.49.06.png)
+
 ## Prerequisites and set up
 You will need to have the following available/installed:
 
