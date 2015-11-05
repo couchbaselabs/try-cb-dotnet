@@ -43,11 +43,20 @@ The source code is split up into branches, every branch represents a step in the
 * `master` is the final result after refactoring part 5.
 
 ###A quick note on the source it self
-This source code is split up in two parts, HTML/JS and .NET code.
-The HTML and Javascript part is actually a static set of files that use Javascript to call a API methods implemented in on the backend. This approach allow for a very clean and elegant seperation of the UI and the data part. 
-In fact this allows us to change the backend without touching the front end code. Therefore if you take a look a the java version `try-cb-java` you quickly learn that the UI is the same it's only the backend that changes.
+This source code is split up in three separate parts with their individual purpose.
+ 
+1. The 'red box' is the Couchbase Server Cluster our data storage
+2. The 'green box' represents the API server, responsible to serve the data to the UI. In this case the backend is build with C# and Web API, but could be implemented in any language. We currently have tutorials for: [Java](https://github.com/couchbaselabs/try-cb-java), [Node.js](https://github.com/couchbaselabs/try-cb-nodejs) and [.net - this tutorial](https://github.com/couchbaselabs/try-cb-dotnet)
+3. The 'blue box' is symbolising the UI it self, this is the part of the application that surfaces the content to the user. It's all static HTML and JavaScript build to consume data from the API. We are not going to change a single line in the UI. 
 
-In the .NET implementation of the backend we use WEB API, as this is the most flexible and easy way to implement an API in .NET.  
+![app diagram](content/images/Screen Shot 2015-11-05 at 12.00.18.png)
+
+This application architecture gives very clean seperation of concerns and would effectively allow us to change the the various parts in the application architecture without influencing the other. This is of course only true if we maintain the REST API methods and responses.
+
+In fact this allows us to change the backend API without touching the front end code. 
+Therefore if you take a look at the java version [`try-cb-java`](https://github.com/couchbaselabs/try-cb-java) you quickly learn that the UI is the same, it's only the backend that has changed.
+
+In the .NET implementation of the backend we use WEB API, as this is probably the most popular, flexible and easy way to implement a REST API endpoint in .NET.  
 
 
 ###Get set up for the tutorial 
