@@ -12,24 +12,34 @@ The HTML/JS code that generates the web application is provided with the source 
 
 ![Application Screen shot](content/images/Screen Shot 2015-11-05 at 11.49.06.png)
 
-## Prerequisites and set up
+## Prerequisites and setup
 You will need to have the following available/installed:
 
-* Visual Studio 2015 or newer (The source code is created using VS 2015 Professional)
+* [Visual Studio 2015](https://www.visualstudio.com/) or newer (The source code is created using VS 2015 Professional)
 * Windows 8.1 or higher (to be able to install and run Visual Studio 2015)
-* Although not a requirement, we recommend you have a Git client for easy source code browsing and making it easy to switch between branches (tutorial steps are spil using branches)
+* Although not a requirement, we recommend you have a Git client for easy source code browsing and making it easy to switch between branches (tutorial steps are split using branches)
 * That's it, your ready to start.
 
 ## Installing Couchbase Server 4.0
 First things first... we need to install Couchbase Server! You can chose to install it locally on your developer machine or remotely, in this tutorial we will assume that Couchbase Server 4.0 is installed locally on the developer machine along side the web site that we will create.
 
- and for the rest  
-Download Couchbase Server and install it. As you follow the download instructions and setup wizard, make sure you keep all the services (data, query, and index) selected. Make sure aolso to install the sample bucket named travel-sample (introduced in CB 4.0) because it contains the data used in this tutorial.
+[Download and installation instructions for Couchbase Server](http://www.couchbase.com/nosql-databases/downloads)
+ 
+Download Couchbase Server and follow the [instructions](http://developer.couchbase.com/documentation/server/4.0/getting-started/installing.html) for your platform to complet the installation. 
+
+If this is the first time you setup Couchbase Server, this [detailed guide](http://developer.couchbase.com/documentation/server/4.0/install/init-setup.html#topic12527) will help you through all the steps need and explain the different options. 
+
+**Important!** As you follow the download instructions and setup wizard, make sure you keep all the services (data, query, and index) selected and remember to install the sample bucket named `travel-sample` (introduced in CB 4.0). `travel-sample` is the data set that will be used throughout this tutorial.
+
+![Select all services](content/images/setup-01.png)
+
 
 >TIP: 
 	If you already have Couchbase Server installed but did not install the travel-	sample bucket!
-	* , open the Couchbase Web Console and select Settings > Sample 	Buckets. 
-	Select the travel-sample check box, and then click Create. A 	notification box in the upper-right corner show the progress and disappears when 	the bucket is ready to use.
+	
+>Open the Couchbase Web Console and select 'Settings' -> 'Sample Buckets' and select the `travel-sample` check box, and then click Create. 
+	 
+>A 	notification box in the upper-right corner will appear and show the progress. When it disappears the bucket is ready to use.
 	
 ## Getting ready
 ### Understanding the source repo
@@ -51,7 +61,7 @@ This source code is split up in three separate parts with their individual purpo
 
 ![app diagram](content/images/Screen Shot 2015-11-05 at 12.00.18.png)
 
-This application architecture gives very clean seperation of concerns and would effectively allow us to change the the various parts in the application architecture without influencing the other. This is of course only true if we maintain the REST API methods and responses.
+This application architecture gives a very clean seperation of concerns and would effectively allow us to change the the various parts in the application architecture without influencing the other. This is of course only true if we maintain the REST API methods and responses.
 
 In fact this allows us to change the backend API without touching the front end code. 
 Therefore if you take a look at the java version [`try-cb-java`](https://github.com/couchbaselabs/try-cb-java) you quickly learn that the UI is the same, it's only the backend that has changed.
