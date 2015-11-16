@@ -82,22 +82,26 @@ To get propper setup for the tutorial and get ready for the first part, follow t
 
 ## Tutorial step 1 - 5
  
-### Step 1 - Understand WEB API and .NET 
-> Part 1 of the tutorial is not using Couchbase Server, it's only included in the tutorial to show how web api works and to emphasise that we are working with JSON. The only task of the backend API is to return JSON. This is an important understanding that will help you not only with this tutorial but whenever working with an API.
+### Step 1 - Understand ASP.NET Web API 2 and .NET 
+The first part of this tutorial is not about how to use the .NET Client for Couchbase Server. 
+
+The focus in part 1 is to show how ASP.NET Web API works and to emphasise that with Web API we have an option to work with and return JSON from the REST endpoints. 
+
+It's important to understand that the main task of the backend REST API is to return JSON. This is an important concept to understand that will greatly help you understand and work with ASP.NET Web API.
  
-> Implementing the API is al about returning the right JSON. Couchbase stores all it's documents in JSON and therefore is a very good match for an API that returns JSON.
+> Implementing the Web API methods (REST Endpoints) is all about returning the right JSON. Couchbase stores all it's documents in JSON and therefore it is a very good match as a data store for a REST API.
+> 
+>If you already feel comfortable working with ASP.NET Web API you can skip this step and go directly to step 2. In step 2 you will learn how to use Couchbase and the Couchbase .NET Client in your .NET projects.
 
->Feel free to skip this step and go directly to step 2, to start learning how to use Couchbase and the Couchbase SDK in your .NET Apps.
-
-In this step you will update all WEB API methods to return static JSON (string values). This will allow you to run and browse the web application and get an understanding of how the code is organised.
+In this step you will update all Web API methods to return static JSON (string values). This will allow you to run and browse the web application and get an understanding of how the code is organised.
 
 ####Step 1.1 
 
 **Where:** `UserController.cs` -> **method:** `Login(string password, string user)`
 
-**Goals:** Return static JSON to learn how WEB API works.
+**Goals:** Return static JSON to learn how Web API works.
 
-**Relevant Documentation Topics:** [ASP.NET WEB API 2](http://www.asp.net/web-api/overview/getting-started-with-aspnet-web-api/tutorial-your-first-web-api)
+**Relevant Documentation Topics:** [ASP.NET Web API 2](http://www.asp.net/web-api/overview/getting-started-with-aspnet-web-api/tutorial-your-first-web-api)
 
 **Task:**
 
@@ -131,9 +135,9 @@ Update the Login method to return the JWT token value:
 
 **Where:** `UserController.cs` -> **method:** `Login([FromBody] UserModel user)`
 
-**Goals:** Return static JSON to learn how WEB API works.
+**Goals:** Return static JSON to learn how ASP.NET Web API works.
 
-**Relevant Documentation Topics:** [ASP.NET WEB API 2](http://www.asp.net/web-api/overview/getting-started-with-aspnet-web-api/tutorial-your-first-web-api)
+**Relevant Documentation Topics:** [ASP.NET Web API 2](http://www.asp.net/web-api/overview/getting-started-with-aspnet-web-api/tutorial-your-first-web-api)
 
 
 **Task:**
