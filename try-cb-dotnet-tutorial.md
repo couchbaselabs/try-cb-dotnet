@@ -95,22 +95,27 @@ It's important to understand that the main task of the backend REST API is to re
 
 In this step you will update all Web API methods to return static JSON (string values). This will allow you to run and browse the web application and get an understanding of how the code is organised.
 
-####Step 1.1 
+####Step 1.1 - Implement Login 
 
 **Where:** `UserController.cs` -> **method:** `Login(string password, string user)`
 
 **Goals:** Return static JSON to learn how Web API works.
 
-**Relevant Documentation Topics:** [ASP.NET Web API 2](http://www.asp.net/web-api/overview/getting-started-with-aspnet-web-api/tutorial-your-first-web-api)
+**Relevant Documentation Topics:** 
+
+ * [ASP.NET Web API 2](http://www.asp.net/web-api/overview/getting-started-with-aspnet-web-api/tutorial-your-first-web-api)
+ * [JWT Token](http://jwt.io/)
 
 **Task:**
 
-This is a Web API call, a method that is called from the static html (index.html).The JavaScript in the static html expects this "Login" web api call to return a "success" status code containing a JWT token. 
+`Login(string password, string user)` is a Web API method called using JavaScript from the static HTML page `index.html`. 
+
+The JavaScript used in the static html page expects this "Login" web api call to return a JavaScript Web Token (JWT) "success" status code token. Returning the "success" token will login the user and redirect the user to the flight booking page. 
 
 The JWT token is used to reference and store data about the user's trips/bookings and login credentials.
 
-The response should be in a JSON format like this:
-   `[{"success":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiZ3Vlc3QiLCJpYXQiOjE0NDE4Njk5NTR9.5jPBtqralE3W3LPtS - j3MClTjwP9ggXSCDt3 - zZOoKU"}]`Implement the method to return a "success" allowing the user to login.
+The JWT response should be in a JSON format like this:
+   `[{"success":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiZ3Vlc3QiLCJpYXQiOjE0NDE4Njk5NTR9.5jPBtqralE3W3LPtS - j3MClTjwP9ggXSCDt3 - zZOoKU"}]`Implement the method to return a "success" JWT token allowing the user to login.
 Later we will implement a JWT token issuer and store user data in Couchbase for later look-up.The token is created for the user:>Note: The login credentials for this JWT token is:
 >
 >username: guest
@@ -141,25 +146,21 @@ Update the Login method to return the JWT token value:
 
 
 **Task:**
-This is a Web API call, a method that is called from the static html (index.html).
-The JS in the static html expectes this "Login" web api call to return a
-"success" status code containing a JWT token. 
+This task is essential the same as `1.1`.
 
-The JWT token is used to reference and store data about the user's trips/booking and login credentials.
-Response should be in a json format like this:
-Round trip: 
+`Login(string password, string user)` is a Web API method called using JavaScript from the static HTML page `index.html`. 
 
-`[{"success":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiZ3Vlc3QiLCJpYXQiOjE0NDE4Njk5NTR9.5jPBtqralE3W3LPtS - j3MClTjwP9ggXSCDt3 - zZOoKU"}]`
+The JavaScript used in the static html page expects this "Login" web api call to return a JavaScript Web Token (JWT) "success" status code token. Returning the "success" token will login the user and redirect the user to the flight booking page. 
 
-Implement the method to return a "success" faking the creation of a new user and allowing the user to login.
+The JWT token is used to reference and store data about the user's trips/bookings and login credentials.
 
->Later we will implement a JWT token issuer and store user data in Couchbase for later look-up.
-       
->The token is created for the user:
+The JWT response should be in a JSON format like this:
+   `[{"success":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiZ3Vlc3QiLCJpYXQiOjE0NDE4Njk5NTR9.5jPBtqralE3W3LPtS - j3MClTjwP9ggXSCDt3 - zZOoKU"}]`Implement the method to return a "success" JWT token allowing the user to login.
+Later we will implement a JWT token issuer and store user data in Couchbase for later look-up.The token is created for the user:>Note: The login credentials for this JWT token is:
 >
 >username: guest
 >
->passowrd: guest
+>password: guest
 
 **Solution:**
 
@@ -181,24 +182,24 @@ Implement the method to return a "success" faking the creation of a new user and
 **Task:**
 
 This is a Web API call, a method that is called from the static html (index.html).
-The js in the static html expects this "flights" web api call to return a
-all bookings done by this user. 
+The JavaScript in the static html expects this "flights" Web APIcall to return
+all bookings done by the logged in user. 
 
 The JWT token is used to look-up the user and find all bookings.
 
-In this fake implementation we are not going to use the Token, but instead return a static list of bookings.
+In this "fake" implementation we are not going to use the JWT Token, but instead return a static list of bookings. The list should be the same for all users.
 
-Response should be in a json format like this:
+Response should be in a JSON format like this:
 
 Bookings:
 `[{"_type":"Flight","_id":"d500a3d1-2cca-43a5-8a66-f11828a35969","name":"American Airlines","flight":"AA344","date":"09/10/2015","sourceairport":"SFO","destinationairport":"LAX","bookedon":"1441881827622"},{"_type":"Flight","_id":"bf676b0d-e63b-4ff6-aade-7ac1c182b3de","name":"American Airlines","flight":"AA787","date":"09/11/2015","sourceairport":"LAX","destinationairport":"SFO","bookedon":"1441881827623"},{"_type":"Flight","_id":"f0099c24-3ad4-482e-8352-704f9cbf1a43","name":"American Airlines","flight":"AA550","date":"09/10/2015","sourceairport":"SFO","destinationairport":"LAX","bookedon":"1441881827623"}]`
             
-Implement the method to return the fake "bookings" for the guest user.
-Later we will look-up bookings with the JWT token, but for now a static list is what we need.
+Implement the method to return the "fake" bookings for all users.
+Later we will look-up actual bookings using the JWT token, but for now a static list is what we need.
 
 >Hint: 
 >
->return the same booking multiple times in a list, re-using the sample JSON above.
+>To simulate more than one booking you can return the same booking multiple times in a list, re-using the sample JSON above.
 
 **Solution:**
 
@@ -226,19 +227,23 @@ Later we will look-up bookings with the JWT token, but for now a static list is 
 
 **Task:**    
 This is a Web API call, a method that is called from the static html (index.html).
-The JS in the static html expects this "flights" web api call to save the selected flight in a booking's document.
+The JavaScript in the static html expects the call to the "flights" Web API method to save the flight bookings for a user. The bookings are saved in a booking's document.
  
-The JWT token is used as a key to the users bookings.
-In this fake implementation we are not going to use the Token, nor store any data about the bookings.
-Instead we return a static value to indicate that the bokking was successfull.
-Response should be in a JSON format like this:
+The JWT token is used as a key to the users bookings document, this way we can use the JWT token to look-up all bookings for a user.
+
+In this "fake" implementation we are not going to use the JWT Token, nor store any data about the bookings.
+
+Instead we return a static value to indicate that the booking was successful, simulation the creation of the bookings document for the user.
+
+The response should be in a JSON format like this:
 
 Bookings:
 
 `{"added":3}`
  
-Implement the method to return the fake "booking success" for the guest user.
-Later we will store bookings using the JWT token, but for now a static response is what we need.
+Implement the Web API method to return the "fake" `booking success` for the guest user.
+
+Later we will revisit this method and updated it to store bookings using the JWT token, but for now a static response is what we need.
 
 **Solution:**
 
@@ -260,8 +265,9 @@ Later we will store bookings using the JWT token, but for now a static response 
 **Task:**  
 
 Task:
-This is a Web API call, a method that is called from the static html (index.html).
-The JS in the static html expects this "findAll" web api call to return a "trip" in a JSON format like this:
+This is a Web API call, a method that is called from the static html page `index.html`.
+
+JavaScript is used in the static `index.html` page to call the Web API and the expected value returned from the `findAll` Web API call is "trip" data in a JSON format like this:
 
 Round trip: 
 `[{"destinationairport":"SFO","equipment":"738","flight":"AA907","id":5746,"name":"American Airlines","sourceairport":"LAX","utc":"00:29:00","flighttime":1,"price":53},{"destinationairport":"SFO","equipment":"738","flight":"AA787","id":5746,"name":"American Airlines","sourceairport":"LAX","utc":"19:06:00","flighttime":1,"price":45},{"destinationairport":"SFO","equipment":"738","flight":"AA279","id":5746,"name":"American Airlines","sourceairport":"LAX","utc":"04:54:00","flighttime":1,"price":52},{"destinationairport":"SFO","equipment":"E75","flight":"DL856","id":21085,"name":"Delta Air Lines","sourceairport":"LAX","utc":"20:08:00","flighttime":1,"price":47},{"destinationairport":"SFO","equipment":"E75","flight":"DL273","id":21085,"name":"Delta Air Lines","sourceairport":"LAX","utc":"14:14:00","flighttime":1,"price":48},{"destinationairport":"SFO","equipment":"73W 73C 733","flight":"WN543","id":63986,"name":"Southwest Airlines","sourceairport":"LAX","utc":"22:16:00","flighttime":1,"price":44},{"destinationairport":"SFO","equipment":"73W 73C 733","flight":"WN828","id":63986,"name":"Southwest Airlines","sourceairport":"LAX","utc":"04:35:00","flighttime":1,"price":43},{"destinationairport":"SFO","equipment":"738","flight":"US086","id":59532,"name":"US Airways","sourceairport":"LAX","utc":"15:06:00","flighttime":1,"price":46},{"destinationairport":"SFO","equipment":"738","flight":"US150","id":59532,"name":"US Airways","sourceairport":"LAX","utc":"15:44:00","flighttime":1,"price":47},{"destinationairport":"SFO","equipment":"738","flight":"US437","id":59532,"name":"US Airways","sourceairport":"LAX","utc":"23:42:00","flighttime":1,"price":52},{"destinationairport":"SFO","equipment":"739 752 753 319 320 738","flight":"UA666","id":57010,"name":"United Airlines","sourceairport":"LAX","utc":"05:11:00","flighttime":1,"price":44},{"destinationairport":"SFO","equipment":"739 752 753 319 320 738","flight":"UA978","id":57010,"name":"United Airlines","sourceairport":"LAX","utc":"19:50:00","flighttime":1,"price":53},{"destinationairport":"SFO","equipment":"739 752 753 319 320 738","flight":"UA123","id":57010,"name":"United Airlines","sourceairport":"LAX","utc":"21:13:00","flighttime":1,"price":49},{"destinationairport":"SFO","equipment":"320 319","flight":"VX929","id":62018,"name":"Virgin America","sourceairport":"LAX","utc":"00:39:00","flighttime":1,"price":49},{"destinationairport":"SFO","equipment":"320 319","flight":"VX351","id":62018,"name":"Virgin America","sourceairport":"LAX","utc":"01:37:00","flighttime":1,"price":49},{"destinationairport":"SFO","equipment":"320 319","flight":"VX703","id":62018,"name":"Virgin America","sourceairport":"LAX","utc":"05:01:00","flighttime":1,"price":47},{"destinationairport":"SFO","equipment":"320 319","flight":"VX743","id":62018,"name":"Virgin America","sourceairport":"LAX","utc":"10:36:00","flighttime":1,"price":53},{"destinationairport":"SFO","equipment":"320 319","flight":"VX301","id":62018,"name":"Virgin America","sourceairport":"LAX","utc":"01:32:00","flighttime":1,"price":49}]`
@@ -269,8 +275,11 @@ Round trip:
 One way trip:
 `[{"destinationairport":"SFO","equipment":"738","flight":"AA787","id":5746,"name":"American Airlines","sourceairport":"LAX","utc":"19:06:00","flighttime":1,"price":48},{"destinationairport":"SFO","equipment":"738","flight":"AA279","id":5746,"name":"American Airlines","sourceairport":"LAX","utc":"04:54:00","flighttime":1,"price":49},{"destinationairport":"SFO","equipment":"738","flight":"AA907","id":5746,"name":"American Airlines","sourceairport":"LAX","utc":"00:29:00","flighttime":1,"price":51},{"destinationairport":"SFO","equipment":"E75","flight":"DL273","id":21085,"name":"Delta Air Lines","sourceairport":"LAX","utc":"14:14:00","flighttime":1,"price":51},{"destinationairport":"SFO","equipment":"E75","flight":"DL856","id":21085,"name":"Delta Air Lines","sourceairport":"LAX","utc":"20:08:00","flighttime":1,"price":53},{"destinationairport":"SFO","equipment":"73W 73C 733","flight":"WN543","id":63986,"name":"Southwest Airlines","sourceairport":"LAX","utc":"22:16:00","flighttime":1,"price":50},{"destinationairport":"SFO","equipment":"73W 73C 733","flight":"WN828","id":63986,"name":"Southwest Airlines","sourceairport":"LAX","utc":"04:35:00","flighttime":1,"price":53},{"destinationairport":"SFO","equipment":"738","flight":"US086","id":59532,"name":"US Airways","sourceairport":"LAX","utc":"15:06:00","flighttime":1,"price":53},{"destinationairport":"SFO","equipment":"738","flight":"US150","id":59532,"name":"US Airways","sourceairport":"LAX","utc":"15:44:00","flighttime":1,"price":43},{"destinationairport":"SFO","equipment":"738","flight":"US437","id":59532,"name":"US Airways","sourceairport":"LAX","utc":"23:42:00","flighttime":1,"price":48},{"destinationairport":"SFO","equipment":"739 752 753 319 320 738","flight":"UA978","id":57010,"name":"United Airlines","sourceairport":"LAX","utc":"19:50:00","flighttime":1,"price":48},{"destinationairport":"SFO","equipment":"739 752 753 319 320 738","flight":"UA666","id":57010,"name":"United Airlines","sourceairport":"LAX","utc":"05:11:00","flighttime":1,"price":51},{"destinationairport":"SFO","equipment":"739 752 753 319 320 738","flight":"UA123","id":57010,"name":"United Airlines","sourceairport":"LAX","utc":"21:13:00","flighttime":1,"price":50},{"destinationairport":"SFO","equipment":"320 319","flight":"VX743","id":62018,"name":"Virgin America","sourceairport":"LAX","utc":"10:36:00","flighttime":1,"price":48},{"destinationairport":"SFO","equipment":"320 319","flight":"VX703","id":62018,"name":"Virgin America","sourceairport":"LAX","utc":"05:01:00","flighttime":1,"price":45},{"destinationairport":"SFO","equipment":"320 319","flight":"VX301","id":62018,"name":"Virgin America","sourceairport":"LAX","utc":"01:32:00","flighttime":1,"price":49},{"destinationairport":"SFO","equipment":"320 319","flight":"VX929","id":62018,"name":"Virgin America","sourceairport":"LAX","utc":"00:39:00","flighttime":1,"price":44},{"destinationairport":"SFO","equipment":"320 319","flight":"VX351","id":62018,"name":"Virgin America","sourceairport":"LAX","utc":"01:37:00","flighttime":1,"price":46}]`
 
-Implement the method to return a "Round trip" meaning a destination and source airport.
-Later we will use Couchbase to do the look-up but for now a "constant" is returned.          
+As shown above the "trip" data is spilt up in two, one way and round trip (return trip). 
+
+Implement the method to return a "Round trip" from a destination and source airport and back.
+
+Later we re-vist this Web API method and update it to use data from Couchbase to do the look-up, but for now a "constant" is returned.          
             
 **Solution:**    
 
@@ -297,13 +306,16 @@ Later we will use Couchbase to do the look-up but for now a "constant" is return
 **Task:**    
 
 This is a Web API call, a method that is called from the static html (index.html).
-The JS in the static html expectes this "findAll" web api call to return a
-"airportname" in a JSON format like this:
+The JavaScript in the static html expects this `findAll` Web API call to return a
+"airportname", based on the input `search` parameter.
+
+The return data used for this static implementation should look as follows:
 
 `[{"airportname":"San Francisco Intl"}]`
 
 Implement the method to return a single airport name.
-Later we will use Couchbase to do the look-up but for now a "constant" is returned.
+
+Later we will use Couchbase to do the look-up, but for now a constant value is returned.
 
 **Solution:**
 
@@ -316,8 +328,11 @@ Later we will use Couchbase to do the look-up but for now a "constant" is return
             new {airportname = "San Francisco Intl"}
         };
     }
+    
 ### Step 1 - Summery
-You should now be able to run and browse the application in your browser. All data is static but never the less it "works". In Step 2 we will update the static JSON returned to actual data.    
+If done correctly all Web API methods now return a static JSON value. This should enable you to be able to run and browse the application. 
+
+All data is static but never the less it "works". In Step 2 we will update the static JSON returned in the Web API method to return actual data from Couchbase Server 4.    
 
 ### Step 2 - Understand Couchbase, Couchbase .NET SDK & N1QL
 In this step we will update all WEB API methods to return data from Couchbase. This is the first step that uses Couchbase and therefore we need to add references to the Couchbase Client and LINQ extensions.
