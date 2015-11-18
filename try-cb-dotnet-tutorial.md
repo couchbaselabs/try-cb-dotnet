@@ -402,9 +402,15 @@ In this tutorial the application at hand is a web application and therefore it's
 
 Using Visual Studio 2015 or later, follow these steps to bootstrap the Couchbase .NET Client:
 
-	Create a new file in the folder `App_Start` called `CouchbaseConfig.cs`.
+	Create a new file in the folder 'App_Start' called 'CouchbaseConfig.cs'.
+	
+![Add new file 1](content/images/Screen Shot 2015-11-18 at 09.28.04.png)
 
-2. Replace the content of `CouchbaseConfig.cs` with this code snippet:
+![Add new file 2](content/images/Screen Shot 2015-11-18 at 09.29.34.png)
+	
+
+	Replace the content of 'CouchbaseConfig.cs' with this code snippet:
+	
 ```C#
 		using System;
 		using System.Collections.Generic;
@@ -453,11 +459,18 @@ Using Visual Studio 2015 or later, follow these steps to bootstrap the Couchbase
       		}
 		} 
 ```
-		  
-3. The class `CouchbaseConfig` references a class called `CouchbaseConfigHelper`, the purpose of this class is to wrap calls to read `web.config` for application configurations and settings.
-4. In the project root create a new code files called: `CouchbaseConfigHelper.cs`.
-5. Replace the content of `CouchbaseConfigHelper.cs` with:
+			  
+	The class 'CouchbaseConfig' references a class called 'CouchbaseConfigHelper' that does not yet exist. The purpose of 'CouchbaseConfigHelper' class is to wrap calls to read the 'AppSettings' section of 'web.config' file. The 'AppSettings' section is often used to store configuration settings for an application in .NET. In this tutorial we will follow this design design practice from Microsoft.
+	
+	In the project root create a new code file called: 'CouchbaseConfigHelper.cs'. Right click the project, in the menu select -> 'Add'-> 'Class'.
+	
+![Add new file 3](content/images/Screen Shot 2015-11-18 at 09.40.22.png)
 
+![Add new file 3](content/images/Screen Shot 2015-11-18 at 09.40.50.png)
+
+		
+	Replace the content of 'CouchbaseConfigHelper.cs' with the following code snippet:
+```C#
 		using System;
 		using System.Collections.Generic;
 		using System.Configuration;
@@ -511,9 +524,13 @@ Using Visual Studio 2015 or later, follow these steps to bootstrap the Couchbase
 		        }
 		    }
 		}
-6. Reading the code in `CouchbaseConfigHelper` reveals that it's referencing a bunch of application setting keys in `web.config`, that we have still to create.
-7. Open `web.config` and add the missing application setting keys:
+```	
+		
+	Reading the code in 'CouchbaseConfigHelper' reveals that it's referencing a bunch of application setting keys in `web.config`, that we have still to create.	
+	
+	Open 'web.config' and add the missing application setting keys in the 'appSettings' section as shown in the following snippet:	
 
+```XML	
 		<configuration>
 		  <configSections>
 		    ...
@@ -535,11 +552,17 @@ Using Visual Studio 2015 or later, follow these steps to bootstrap the Couchbase
 		  </appSettings>
 		  ...
 	  	</configuration>
+```
 
-8. Change the settings in `web.config` to reflect your actual Couchbase setup. Add username and password if appropriate and correct the cluster url if needed.
-9. Open the file `Global.asax.cs` 
-10. Update the method `Application_Start()` with a call to `CouchbaseConfig.Initialize();` to initialise the Couchbasebase Client.
+	You can change the settings in 'web.config' to reflect your actual Couchbase Server setup. This includes adding username and password if appropriate and correct the cluster url if needed. The current configuration assumes that Couchbase Server is installed on localhost and no password protection on the bucket.
 
+	We now have all configurations in place need to initialise the Couchbase .NET Client.
+	Open the file 'Global.asax.cs' in project root. 
+	
+	Update the method 'Application_Start()' with a call to 'CouchbaseConfig.Initialize();' 
+	This will initialise the Couchbasebase Client based on the settings from 'web.config'.
+
+```C#
 		protected void Application_Start()
     	{
 	        // Initialize Couchbase & ClusterHelper
@@ -551,15 +574,21 @@ Using Visual Studio 2015 or later, follow these steps to bootstrap the Couchbase
 	        RouteConfig.RegisterRoutes(RouteTable.Routes);
 	        BundleConfig.RegisterBundles(BundleTable.Bundles);
 	    }
-11. The only thing missing now is disposing of resources when the application stops.
-12. Update the `Application_End()` method to call the `Close()` method on `CouchbaseConfig`
+```
+    
+	The only thing missing now is disposing of resources when the application stops.
+	This includes closing the connection to the Couchbase Cluster and releasing memory.
+	
+	Update the 'Application_End()' method to call the 'Close()' method on 'CouchbaseConfig'
 
+```C#
 		protected void Application_End()
 		{
 			CouchbaseConfig.Close();
 		}
-		
-You're ready to start coding!
+```
+	
+You're ready to start using the Couchbase .NET Client, happy coding!
 
 ####Step 2.1 
 
