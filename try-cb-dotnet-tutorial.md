@@ -392,17 +392,20 @@ That’s it! NuGet has pulled in all required dependencies and reference require
 
 
 ##### 2.0 - Task 2: Bootstrapping Couchbase Client 
-Before using the Couchbase .NET Client it needs to be initialised and configured to point to the right cluster and buckets.
+Bootstrapping is the popular phrase used to describe the task of initialising and configuring a library. In case of the Couchbase .NET Client we need to inform the .NET Client where to find the Couchbase Server and what buckets to use.
 
-Bootstrapping is the process for initialising and configuring the Couchbase Client for use in the application.
+The Couchbase Client includes a helper class called `ClusterHelper`. This class is a singleton that can be shared globally in the application and should be kept alive for the lifetime of the application. The benefit of using `ClusterHelper` is that resources are shared across the the application and thereby setup and teardown is not done unless explicitly needed. 
 
-The Couchbase Client includes a helper class called `ClusterHelper`. This class is a singleton that can be shared globally in the application and should always be kept alive for the lifetime of the application. 
+It is recommended by Couchbase to use `ClusterHelper` when working with the .NET Client and part of the best practices. 
 
-The application we use is a web application and therefore it's most convenient to initialise the Couchbase Client in `Global.asax.cs` as this is run on application start.
+In this tutorial the application at hand is a web application and therefore it's most convenient to initialise the Couchbase Client in `Global.asax.cs` as this is the main entry point and run on application start. Initialising the Couchbase .NET Client here will ensure that it is initialised before any other code is called.
 
-1. Create a new file in the folder `App_Start` called `CouchbaseConfig.cs`.
+Using Visual Studio 2015 or later, follow these steps to bootstrap the Couchbase .NET Client:
+
+	Create a new file in the folder `App_Start` called `CouchbaseConfig.cs`.
+
 2. Replace the content of `CouchbaseConfig.cs` with this code snippet:
-
+```C#
 		using System;
 		using System.Collections.Generic;
 		using System.Linq;
@@ -448,7 +451,9 @@ The application we use is a web application and therefore it's most convenient t
 		           ClusterHelper.Close();
 		       }
       		}
-		}   
+		} 
+```
+		  
 3. The class `CouchbaseConfig` references a class called `CouchbaseConfigHelper`, the purpose of this class is to wrap calls to read `web.config` for application configurations and settings.
 4. In the project root create a new code files called: `CouchbaseConfigHelper.cs`.
 5. Replace the content of `CouchbaseConfigHelper.cs` with:
