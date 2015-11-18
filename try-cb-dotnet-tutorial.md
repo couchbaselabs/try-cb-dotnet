@@ -871,7 +871,7 @@ public object Flights(string token)
 
 **Where:** `UserController.cs` -> **method:** `BookFlights([FromBody] dynamic request)`
 
-**Goals:** Store live data about the user's travel bookings, persist them in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
+**Goals:** Persist data about the user's travel bookings, persist them in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
 
 **Relevant Documentation Topics:** 
 
@@ -879,69 +879,74 @@ public object Flights(string token)
 * [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
 
 **Task:**
-In the current implementation `BookFlights([FromBody] dynamic request)` nothing is actually stored, we just return a constant that indicates how many line items where stored. 
+The intention of `BookFlights([FromBody] dynamic request)` is to store information about a users actual travel bookings.
+
+In the current implementation `BookFlights([FromBody] dynamic request)` nothing is actually stored, we just return a constant that indicates how many line items where stored about a users bookings.
+ 
 Using the `travel-sample` bucket, Couchbase .NET Client and N1QL we will update the method to store actual data about the users bookings. 
 
-The intention of `BookFlights([FromBody] dynamic request)` is to store information about a users actual travel bookings. 
+The JWT token is used as a key to the users bookings document, see step 2.3.
 
-This is a Web API call, a method that is called from the static html (index.html).
-The JS in the static html expects this "flights" web api call to save the selected flight in a booking's document.
+Responses should be in a JSON format like this:
 
-The JWT token is used as a key to the users bookings.
-In this fake implementation we are not going to use the Token, nor store any data about the bookings.
-Instead we return a static value to indicate that the booking was successful.
-Response should be in a JSON format like this:
-Bookings:
+```JSON
 {"added":3}
+```
 
-Implement the method to return the the number of successful bookings that where persisted in couchbase for the user (token)
+Implement the method to return the the number of successful bookings that where persisted in Couchbase Server for the user. Remember to use the JWT token in the key for the document, like this:
 
-* 1:
-    First we need to get an understanding of the "dynamic request" value. 
-    Add a breakpoint to this method and use "immediate window" in Visual studio to investigate the request value.
-    "request" is a list of dynamic "JToken" values. It's therefore possible to "foreach" over the collection and "select" 
-    the the relevant values and store them directly in Couchbase.
-* 2:
-    Create a foreach loop to iterate over the request collection and store all bookings to Couchbase.
-    the bookings should be stored in a document with the compound key
-    bookings::{token}
-    The token is available in the request, request.token
+`bookings::{token}`
 
-* 3:
-    Update the return value to reflect the actual number of stored bookings    
 
->Hint: 
-    Use ClusterHelper to `Upsert(...)` the document in the "default" bucket. 
+1. First we need to get an understanding of the `dynamic` request value.
+	
+	Add a breakpoint inside the method and use Visual Studio's built in `Immediate Window` to investigate the request value.
+	
+    `request` is a list of dynamic `JToken` values. It's therefore possible to loop over the collection and select the the relevant values and store them directly in Couchbase.
+2. Create a foreach loop to iterate over the request collection and store all bookings to Couchbase.
+	
+	The bookings should be stored in a document with the compound key
+	`bookings::{token}`
+	The `token` is available in the request parameter under the property, request.token
+3. Update the return value to reflect the actual number of stored bookings.    
+
+>Hint:
+>
+>Use `ClusterHelper` to `Upsert(...)` the document in the bucket. 
     
 **Solution:**
-    
-    	[HttpPost]
-        [ActionName("flights")]
-        public object BookFlights([FromBody] dynamic request)
+
+```C#    
+[HttpPost]
+[ActionName("flights")]
+public object BookFlights([FromBody] dynamic request)
+{
+    List<FlightModel> flights = new List<FlightModel>();
+
+    foreach (var flight in request.flights)
+    {
+        flights.Add(new FlightModel
         {
-            List<FlightModel> flights = new List<FlightModel>();
+            name = flight._data.name,
+            bookedon = DateTime.Now.ToString(),
+            date = flight._data.date,
+            destinationairport = flight._data.destinationairport,
+            sourceairport = flight._data.sourceairport
+        });
+    }
 
-            foreach (var flight in request.flights)
-            {
-                flights.Add(new FlightModel
-                {
-                    name = flight._data.name,
-                    bookedon = DateTime.Now.ToString(),
-                    date = flight._data.date,
-                    destinationairport = flight._data.destinationairport,
-                    sourceairport = flight._data.sourceairport
-                });
-            }
+     ClusterHelper
+        .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
+        .Upsert("bookings::" + request.token, flights);
 
-             ClusterHelper
-                .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
-                .Upsert("bookings::" + request.token, flights);
-
-            return new { added = flights.Count };
-        }
+    return new { added = flights.Count };
+}
+```
 
 ### Step 2 - Summery
-In part 2 we learned how to bootstrap the .NET Couchbase Client and query data with N1QL raw string queries. We have not used LINQ 2 Couchbase yet, we will come back to that in Step 4.
+In part 2 we learned how to bootstrap the .NET Couchbase Client and query data with N1QL using raw string queries. 
+
+We have yet to learn how to use LINQ 2 Couchbase, we will come back to that in Step 4.
 
 ### Step 3 - Login credentials and authentications 
 In this step we will implement the login page to use JWT Tokens for new and exciting users.
