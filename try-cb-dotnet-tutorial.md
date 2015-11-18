@@ -126,15 +126,16 @@ The JWT response should be in a JSON format like this:
 
 Update the Login method to return the JWT token value:
 
-		[HttpGet]
-        [ActionName("Login")]
-        public object Login(string password, string user)
-        {
-       
-            return new { 
-            	success = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiZ3Vlc3QiLCJpYXQiOjE0NDE4Njk5NTR9.5jPBtqralE3W3LPtS - j3MClTjwP9ggXSCDt3 - zZOoKU" 
-            	};
-        }
+```C#
+	[HttpGet]
+	[ActionName("Login")]
+	public object Login(string password, string user)
+	{
+	   
+	    return new { success = 	"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9." +
+	            "eyJ1c2VyIjoiZ3Vlc3QiLCJpYXQiOjE0NDE4Njk5NTR9.5jPBtqralE3W3LPtS - " +
+	            "j3MClTjwP9ggXSCDt3 - zZOoKU" };	}
+```    
         
 ####Step 1.2
 
@@ -164,12 +165,16 @@ The JWT response should be in a JSON format like this:
 
 **Solution:**
 
+```C#
 	[HttpPost]
 	[ActionName("Login")]
     public object CreateLogin([FromBody] UserModel user)
     {        
-            return new { success = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiZ3Vlc3QiLCJpYXQiOjE0NDE4Njk5NTR9.5jPBtqralE3W3LPtS - j3MClTjwP9ggXSCDt3 - zZOoKU" };
+            return new { success = 	"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9." +
+            "eyJ1c2VyIjoiZ3Vlc3QiLCJpYXQiOjE0NDE4Njk5NTR9.5jPBtqralE3W3LPtS - " +
+            "j3MClTjwP9ggXSCDt3 - zZOoKU" };
     }
+```
 
 ####Step 1.3
 
@@ -203,19 +208,21 @@ Later we will look-up actual bookings using the JWT token, but for now a static 
 
 **Solution:**
 
+```C#
 	[HttpGet]
-   	[ActionName("flights")]
-    public object Flights(string token)
-    {
-           
-    	return new List<dynamic>
-    	{
-    		new {
-    		_type="Flight",_id="f0099c24-3ad4-482e-8352-704f9cbf1a43",name="American Airlines",flight="AA550",date="09/10/2015",sourceairport="SFO",destinationairport="LAX",bookedon=1441881827623},
-                new {_type="Flight",_id="f0099c24-3ad4-482e-8352-704f9cbf1a43",name="American Airlines",flight="AA550",date="09/10/2015",sourceairport="SFO",destinationairport="LAX",bookedon=1441881827623},
-                new {_type="Flight",_id="f0099c24-3ad4-482e-8352-704f9cbf1a43",name="American Airlines",flight="AA550",date="09/10/2015",sourceairport="SFO",destinationairport="LAX",bookedon=1441881827623},
-            };
-        }
+	[ActionName("flights")]
+	public object Flights(string token)
+	{
+	       
+		return new List<dynamic>
+		{
+			new {
+			_type="Flight",_id="f0099c24-3ad4-482e-8352-704f9cbf1a43",name="American Airlines",flight="AA550",date="09/10/2015",sourceairport="SFO",destinationairport="LAX",bookedon=1441881827623},
+	            new {_type="Flight",_id="f0099c24-3ad4-482e-8352-704f9cbf1a43",name="American Airlines",flight="AA550",date="09/10/2015",sourceairport="SFO",destinationairport="LAX",bookedon=1441881827623},
+	            new {_type="Flight",_id="f0099c24-3ad4-482e-8352-704f9cbf1a43",name="American Airlines",flight="AA550",date="09/10/2015",sourceairport="SFO",destinationairport="LAX",bookedon=1441881827623},
+	        };
+	}    
+```    
 
 ####Step 1.4
 
@@ -247,12 +254,14 @@ Later we will revisit this method and updated it to store bookings using the JWT
 
 **Solution:**
 
+```C#
 	[HttpPost]
-    [ActionName("flights")]
-    public object BookFlights([FromBody] dynamic request)
-    {
- 		return new { added = 3 };
-    }
+	[ActionName("flights")]
+	public object BookFlights([FromBody] dynamic request)
+	{
+		return new { added = 3 };
+	}
+```    
 
 ####Step 1.5
 
@@ -283,17 +292,19 @@ Later we re-vist this Web API method and update it to use data from Couchbase to
             
 **Solution:**    
 
+```C#
 	[HttpGet]
-    [ActionName("findAll")]
-    public object FindAll(string from, DateTime leave, string to, string token)
-    {
-    	return new List<dynamic>
-        {
-        	new { destinationairport="SFO",equipment=738,flight="AA907",id=5746,name="American Airlines",sourceairport="LAX",utc="00:29:00",flighttime=1,price=53},
-        	new { destinationairport="SFO",equipment=738,flight="AA907",id=5746,name="American Airlines",sourceairport="LAX",utc="00:29:00",flighttime=1,price=53},
-        	new { destinationairport="SFO",equipment=738,flight="AA907",id=5746,name="American Airlines",sourceairport="LAX",utc="00:29:00",flighttime=1,price=53}
-            };
-        }
+	[ActionName("findAll")]
+	public object FindAll(string from, DateTime leave, string to, string token)
+	{
+		return new List<dynamic>
+	    {
+	    	new { destinationairport="SFO",equipment=738,flight="AA907",id=5746,name="American Airlines",sourceairport="LAX",utc="00:29:00",flighttime=1,price=53},
+	    	new { destinationairport="SFO",equipment=738,flight="AA907",id=5746,name="American Airlines",sourceairport="LAX",utc="00:29:00",flighttime=1,price=53},
+	    	new { destinationairport="SFO",equipment=738,flight="AA907",id=5746,name="American Airlines",sourceairport="LAX",utc="00:29:00",flighttime=1,price=53}
+	    };
+	}
+```
 
 ####Step 1.6
 
@@ -319,6 +330,7 @@ Later we will use Couchbase to do the look-up, but for now a constant value is r
 
 **Solution:**
 
+```C#
 	[HttpGet]
    	[ActionName("findAll")]
     public object FindAll(string search, string token)
@@ -328,6 +340,7 @@ Later we will use Couchbase to do the look-up, but for now a constant value is r
             new {airportname = "San Francisco Intl"}
         };
     }
+```
     
 ### Step 1 - Summery
 If done correctly all Web API methods now return a static JSON value. This should enable you to be able to run and browse the application. 
@@ -362,33 +375,32 @@ If you are not familiar with NuGet, it’s the official and most widely supporte
 
 Using Visual Studio 2015 or later, follow these steps to get started with the Couchbase .NET SDK:
 
-	From the IDE, right-click the solution/project to which you want to add the dependency.
+1. From the IDE, right-click the solution/project to which you want to add the dependency.
 
-![Add NuGet Ref](content/images/Screen Shot 2015-11-18 at 08.23.42.png)
+	![Add NuGet Ref](content/images/Screen Shot 2015-11-18 at 08.23.42.png)
 
 
-	In the context menu, click `Manage NuGet Packages for ...`. The NuGet package manager view opens.
+2. In the context menu, click `Manage NuGet Packages for ...`. The NuGet package manager view opens.
 
-![NuGet view](content/images/Screen Shot 2015-11-18 at 08.30.52.png)
+	![NuGet view](content/images/Screen Shot 2015-11-18 at 08.30.52.png)
 
-	In the search box at the top right-hand side of the dialog, type 'CouchbaseNetClient' and then press enter on your keyboard.
+3. In the search box at the top right-hand side of the dialog, type `CouchbaseNetClient` and press 'Enter' on your keyboard to start the search. 
 
-![NuGet install CB Client](content/images/Screen Shot 2015-11-18 at 08.34.20.png)
+	![NuGet install CB Client](content/images/Screen Shot 2015-11-18 at 08.34.20.png)
 
-	In the search results, select the 'CouchbaseNetClient' package and then click Install. 
-	The Visual Studio Output window will show progress and concluded with a 'Finished'.
+4. In the search results, select the 'CouchbaseNetClient' package and then click Install. The Visual Studio Output window will show progress and concluded with a 'Finished'.
 
-![NuGet install progress](content/images/Screen Shot 2015-11-18 at 08.36.36.png)
+	![NuGet install progress](content/images/Screen Shot 2015-11-18 at 08.36.36.png)
 
-	Repeat step 3-4 to install 'Linq2Couchbase'.
+5. Repeat step 3-4 to install `Linq2Couchbase`.
 	
-![NuGet installed packages](content/images/Screen Shot 2015-11-18 at 08.41.21.png)	
+	![NuGet installed packages](content/images/Screen Shot 2015-11-18 at 08.41.21.png)	
 	
-	Confirm that both NuGet packages have been successfully installed.
-	Using the NuGET view, sarch for 'Couchbase' and set Filter to 'Installed' as shown above.
-	Confirm that both 'Linq2Couchbase' and 'CouchbaseNetClient' are installed.
+6. Confirm that both NuGet packages have been successfully installed.
+	Using the NuGet view, search for `Couchbase` and set Filter to `Installed` as shown above.
+	Confirm that both `Linq2Couchbase` and `CouchbaseNetClient` are installed.
 
-That’s it! NuGet has pulled in all required dependencies and reference required dependencies for Couchbase Client and LINQ to N1QL extension. 
+	That’s it! NuGet has pulled in all required dependencies and reference required dependencies for Couchbase Client and LINQ to N1QL extension. 
 
 
 ##### 2.0 - Task 2: Bootstrapping Couchbase Client 
@@ -402,143 +414,145 @@ In this tutorial the application at hand is a web application and therefore it's
 
 Using Visual Studio 2015 or later, follow these steps to bootstrap the Couchbase .NET Client:
 
-	Create a new file in the folder 'App_Start' called 'CouchbaseConfig.cs'.
+1. Create a new file in the folder 'App_Start' called 'CouchbaseConfig.cs'.
 	
-![Add new file 1](content/images/Screen Shot 2015-11-18 at 09.28.04.png)
+	![Add new file 1](content/images/Screen Shot 2015-11-18 at 09.28.04.png)
 
-![Add new file 2](content/images/Screen Shot 2015-11-18 at 09.29.34.png)
+	![Add new file 2](content/images/Screen Shot 2015-11-18 at 09.29.34.png)
+
+2. Replace the content of `CouchbaseConfig.cs` with this code snippet:
 	
-
-	Replace the content of 'CouchbaseConfig.cs' with this code snippet:
+	```C#
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Text;
+	using System.Threading.Tasks;
+	using Couchbase;
+	using Couchbase.Configuration.Client;
 	
-```C#
-		using System;
-		using System.Collections.Generic;
-		using System.Linq;
-		using System.Text;
-		using System.Threading.Tasks;
-		using Couchbase;
-		using Couchbase.Configuration.Client;
-
-		namespace try_cb_dotnet.App_Start
+	namespace try_cb_dotnet.App_Start
+	{
+		public static class CouchbaseConfig
 		{
-    		public static class CouchbaseConfig
+    		public static void Initialize()
     		{
-        		public static void Initialize()
-        		{
-            		var config = new ClientConfiguration();
-            		config.BucketConfigs.Clear();
-
-            		config.Servers = new List<Uri>(new Uri[] { new Uri(CouchbaseConfigHelper.Instance.Server) });
-
-            		config.BucketConfigs.Add(
-                		CouchbaseConfigHelper.Instance.Bucket,
-	                new BucketConfiguration
-	                {
-	                    BucketName = CouchbaseConfigHelper.Instance.Bucket,
-	                    Username = CouchbaseConfigHelper.Instance.User,
-	                    Password = CouchbaseConfigHelper.Instance.Password
-	                });
-
-            		config.BucketConfigs.Add(
-                	"default",
-                	new BucketConfiguration
-                	{
-                    	BucketName = "default",
-                    	Username = CouchbaseConfigHelper.Instance.User,
-                    	Password = CouchbaseConfigHelper.Instance.Password
-                	});
-
-            		ClusterHelper.Initialize(config);
-        		}
-
-		       public static void Close()
-		       {
-		           ClusterHelper.Close();
-		       }
-      		}
-		} 
-```
-			  
-	The class 'CouchbaseConfig' references a class called 'CouchbaseConfigHelper' that does not yet exist. The purpose of 'CouchbaseConfigHelper' class is to wrap calls to read the 'AppSettings' section of 'web.config' file. The 'AppSettings' section is often used to store configuration settings for an application in .NET. In this tutorial we will follow this design design practice from Microsoft.
+        		var config = new ClientConfiguration();
+        		config.BucketConfigs.Clear();
 	
-	In the project root create a new code file called: 'CouchbaseConfigHelper.cs'. Right click the project, in the menu select -> 'Add'-> 'Class'.
+        		config.Servers = new List<Uri>(new Uri[] { new Uri(CouchbaseConfigHelper.Instance.Server) });
 	
-![Add new file 3](content/images/Screen Shot 2015-11-18 at 09.40.22.png)
-
-![Add new file 3](content/images/Screen Shot 2015-11-18 at 09.40.50.png)
-
-		
-	Replace the content of 'CouchbaseConfigHelper.cs' with the following code snippet:
-```C#
-		using System;
-		using System.Collections.Generic;
-		using System.Configuration;
-		using System.Linq;
-		using System.Web;
-		
-		namespace try_cb_dotnet
-		{
-		    public class CouchbaseConfigHelper
-		    {
-		        public CouchbaseConfigHelper()
-		        {
-		        }
-		
-		        private static CouchbaseConfigHelper instance = null;
-		        public static CouchbaseConfigHelper Instance
-		        {
-		            get { if (instance == null) { instance = new CouchbaseConfigHelper(); } return instance; }
-		        }
-		
-		        public string Bucket
-		        {
-		            get
-		            {
-		                return ConfigurationManager.AppSettings["couchbaseBucketName"];
-		            }
-		        }
-		
-		        public string Server
-		        {
-		            get
-		            {
-		                return ConfigurationManager.AppSettings["couchbaseServer"];
-		            }
-		        }
-		
-		        public string Password
-		        {
-		            get
-		            {
-		                return ConfigurationManager.AppSettings["couchbasePassword"];
-		            }
-		        }
-		
-		        public string User
-		        {
-		            get
-		            {
-		                return ConfigurationManager.AppSettings["couchbaseUser"];
-		            }
-		        }
-		    }
+        		config.BucketConfigs.Add(
+            		CouchbaseConfigHelper.Instance.Bucket,
+                new BucketConfiguration
+                {
+                    BucketName = CouchbaseConfigHelper.Instance.Bucket,
+                    Username = CouchbaseConfigHelper.Instance.User,
+                    Password = CouchbaseConfigHelper.Instance.Password
+                });
+	
+        		config.BucketConfigs.Add(
+            	"default",
+            	new BucketConfiguration
+            	{
+                	BucketName = "default",
+                	Username = CouchbaseConfigHelper.Instance.User,
+                	Password = CouchbaseConfigHelper.Instance.Password
+            	});
+	
+        		ClusterHelper.Initialize(config);
+    		}
+	
+	       public static void Close()
+	       {
+	           ClusterHelper.Close();
+	       }
 		}
-```	
+	} 
+	```
+			  
+	The class `CouchbaseConfig` references a class called `CouchbaseConfigHelper` that does not yet exist. The purpose of `CouchbaseConfigHelper` class is to wrap calls to read the `AppSettings` section of `web.config` file. 
+	
+	The `appSettings` section is often used to store configuration settings for an application in .NET. In this tutorial we will follow this design practice from Microsoft.
+	
+3. In the project root create a new code file called: `CouchbaseConfigHelper.cs`. 
+	Right click the project, in the menu select -> 'Add'-> 'Class'.
+	
+	![Add new file 3](content/images/Screen Shot 2015-11-18 at 09.40.22.png)
+
+	![Add new file 3](content/images/Screen Shot 2015-11-18 at 09.40.50.png)
+		
+4. Replace the content of `CouchbaseConfigHelper.cs` with the following code snippet:
+
+	```C#
+	using System;
+	using System.Collections.Generic;
+	using System.Configuration;
+	using System.Linq;
+	using System.Web;
+	
+	namespace try_cb_dotnet
+	{
+	    public class CouchbaseConfigHelper
+	    {
+	        public CouchbaseConfigHelper()
+	        {
+	        }
+	
+	        private static CouchbaseConfigHelper instance = null;
+	        public static CouchbaseConfigHelper Instance
+	        {
+	            get { if (instance == null) { instance = new CouchbaseConfigHelper(); } return instance; }
+	        }
+	
+	        public string Bucket
+	        {
+	            get
+	            {
+	                return ConfigurationManager.AppSettings["couchbaseBucketName"];
+	            }
+	        }
+	
+	        public string Server
+	        {
+	            get
+	            {
+	                return ConfigurationManager.AppSettings["couchbaseServer"];
+	            }
+	        }
+	
+	        public string Password
+	        {
+	            get
+	            {
+	                return ConfigurationManager.AppSettings["couchbasePassword"];
+	            }
+	        }
+	
+	        public string User
+	        {
+	            get
+	            {
+	                return ConfigurationManager.AppSettings["couchbaseUser"];
+	            }
+	        }
+	    }
+	}
+	```	
 		
 	Reading the code in 'CouchbaseConfigHelper' reveals that it's referencing a bunch of application setting keys in `web.config`, that we have still to create.	
 	
-	Open 'web.config' and add the missing application setting keys in the 'appSettings' section as shown in the following snippet:	
+5. Open `web.config` and add the missing application setting keys in the `appSettings` section as shown in the following snippet:	
 
-```XML	
-		<configuration>
-		  <configSections>
-		    ...
-		  </configSections>
-		  <connectionStrings>
-		    ....
-		  </connectionStrings>
-		  <appSettings>
+	```XML	
+	<configuration>
+		<configSections>
+    		...
+	  	</configSections>
+	  	<connectionStrings>
+	    	...
+	  	</connectionStrings>
+	  	<appSettings>
 		    <add key="webpages:Version" value="3.0.0.0" />
 		    <add key="webpages:Enabled" value="false" />
 		    <add key="ClientValidationEnabled" value="true" />
@@ -549,46 +563,49 @@ Using Visual Studio 2015 or later, follow these steps to bootstrap the Couchbase
 		    <add key="couchbasePassword" value="" />
 		    <add key="couchbaseUser" value="" />
 		    <!--END -->
-		  </appSettings>
-		  ...
-	  	</configuration>
-```
+	  	</appSettings>
+	  	...
+	</configuration>
+	```
 
-	You can change the settings in 'web.config' to reflect your actual Couchbase Server setup. This includes adding username and password if appropriate and correct the cluster url if needed. The current configuration assumes that Couchbase Server is installed on localhost and no password protection on the bucket.
-
-	We now have all configurations in place need to initialise the Couchbase .NET Client.
-	Open the file 'Global.asax.cs' in project root. 
+	You can change the settings in `web.config` to reflect your actual Couchbase Server setup. 
 	
-	Update the method 'Application_Start()' with a call to 'CouchbaseConfig.Initialize();' 
+	This includes adding username and password if appropriate and correct the cluster url if needed. 
+	
+	The current configuration assumes that Couchbase Server is installed on localhost and no password protection on the bucket.
+
+6. We now have all configurations in place need to initialise the Couchbase .NET Client.
+	Open the file `Global.asax.cs` in project root. 
+	
+7. Update the method `Application_Start()` with a call to `CouchbaseConfig.Initialize()` 
 	This will initialise the Couchbasebase Client based on the settings from 'web.config'.
 
-```C#
-		protected void Application_Start()
-    	{
-	        // Initialize Couchbase & ClusterHelper
-	        CouchbaseConfig.Initialize();
+	```C#
+	protected void Application_Start()
+	{
+        // Initialize Couchbase & ClusterHelper
+        CouchbaseConfig.Initialize();
 	
-	        AreaRegistration.RegisterAllAreas();
-	        GlobalConfiguration.Configure(WebApiConfig.Register);
-	        FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
-	        RouteConfig.RegisterRoutes(RouteTable.Routes);
-	        BundleConfig.RegisterBundles(BundleTable.Bundles);
-	    }
-```
+        AreaRegistration.RegisterAllAreas();
+        GlobalConfiguration.Configure(WebApiConfig.Register);
+        FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
+        RouteConfig.RegisterRoutes(RouteTable.Routes);
+        BundleConfig.RegisterBundles(BundleTable.Bundles);
+    }
+	```
     
-	The only thing missing now is disposing of resources when the application stops.
-	This includes closing the connection to the Couchbase Cluster and releasing memory.
+	The only thing missing now is disposing of resources when the application stops. This includes closing the connection to the Couchbase Cluster and releasing memory.
 	
-	Update the 'Application_End()' method to call the 'Close()' method on 'CouchbaseConfig'
-
-```C#
-		protected void Application_End()
-		{
-			CouchbaseConfig.Close();
-		}
-```
+8. Update the `Application_End()` method to call the `Close()` method on `CouchbaseConfig`
 	
-You're ready to start using the Couchbase .NET Client, happy coding!
+	```C#
+	protected void Application_End()
+	{
+		CouchbaseConfig.Close();
+	}
+	```
+	
+	You're ready to start using the Couchbase .NET Client, happy coding!
 
 ####Step 2.1 
 
