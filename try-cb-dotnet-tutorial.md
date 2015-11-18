@@ -335,14 +335,17 @@ If done correctly all Web API methods now return a static JSON value. This shoul
 All data is static but never the less it "works". In Step 2 we will update the static JSON returned in the Web API method to return actual data from Couchbase Server 4.    
 
 ### Step 2 - Understand Couchbase, Couchbase .NET SDK & N1QL
-In this step we will update all WEB API methods to return data from Couchbase. This is the first step that uses Couchbase and therefore we need to add references to the Couchbase Client and LINQ extensions.
+In this step we will update all ASP.NET Web API methods to return data from Couchbase Server. 
+
+This is the first step that uses Couchbase and therefore we need to add references to the Couchbase Client, LINQ extensions and configure the Couchbase Client also know as bootstrapping. 
 
 ####Step 2.0 - Referencing & Bootstrapping the Couchbase Client.
 
 **Where:** `Solution` (this is a solution wide update)
 
 **Goals:** Add a reference to: [CouchbaseNetClient](https://www.nuget.org/packages/CouchbaseNetClient) and [Linq2Couchbase](https://www.nuget.org/packages/Linq2Couchbase) the later is the LINQ to N1QL extensions. 
-When the references are in place we need to bootstrap the Couchbase SDK and make it globally available in the solution/web application.
+
+When the references are in place we need to bootstrap (configuration and initialisation) the Couchbase .NET SDK and make it globally available to the application.
 
 **Relevant Documentation Topics:** 
 
@@ -353,17 +356,38 @@ When the references are in place we need to bootstrap the Couchbase SDK and make
 * [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
 
 **Task (Add references):**
-For every release, we package the binaries and store the latest version in NuGet. If you are not familiar with NuGet, it’s the official and most widely supported package manager for Microsoft Visual Studio and .NET in general. NuGet is a centralized repository for package authors and consumers, and it also defines a suite of tools for authoring and consuming packages.
+For every release of the Couchbase .NET Client a matching NuGet package with the binaries is released to the [NuGet Gallery](https://www.nuget.org/packages). 
+
+If you are not familiar with NuGet, it’s the official and most widely supported package manager for Microsoft Visual Studio and .NET in general. NuGet is a centralised repository for package authors and consumers, and it also defines a suite of tools for authoring, publishing and consuming packages from various vendors and authors.
 
 Using Visual Studio 2015 or later, follow these steps to get started with the Couchbase .NET SDK:
 
-1. From the IDE, right-click the solution/project to which you want to add the dependency.
-2. In the context menu, click Manage NuGet Packages. The NuGet package manager modal dialog opens.
-3. In the search box at the top right-hand side of the dialog, type CouchbaseNetClient and then press enter on your keyboard.
-4. In the search results, select the `CouchbaseNetClient` package and then click Install.
-5. Repeat step 3-4 to install `Linq2Couchbase`.
+	From the IDE, right-click the solution/project to which you want to add the dependency.
 
-That’s it! NuGet will pull in all required dependencies and reference them. 
+![Add NuGet Ref](content/images/Screen Shot 2015-11-18 at 08.23.42.png)
+
+
+	In the context menu, click `Manage NuGet Packages for ...`. The NuGet package manager view opens.
+
+![NuGet view](content/images/Screen Shot 2015-11-18 at 08.30.52.png)
+
+	In the search box at the top right-hand side of the dialog, type 'CouchbaseNetClient' and then press enter on your keyboard.
+
+![NuGet install CB Client](content/images/Screen Shot 2015-11-18 at 08.34.20.png)
+
+	In the search results, select the 'CouchbaseNetClient' package and then click Install. 
+	The Visual Studio Output window will show progress and concluded with a 'Finished'.
+
+![NuGet install progress](content/images/Screen Shot 2015-11-18 at 08.36.36.png)
+
+	Repeat step 3-4 to install 'Linq2Couchbase'.
+	
+![NuGet installed packages](content/images/Screen Shot 2015-11-18 at 08.41.21.png)	
+	
+	Confirm that both NuGet packages have been successfully installed by searching for 'Couchbase' and set Filter to 'Installed' as shown above.
+
+That’s it! NuGet has pulled in all required dependencies and reference required dependencies for Couchbase Client and LINQ to N1QL extension. 
+
 
 **Task (Bootstrap):**
 Before we can start using the Couchbase SDK it needs to be initialised and configured to point to the right cluster and buckets.
