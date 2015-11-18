@@ -828,39 +828,44 @@ public object FindAll(string from, DateTime leave, string to, string token)
 * [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
 
 **Task:**
-In the current implementation `Flights(string token)` returns static data, using the `travel-sample` bucket, Couchbase .NET Client and N1QL we will update the method to return actual data stored about the users bookings. 
+The intention of `Flights(string token)` is to return a list of all travel bookings stored by the user.
 
-The intention of `Flights(string token)` is to return a users actual travel bookings. 
+In the current implementation `Flights(string token)` returns static data.
 
-This is a Web API call, a method that is called from the static html (index.html).
-The JS in the static html expects this "flights" web api call to return a
-all bookings done by this user. 
-The JWT token is used to look-up the user and find all bookings.
-Response should be in a JSON format
+Using the `travel-sample` bucket, Couchbase .NET Client and N1QL we will update the Web API method to return actual data stored about the users bookings. 
+All data is stored in Couchbase Server in the `travel-sample` bucket.
+
+The `JWT token` id is used to look-up the user and find all bookings for that logged in user.
+
+Response should be in JSON.
 
 Implement the method to return all bookings for the logged-in user.
 
-* 1:
-    Use the token to look-up the "bookings" document for the user and return all bookings.
-    The document key is in the format
-    bookings::token
-    The great thing with using Couchbase (a JSON document store) is that we don't need to convert the value,
-    we can just return the actual document stored in Couchbase.
+1. Use the token to look-up the "bookings" document for the user and return all bookings.
+	The document key should be in a format like
+	`bookings::token`
+    Where `token` is the JWT Token id.
+    
+    The great thing with using Couchbase (or any JSON document store) is that we don't need to convert the value,
+    we can just return the actual document retrieved from Couchbase Server.
  
->Hint: 
-    Use `ClusterHelper` to Get document in the "default" bucket and retur the value. 
+>Hint:
+> 
+> Use `ClusterHelper` and `Get<dynamic>(...)` to retrive documents from the bucket and return the value. 
     
 **Solution:**
 
-		[HttpGet]
-        [ActionName("flights")]
-        public object Flights(string token)
-        {
-            return ClusterHelper
-                    .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
-                    .Get<dynamic>("bookings::" + token)
-                    .Value;
-        }    
+```C#
+[HttpGet]
+[ActionName("flights")]
+public object Flights(string token)
+{
+    return ClusterHelper
+            .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
+            .Get<dynamic>("bookings::" + token)
+            .Value;
+}    
+```
 
 ####Step 2.4
 
