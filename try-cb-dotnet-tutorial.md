@@ -637,64 +637,76 @@ Using Visual Studio 2015 or later, follow these steps to bootstrap the Couchbase
 * [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
 
 **Task:**
-In the current implementation `FindAll(string search, string token)` returns static data, using the `travel-sample` bucket, Couchbase .NET Client and N1QL we will update the method to return actual data. 
+In the current implementation the `FindAll(string search, string token)` method returns static data. 
 
-The intention of `FindAll(string search, string token)` is to return a airport name based on the `search` string passed to the method.
+Update the method to return data from the `travel-sample` bucket using the Couchbase .NET Client and N1QL.
 
-This is a Web API call, a method that is called from the static html (index.html).
-The JS in the static html expects this "findAll" web api call to return a
-"airportname" in a JSON format like this:
+The intention of `FindAll(string search, string token)` is to return a airport name based on the `search` string passed to the method. The `search` string can be in three different formats:
+
+1. Three letter acronym, one sample could be `LAX` 
+2. Four letter acronym, one sample could be `KLAX`
+3. Free-text search with a partial all complet airport name, one sample could be: `Los Angeles Interna`'
+
+In all three cases above the airport name returned should be `Los Angeles International Airport`.
+
+Implement the method to return a list of airport names that match the `search` string
+and return the result list in a JSON format like:
+
+```JSON
 [{"airportname":"San Francisco Intl"}]
+```
 
-Implement the method to return a list of airport names that match the "search" string
-and return the result list.
 The result list is used by the UI to show a drop-down of matching airport names the user can select from.
 
->Hint: use N1QL to query the "travel-sample" bucket in Couchbase and return all matching airport names. 
+>Hint:
+>
+>Use N1QL to query the `travel-sample` bucket in Couchbase Server and return all matching airport names. 
 
 **Solution:**
 
-		[HttpGet]
-        [ActionName("findAll")]
-        public object FindAll(string search, string token)
-        {
-            if (search.Length == 3)
-            {
-                // LAX
-                var query = 
-                    new QueryRequest("SELECT airportname FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE faa=$1")
-                    .AddPositionalParameter(search.ToUpper());
+```C#
+[HttpGet]
+[ActionName("findAll")]
+public object FindAll(string search, string token)
+{
+    if (search.Length == 3)
+    {
+        // LAX
+        var query = 
+            new QueryRequest("SELECT airportname FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE faa=$1")
+            .AddPositionalParameter(search.ToUpper());
 
-                return ClusterHelper
-                    .GetBucket("travel-sample")
-                    .Query<dynamic>(query)
-                    .Rows;
-            }
-            else if (search.Length == 4)
-            {
-                // KLAX
-                var query =
-                    new QueryRequest("SELECT airportname FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE icao = '$1'")
-                    .AddPositionalParameter(search.ToUpper());
+        return ClusterHelper
+            .GetBucket("travel-sample")
+            .Query<dynamic>(query)
+            .Rows;
+    }
+    else if (search.Length == 4)
+    {
+        // KLAX
+        var query =
+            new QueryRequest("SELECT airportname FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE icao = '$1'")
+            .AddPositionalParameter(search.ToUpper());
 
-                return ClusterHelper
-                    .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
-                    .Query<dynamic>(query)
-                    .Rows;
-            }
-            else
-            {
-                // Los Angeles
-                var query =
-                    new QueryRequest("SELECT airportname FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE airportname LIKE $1")
-                    .AddPositionalParameter("%" + search + "%");
+        return ClusterHelper
+            .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
+            .Query<dynamic>(query)
+            .Rows;
+    }
+    else
+    {
+        // Los Angeles
+        var query =
+            new QueryRequest("SELECT airportname FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` WHERE airportname LIKE $1")
+            .AddPositionalParameter("%" + search + "%");
 
-                return ClusterHelper
-                    .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
-                    .Query<dynamic>(query)
-                    .Rows;
-            }
-        }    
+        return ClusterHelper
+            .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
+            .Query<dynamic>(query)
+            .Rows;
+    }
+}    
+```
 
 Test the application with various airport names and abbreviation forms: `SFO`, `KLAX`, `Los Angeles` etc.
 
@@ -710,32 +722,33 @@ Test the application with various airport names and abbreviation forms: `SFO`, `
 * [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
 
 **Task:**
-In the current implementation `FindAll(string from, DateTime leave, string to, string token)` returns static data, using the `travel-sample` bucket, Couchbase .NET Client and N1QL we will update the method to return actual data. 
+In the current implementation `FindAll(string from, DateTime leave, string to, string token)` returns static data, using the `travel-sample` bucket, Couchbase .NET Client and N1QL we will update the method to return actual data from Couchbase Server. 
 
 The intention of `FindAll(string from, DateTime leave, string to, string token)` is to search out and find actual route data. Trip data is create by joining `airport` documents with with `routes`.
 
-This is a Web API call, a method that is called from the static html (index.html).
-The JS in the static html expects this "findAll" web api call to return a
-"trip" in a JSON format.
+Implement the method to return all trips that match the selected source `from` and destination `to` airport name for the given date interval `leave`.
 
-Implement the method to return all trips that match the selected source and destination airport for the given date interval.
+>Hint: 
+>
+>Use N1QL to query the `travel-sample` bucket in Couchbase Server to find matching `trips`.
+>
+>The `travel-sample` does not contain any `trip` documents therefore you will need to use `join` to build a result-set to represent `trips`.
 
->HINT: Use N1QL to query the "travel-sample" bucket in Couchbase to find matching "trips"
-The travel sample does not contain any "trip" documents you will need to use "join" to build a matcing result-set.
-This is a two step proccess/query.
+This is a two step process, where each step will perform it's own N1QL query.
 
-* 1: 
-    This API method is called with the "from" and "to" values witch represent the full airport name.
-    The "join" that we will do in step 2, needs the FAA (3 letter abbreviation for the airport name)
-    Therefore the first step is to make a N1QL query to convert the airport name to a FAA 3 letter value 
-    for both from and to airport.
+1. This API method is called with the `from` and `to` values witch represent the full airport names.
 
-* 2:
-    This is a bit tricky as we will create a N1QL query that will use both UNNEST and JOIN. 
-    Below you can find a "template" version of the query.
-    This will allow you to understand the query in it's full detail and exam the parameters needed for this query.
+	The `join` that we will create in step 2, needs the FAA (three letter abbreviation for the airport name)
 
->SELECT r.id, a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment FROM 
+	Therefore the first step is to make a N1QL query to convert the airport name to a FAA, three letter value for both from and to airport.
+
+2. This part is a bit tricky as it uses one of the more advanced features in N1QL, the `JOIN` and `UNNEST` statement.
+	Below you can find a template version of the query.
+	
+    This will allow you to understand the query in it's full detail and examin the parameters needed for this query.
+
+```SQL
+SELECT r.id, a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment FROM 
     `travel-sample` r 
     UNNEST r.schedule s 
     JOIN `travel-sample` a 
@@ -744,61 +757,64 @@ This is a two step proccess/query.
     AND r.destinationairport='SFO' 
     AND s.day=1
     ORDER BY a.name      
+```
     
 **Solution:**
 
-		[HttpGet]
-    	[ActionName("findAll")]
-        public object FindAll(string from, DateTime leave, string to, string token)
+```C#
+[HttpGet]
+[ActionName("findAll")]
+public object FindAll(string from, DateTime leave, string to, string token)
+{
+    string queryFrom = null;
+    string queryTo = null;
+    var queryLeave = (int)leave.DayOfWeek;
+
+    // raw query
+    var query1 =
+           new QueryRequest(
+               "SELECT faa as fromAirport, geo FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` " +
+               "WHERE airportname = $from " +
+               "UNION SELECT faa as toAirport, geo FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` " +
+               "WHERE airportname = $to")
+           .AddNamedParameter("from", from)
+           .AddNamedParameter("to", to);
+
+    var partialResult1 = ClusterHelper
+            .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
+            .Query<dynamic>(query1);
+
+    if (partialResult1.Rows.Any())
+    {
+        foreach (dynamic row in partialResult1.Rows)
         {
-            string queryFrom = null;
-            string queryTo = null;
-            var queryLeave = (int)leave.DayOfWeek;
-
-            // raw query
-            var query1 =
-                   new QueryRequest(
-                       "SELECT faa as fromAirport, geo FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` " +
-                       "WHERE airportname = $from " +
-                       "UNION SELECT faa as toAirport, geo FROM `" + CouchbaseConfigHelper.Instance.Bucket + "` " +
-                       "WHERE airportname = $to")
-                   .AddNamedParameter("from", from)
-                   .AddNamedParameter("to", to);
-
-            var partialResult1 = ClusterHelper
-                    .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
-                    .Query<dynamic>(query1);
-
-            if (partialResult1.Rows.Any())
-            {
-                foreach (dynamic row in partialResult1.Rows)
-                {
-                    if (row.fromAirport != null) queryFrom = row.fromAirport;
-                    if (row.toAirport != null) queryTo = row.toAirport;
-                }
-            }
-
-            // raw query
-            var query2 =
-                   new QueryRequest(
-                       "SELECT r.id, a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment FROM " +
-                       "`" + CouchbaseConfigHelper.Instance.Bucket + "` r " +
-                       "UNNEST r.schedule s JOIN " +
-                       "`" + CouchbaseConfigHelper.Instance.Bucket + "` " +
-                       "a ON KEYS r.airlineid WHERE r.sourceairport=$from " +
-                       "AND r.destinationairport=$to " +
-                       "AND s.day=$leave " +
-                       "ORDER BY a.name")
-                   .AddNamedParameter("from", queryFrom)
-                   .AddNamedParameter("to", queryTo)
-                   .AddNamedParameter("leave", queryLeave);
-
-            return ClusterHelper
-                    .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
-                    .Query<dynamic>(query2)
-                    .Rows;
+            if (row.fromAirport != null) queryFrom = row.fromAirport;
+            if (row.toAirport != null) queryTo = row.toAirport;
         }
-    }    
+    }
+
+    // raw query
+    var query2 =
+           new QueryRequest(
+               "SELECT r.id, a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment FROM " +
+               "`" + CouchbaseConfigHelper.Instance.Bucket + "` r " +
+               "UNNEST r.schedule s JOIN " +
+               "`" + CouchbaseConfigHelper.Instance.Bucket + "` " +
+               "a ON KEYS r.airlineid WHERE r.sourceairport=$from " +
+               "AND r.destinationairport=$to " +
+               "AND s.day=$leave " +
+               "ORDER BY a.name")
+           .AddNamedParameter("from", queryFrom)
+           .AddNamedParameter("to", queryTo)
+           .AddNamedParameter("leave", queryLeave);
+
+    return ClusterHelper
+            .GetBucket(CouchbaseConfigHelper.Instance.Bucket)
+            .Query<dynamic>(query2)
+            .Rows;
+	}
+}    
+```
     
 ####Step 2.3
 
