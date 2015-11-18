@@ -339,7 +339,7 @@ In this step we will update all ASP.NET Web API methods to return data from Couc
 
 This is the first step that uses Couchbase and therefore we need to add references to the Couchbase Client, LINQ extensions and configure the Couchbase Client also know as bootstrapping. 
 
-####Step 2.0 - Referencing & Bootstrapping the Couchbase Client.
+####Step 2.0 - Referencing & Bootstrapping Couchbase Client for .NET.
 
 **Where:** `Solution` (this is a solution wide update)
 
@@ -355,7 +355,7 @@ When the references are in place we need to bootstrap (configuration and initial
 * [Linq2Couchbase - github](https://github.com/couchbaselabs/Linq2Couchbase)
 * [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
 
-**Task (Add references):**
+##### 2.0 - Task 1: Referencing Couchbase Client and LINQ to N1QL Extensions
 For every release of the Couchbase .NET Client a matching NuGet package with the binaries is released to the [NuGet Gallery](https://www.nuget.org/packages). 
 
 If you are not familiar with NuGet, it’s the official and most widely supported package manager for Microsoft Visual Studio and .NET in general. NuGet is a centralised repository for package authors and consumers, and it also defines a suite of tools for authoring, publishing and consuming packages from various vendors and authors.
@@ -384,13 +384,15 @@ Using Visual Studio 2015 or later, follow these steps to get started with the Co
 	
 ![NuGet installed packages](content/images/Screen Shot 2015-11-18 at 08.41.21.png)	
 	
-	Confirm that both NuGet packages have been successfully installed by searching for 'Couchbase' and set Filter to 'Installed' as shown above.
+	Confirm that both NuGet packages have been successfully installed.
+	Using the NuGET view, sarch for 'Couchbase' and set Filter to 'Installed' as shown above.
+	Confirm that both 'Linq2Couchbase' and 'CouchbaseNetClient' are installed.
 
 That’s it! NuGet has pulled in all required dependencies and reference required dependencies for Couchbase Client and LINQ to N1QL extension. 
 
 
-**Task (Bootstrap):**
-Before we can start using the Couchbase SDK it needs to be initialised and configured to point to the right cluster and buckets.
+##### 2.0 - Task 2: Bootstrapping Couchbase Client 
+Before using the Couchbase .NET Client it needs to be initialised and configured to point to the right cluster and buckets.
 
 Bootstrapping is the process for initialising and configuring the Couchbase Client for use in the application.
 
