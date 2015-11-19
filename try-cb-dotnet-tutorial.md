@@ -1,4 +1,4 @@
-# Couchbase .NET Client SDK Tutorial
+#Couchbase .NET Client SDK Tutorial
 The .NET SDK tutorial bridges the gap between simple and advanced concepts by walking through a complete web application using Couchbase .NET Client library for N1QL and normal set/get operations.
 
 The full source code for the tutorial is available on 
@@ -22,7 +22,7 @@ After completing this tutorial you will have learned:
 
 ![Application Screen shot](content/images/Screen Shot 2015-11-05 at 11.49.06.png)
 
-## Prerequisites and setup
+##Prerequisites and setup
 You will need to have the following available/installed:
 
 * [Visual Studio 2015](https://www.visualstudio.com/) or newer (The source code is created using VS 2015 Professional)
@@ -30,7 +30,7 @@ You will need to have the following available/installed:
 * Although not a requirement, we recommend you have a Git client for easy source code browsing and making it easy to switch between branches (tutorial steps are split using branches)
 * That's it, your ready to start.
 
-## Installing Couchbase Server 4.0
+##Installing Couchbase Server 4.0
 First things first... we need to install Couchbase Server! You can chose to install it locally on your developer machine or remotely, in this tutorial we will assume that Couchbase Server 4.0 is installed locally on the developer machine along side the web site that we will create.
 
 [Download and installation instructions for Couchbase Server](http://www.couchbase.com/nosql-databases/downloads)
@@ -50,8 +50,8 @@ If this is the first time you setup Couchbase Server, this [detailed guide](http
 	 
 >A 	notification box in the upper-right corner will appear and show the progress. When it disappears the bucket is ready to use.
 	
-## Getting ready
-### Understanding the source repo
+##Getting ready
+###Understanding the source repo
 The source code is split up into branches, every branch represents a step in the tutorial. Every step (branch) builds on the previous and the final result is in the `master` branch.
 
 * `tutorial-part-1` is the most simple skeleton that can compile and show a UI. But it's not possible to navigate the app yet.
@@ -89,9 +89,9 @@ To get propper setup for the tutorial and get ready for the first part, follow t
 >Note:
 	Restoring the missing nuget packages can take some time and is also influenced 	by your network speed.
 
-# Tutorial step 1 - 5
+#Tutorial step 1 - 5
  
-## Step 1 - Understand ASP.NET Web API 2 and .NET 
+##Step 1 - Understand ASP.NET Web API 2 and .NET 
 The first part of this tutorial is not about how to use the .NET Client for Couchbase Server. 
 
 The focus in part 1 is to show how ASP.NET Web API works and to emphasise that with Web API we have an option to work with and return JSON from the REST endpoints. 
@@ -371,12 +371,12 @@ public object FindAll(string search, string token)
 }
 ```
     
-### Step 1 - Summery
+###Step 1 - Summery
 If done correctly all Web API methods now return a static JSON value. This should enable you to be able to run and browse the application. 
 
 All data is static but never the less it "works". In Step 2 we will update the static JSON returned in the Web API method to return actual data from Couchbase Server 4.    
 
-## Step 2 - Understand Couchbase, Couchbase .NET SDK & N1QL
+##Step 2 - Understand Couchbase, Couchbase .NET SDK & N1QL
 In this step we will update all ASP.NET Web API methods to return data from Couchbase Server. 
 
 This is the first step that uses Couchbase and therefore we need to add references to the Couchbase Client, LINQ extensions and configure the Couchbase Client also know as bootstrapping. 
@@ -432,7 +432,7 @@ Using Visual Studio 2015 or later, follow these steps to get started with the Co
 	That’s it! NuGet has pulled in all required dependencies and reference required dependencies for Couchbase Client and LINQ to N1QL extension. 
 
 
-### 2.0 - Task 2: Bootstrapping Couchbase Client 
+###2.0 - Task 2: Bootstrapping Couchbase Client 
 Bootstrapping is the popular phrase used to describe the task of initialising and configuring a library. In case of the Couchbase .NET Client we need to inform the .NET Client where to find the Couchbase Server and what buckets to use.
 
 The Couchbase Client includes a helper class called `ClusterHelper`. This class is a singleton that can be shared globally in the application and should be kept alive for the lifetime of the application. The benefit of using `ClusterHelper` is that resources are shared across the the application and thereby setup and teardown is not done unless explicitly needed. 
@@ -954,12 +954,12 @@ public object BookFlights([FromBody] dynamic request)
 }
 ```
 
-### Step 2 - Summery
+###Step 2 - Summery
 In step 2 we learned how to bootstrap the .NET Couchbase Client and query data with N1QL using raw string queries. 
 
 We have yet to learn how to use LINQ 2 Couchbase, we will come back to that in Step 4.
 
-## Step 3 - Login credentials and authentications 
+##Step 3 - Login credentials and authentications 
 In this step we will implement the login page to use JWT Tokens for new and exciting users.
 
 Before we can continue with the tutorial we first need to add a reference to the relevant NuGet packages to handle JWT Tokens. 
@@ -988,7 +988,7 @@ There are other libraries on NuGet, feel free to search for others.
 
 * [JWT Token .NET](https://www.nuget.org/packages/JWT)
 
-### 3.0 - Referencing the JWT Token library
+###3.0 - Referencing the JWT Token library
 For more information about the package and developers behind it, visit
 [NuGet Gallery](https://www.nuget.org/packages). 
 
@@ -1199,10 +1199,10 @@ public string JWTTokenSecret
 </appSettings>
 ```
 
-### Step 3 - Summery
+###Step 3 - Summery
 In part 3 we added JWT Tokens and login credentials to the web site, allowing users to create profiles and store/retrieve their bookings.
 
-## Step 4 - Using LINQ with N1QL
+##Step 4 - Using LINQ with N1QL
 In this step we will update one of the raw N1QL queries to use the LINQ extensions for N1QL. 
 
 LINQ is an abbreviation for Language Integrated Query. LINQ allows you as a developer to take query into your .NET code and describe your search and set conditions.
@@ -1381,21 +1381,21 @@ public object FindAll(string from, DateTime leave, string to, string token)
 }
 ```
 
-### Step 4 - Summery
+###Step 4 - Summery
 In part 4 you learned how to use LINQ with N1QL. 
 
 The benefits of using LINQ with N1QL is code completion, type safety and compile time checks of you queries. On the other hand there is an ekstra step required when creating the PoCo classes in converting the JSON structures to C# class's. 
 
 It's entirely up to you to decide what approach fits best to your temper and or projects. 
  
-## Step 5 - Done
+##Step 5 - Done
 This is the Travel sample in it's entirety, nothing needs to be updated or changed. You can find the final version here:
 
 [Step 5/branch 5](https://github.com/couchbaselabs/try-cb-dotnet/tree/tutorial-part-5)
 
 Use this branch as a reference when creating the previous steps or as a reference app. 
 
-## Comments and Feedback
+##Comments and Feedback
 If you have any comments to the source, tutorial or any content related to this tutorial and/or source please open an ticket in the issues section on GitHub, [here](https://github.com/couchbaselabs/try-cb-dotnet/issues)
 
 Thanks for trying Couchbase with .NET!
