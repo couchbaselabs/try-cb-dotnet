@@ -89,9 +89,9 @@ To get propper setup for the tutorial and get ready for the first part, follow t
 >Note:
 	Restoring the missing nuget packages can take some time and is also influenced 	by your network speed.
 
-## Tutorial step 1 - 5
+# Tutorial step 1 - 5
  
-### Step 1 - Understand ASP.NET Web API 2 and .NET 
+## Step 1 - Understand ASP.NET Web API 2 and .NET 
 The first part of this tutorial is not about how to use the .NET Client for Couchbase Server. 
 
 The focus in part 1 is to show how ASP.NET Web API works and to emphasise that with Web API we have an option to work with and return JSON from the REST endpoints. 
@@ -104,7 +104,7 @@ It's important to understand that the main task of the backend REST API is to re
 
 In this step you will update all Web API methods to return static JSON (string values). This will allow you to run and browse the web application and get an understanding of how the code is organised.
 
-####Step 1.1 - Implement Login 
+###Step 1.1 - Implement Login 
 
 **Where:** `UserController.cs` -> **method:** `Login(string password, string user)`
 
@@ -150,7 +150,7 @@ public object Login(string password, string user)
 }
 ```    
         
-####Step 1.2
+###Step 1.2
 
 **Where:** `UserController.cs` -> **method:** `Login([FromBody] UserModel user)`
 
@@ -192,7 +192,7 @@ public object CreateLogin([FromBody] UserModel user)
 }
 ```
 
-####Step 1.3
+###Step 1.3
 
 **Where:** `UserController.cs` -> **method:** `Flights(string token)`
 
@@ -243,7 +243,7 @@ public object Flights(string token)
 }    
 ```    
 
-####Step 1.4
+###Step 1.4
 
 **Where:** `UserController.cs` -> **method:** `BookFlights([FromBody] dynamic request)`
 
@@ -284,7 +284,7 @@ public object BookFlights([FromBody] dynamic request)
 }
 ```    
 
-####Step 1.5
+###Step 1.5
 
 **Where:** `FlightPathController.cs` -> **method:** `FindAll(string from, DateTime leave, string to, string token)`
 
@@ -333,7 +333,7 @@ public object FindAll(string from, DateTime leave, string to, string token)
 }
 ```
 
-####Step 1.6
+###Step 1.6
 
 **Where:** `AirportController.cs` -> **method:** `FindAll(string search, string token)`
 
@@ -376,12 +376,12 @@ If done correctly all Web API methods now return a static JSON value. This shoul
 
 All data is static but never the less it "works". In Step 2 we will update the static JSON returned in the Web API method to return actual data from Couchbase Server 4.    
 
-### Step 2 - Understand Couchbase, Couchbase .NET SDK & N1QL
+## Step 2 - Understand Couchbase, Couchbase .NET SDK & N1QL
 In this step we will update all ASP.NET Web API methods to return data from Couchbase Server. 
 
 This is the first step that uses Couchbase and therefore we need to add references to the Couchbase Client, LINQ extensions and configure the Couchbase Client also know as bootstrapping. 
 
-####Step 2.0 - Referencing & Bootstrapping Couchbase Client for .NET.
+###Step 2.0 - Referencing & Bootstrapping Couchbase Client for .NET.
 
 **Where:** `Solution` (this is a solution wide update)
 
@@ -397,7 +397,7 @@ When the references are in place we need to bootstrap (configuration and initial
 * [Linq2Couchbase - github](https://github.com/couchbaselabs/Linq2Couchbase)
 * [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
 
-##### 2.0 - Task 1: Referencing Couchbase Client and LINQ to N1QL Extensions
+### 2.0 - Task 1: Referencing Couchbase Client and LINQ to N1QL Extensions
 For every release of the Couchbase .NET Client a matching NuGet package with the binaries is released to the [NuGet Gallery](https://www.nuget.org/packages). 
 
 If you are not familiar with NuGet, it’s the official and most widely supported package manager for Microsoft Visual Studio and .NET in general. NuGet is a centralised repository for package authors and consumers, and it also defines a suite of tools for authoring, publishing and consuming packages from various vendors and authors.
@@ -432,7 +432,7 @@ Using Visual Studio 2015 or later, follow these steps to get started with the Co
 	That’s it! NuGet has pulled in all required dependencies and reference required dependencies for Couchbase Client and LINQ to N1QL extension. 
 
 
-##### 2.0 - Task 2: Bootstrapping Couchbase Client 
+### 2.0 - Task 2: Bootstrapping Couchbase Client 
 Bootstrapping is the popular phrase used to describe the task of initialising and configuring a library. In case of the Couchbase .NET Client we need to inform the .NET Client where to find the Couchbase Server and what buckets to use.
 
 The Couchbase Client includes a helper class called `ClusterHelper`. This class is a singleton that can be shared globally in the application and should be kept alive for the lifetime of the application. The benefit of using `ClusterHelper` is that resources are shared across the the application and thereby setup and teardown is not done unless explicitly needed. 
@@ -636,7 +636,7 @@ Using Visual Studio 2015 or later, follow these steps to bootstrap the Couchbase
 	
 	You're ready to start using the Couchbase .NET Client, happy coding!
 
-####Step 2.1 
+###Step 2.1 
 
 **Where:** `AirportController.cs` -> **method:** `FindAll(string search, string token)`
 
@@ -721,7 +721,7 @@ public object FindAll(string search, string token)
 
 Test the application with various airport names and abbreviation forms: `SFO`, `KLAX`, `Los Angeles` etc.
 
-####Step 2.2 
+###Step 2.2 
 
 **Where:** `FlightPathController.cs` -> **method:** `FindAll(string from, DateTime leave, string to, string token)`
 
@@ -827,7 +827,7 @@ public object FindAll(string from, DateTime leave, string to, string token)
 }    
 ```
     
-####Step 2.3
+###Step 2.3
 
 **Where:** `UserController.cs` -> **method:** `Flights(string token)`
 
@@ -878,7 +878,7 @@ public object Flights(string token)
 }    
 ```
 
-####Step 2.4
+###Step 2.4
 
 **Where:** `UserController.cs` -> **method:** `BookFlights([FromBody] dynamic request)`
 
@@ -959,7 +959,7 @@ In step 2 we learned how to bootstrap the .NET Couchbase Client and query data w
 
 We have yet to learn how to use LINQ 2 Couchbase, we will come back to that in Step 4.
 
-### Step 3 - Login credentials and authentications 
+## Step 3 - Login credentials and authentications 
 In this step we will implement the login page to use JWT Tokens for new and exciting users.
 
 Before we can continue with the tutorial we first need to add a reference to the relevant NuGet packages to handle JWT Tokens. 
@@ -974,7 +974,7 @@ The JWT Token Secret is `UNSECURE_SECRET_TOKEN`. It is recommended that you chos
 
 To maintain the design principles from Microsoft we will store the token in `Web.Config`, making it easy to change at a later point. 
 
-####Step 3.0 - Add a reference to JWT Token library
+###Step 3.0 - Add a reference to JWT Token library
 
 **Where:** `Solution` (this is a solution wide update)
 
@@ -988,7 +988,7 @@ There are other libraries on NuGet, feel free to search for others.
 
 * [JWT Token .NET](https://www.nuget.org/packages/JWT)
 
-##### 3.0 - Task 1: Referencing the JWT Token library
+### 3.0 - Referencing the JWT Token library
 For more information about the package and developers behind it, visit
 [NuGet Gallery](https://www.nuget.org/packages). 
 
@@ -1019,7 +1019,7 @@ Using Visual Studio 2015 or later, follow these steps to get the JWT Token libra
 
 	That’s it! NuGet has pulled in all required dependencies and reference required dependencies for the JWT Token library. 
 
-####Step 3.1
+###Step 3.1
 
 **Where:** `UserController.cs` -> **method:** `Login(string password, string user)`
 
@@ -1088,7 +1088,7 @@ public object Login(string password, string user)
 }
 ```
 
-####Step 3.2
+###Step 3.2
 
 **Where:** `UserController.cs` -> **method:** `CreateLogin([FromBody] UserModel user)`
 
@@ -1202,14 +1202,14 @@ public string JWTTokenSecret
 ### Step 3 - Summery
 In part 3 we added JWT Tokens and login credentials to the web site, allowing users to create profiles and store/retrieve their bookings.
 
-### Step 4 - Using LINQ with N1QL
+## Step 4 - Using LINQ with N1QL
 In this step we will update one of the raw N1QL queries to use the LINQ extensions for N1QL. 
 
 LINQ is an abbreviation for Language Integrated Query. LINQ allows you as a developer to take query into your .NET code and describe your search and set conditions.
 
 If you want to learn more about LINQ and it's impressive capabilities, then please visit the official Microsoft MSDN site, [here](https://msdn.microsoft.com/en-us/library/bb397926.aspx).  
 
-####Step 4.1
+###Step 4.1
 
 **Where:** `FlightPathController.cs` -> **method:** `FindAll(string from, DateTime leave, string to, string token)`
 
@@ -1388,10 +1388,15 @@ The benefits of using LINQ with N1QL is code completion, type safety and compile
 
 It's entirely up to you to decide what approach fits best to your temper and or projects. 
  
-### Step 5 - Done
+## Step 5 - Done
 This is the Travel sample in it's entirety, nothing needs to be updated or changed. You can find the final version here:
 
 [Step 5/branch 5](https://github.com/couchbaselabs/try-cb-dotnet/tree/tutorial-part-5)
 
 Use this branch as a reference when creating the previous steps or as a reference app. 
+
+## Comments and Feedback
+If you have any comments to the source, tutorial or any content related to this tutorial and/or source please open an ticket in the issues section on GitHub, [here](https://github.com/couchbaselabs/try-cb-dotnet/issues)
+
+Thanks for trying Couchbase with .NET!
 
