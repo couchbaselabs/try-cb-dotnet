@@ -259,7 +259,7 @@ The JWT token is used as a key to the users bookings document, this way we can u
 
 In this "fake" implementation we are not going to use the JWT Token, nor store any data about the bookings.
 
-Instead we return a static value to indicate that the booking was successful, simulation the creation of the bookings document for the user.
+Instead we return a static value to indicate that the booking was successful, we simply simulate the creation of the bookings document for the user.
 
 The response should be in a JSON format like this:
 
@@ -719,7 +719,7 @@ public object FindAll(string search, string token)
 }    
 ```
 
-Test the application with various airport names and abbreviation forms: `SFO`, `KLAX`, `Los Angeles` etc.
+Test the application with various airport names and abbreviations, you can start with: `SFO`, `KLAX`, `Los Angeles` etc.
 
 ###Step 2.2 
 
