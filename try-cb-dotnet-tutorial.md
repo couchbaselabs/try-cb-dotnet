@@ -22,7 +22,7 @@ After completing this tutorial you will have learned:
 
 ![Application Screen shot](content/images/Screen Shot 2015-11-05 at 11.49.06.png)
 
-##Prerequisites and setup
+##Prerequisites and Setup
 You will need to have the following available/installed:
 
 * [Visual Studio 2015](https://www.visualstudio.com/) or newer (The source code is created using VS 2015 Professional)
@@ -50,7 +50,7 @@ If this is the first time you setup Couchbase Server, this [detailed guide](http
 	 
 >A 	notification box in the upper-right corner will appear and show the progress. When it disappears the bucket is ready to use.
 	
-##Getting ready
+##Getting Ready
 ###Understanding the source repo
 The source code is split up into branches, every branch represents a step in the tutorial. Every step (branch) builds on the previous and the final result is in the `master` branch.
 
@@ -89,7 +89,7 @@ To get propper setup for the tutorial and get ready for the first part, follow t
 >Note:
 	Restoring the missing nuget packages can take some time and is also influenced 	by your network speed.
 
-#Tutorial step 1 - 5
+#Tutorial Step 1 - 5
  
 ##Step 1 - Understand ASP.NET Web API 2 and .NET 
 The first part of this tutorial is not about how to use the .NET Client for Couchbase Server. 
@@ -376,12 +376,12 @@ If done correctly all Web API methods now return a static JSON value. This shoul
 
 All data is static but never the less it "works". In Step 2 we will update the static JSON returned in the Web API method to return actual data from Couchbase Server 4.    
 
-##Step 2 - Understand Couchbase, Couchbase .NET SDK & N1QL
+##Step 2 - Understand the Couchbase .NET SDK & N1QL
 In this step we will update all ASP.NET Web API methods to return data from Couchbase Server. 
 
 This is the first step that uses Couchbase and therefore we need to add references to the Couchbase Client, LINQ extensions and configure the Couchbase Client also know as bootstrapping. 
 
-###Step 2.0 - Referencing & Bootstrapping Couchbase Client for .NET.
+###Step 2.0 - Referencing and Bootstrapping Couchbase Client for .NET.
 
 **Where:** `Solution` (this is a solution wide update)
 
@@ -959,7 +959,7 @@ In step 2 we learned how to bootstrap the .NET Couchbase Client and query data w
 
 We have yet to learn how to use LINQ 2 Couchbase, we will come back to that in Step 4.
 
-##Step 3 - Login credentials and authentications 
+##Step 3 - Login Credentials and Authentications 
 In this step we will implement the login page to use JWT Tokens for new and exciting users.
 
 Before we can continue with the tutorial we first need to add a reference to the relevant NuGet packages to handle JWT Tokens. 
@@ -974,7 +974,7 @@ The JWT Token Secret is `UNSECURE_SECRET_TOKEN`. It is recommended that you chos
 
 To maintain the design principles from Microsoft we will store the token in `Web.Config`, making it easy to change at a later point. 
 
-###Step 3.0 - Add a reference to JWT Token library
+###Step 3.0 - Add a reference to the JWT Token library
 
 **Where:** `Solution` (this is a solution wide update)
 
@@ -1389,7 +1389,9 @@ The benefits of using LINQ with N1QL is code completion, type safety and compile
 It's entirely up to you to decide what approach fits best to your temper and or projects. 
  
 ##Step 5 - Done
-This is the Travel sample in it's entirety, nothing needs to be updated or changed. You can find the final version here:
+This is the Travel sample app in it's entirety, nothing needs to be updated or changed. 
+
+You can find the final version here:
 
 [Step 5/branch 5](https://github.com/couchbaselabs/try-cb-dotnet/tree/tutorial-part-5)
 
