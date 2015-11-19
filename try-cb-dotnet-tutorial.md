@@ -1,13 +1,24 @@
-# .NET SDK Tutorial
-The .NET SDK tutorial bridges the gap between simple and advanced concepts by walking through a complete web application.
+# Couchbase .NET Client SDK Tutorial
+The .NET SDK tutorial bridges the gap between simple and advanced concepts by walking through a complete web application using Couchbase .NET Client library for N1QL and normal set/get operations.
 
-The full source code for the tutorial is available on [GitHub - try-cb-dotnet](https://github.com/couchbaselabs/try-cb-dotnet).
+The full source code for the tutorial is available on 
+
+GitHub [github.com/couchbaselabs/try-cb-dotnet](https://github.com/couchbaselabs/try-cb-dotnet).
 
 The primary focus of the tutorial is to explain the function and theory behind the Couchbase .NET client and how it works together with Couchbase Server, and especially the new features in Couchbase Server version 4.0 like N1QL. 
 
-This tutorial makes use of the travel-sample data set that comes with Couchbase Server 4.0. 
+This tutorial makes use of the `travel-sample` data-set that comes with Couchbase Server 4.0. 
 
-The HTML/JS code that generates the web application is provided with the source code but it is not the scope of this tutorial to explain any details of the implementation. 
+The HTML/JavaScript code that generates the web application is provided with the source code but it is not the scope of this tutorial to explain any details of the implementation. 
+
+After completing this tutorial you will have learned:
+
+* How to install and configure the Couchbase .NET Client
+* Bootstrap the .NET Client
+* Using LINQ with N1QL
+* Use Couchbase in your own projects.
+* Recommended practices for working with Couchbase with .NET
+* Basic knowlagde about Couchbase, Couchbase Server and usage in .NET
 
 ![Application Screen shot](content/images/Screen Shot 2015-11-05 at 11.49.06.png)
 
