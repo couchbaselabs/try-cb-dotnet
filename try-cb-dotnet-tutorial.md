@@ -51,7 +51,7 @@ If this is the first time you setup Couchbase Server, this [detailed guide](http
 >A 	notification box in the upper-right corner will appear and show the progress. When it disappears the bucket is ready to use.
 	
 ##Getting Ready
-###Understanding the source repo
+###Understanding the source code repository 
 The source code is split up into branches, every branch represents a step in the tutorial. Every step (branch) builds on the previous and the final result is in the `master` branch.
 
 * `tutorial-part-1` is the most simple skeleton that can compile and show a UI. But it's not possible to navigate the app yet.
@@ -61,7 +61,7 @@ The source code is split up into branches, every branch represents a step in the
 * `tutorial-part-5`is the result of part 4 and shows a few ekstra options in the Couchbase .NET SDK like LINQ support.
 * `master` is the final result after refactoring part 5.
 
-###A quick note on the source it self
+###A quick note on the source itself
 This source code is split up in three separate parts with their individual purpose.
  
 1. The 'red box' is the Couchbase Server Cluster our data storage
@@ -78,7 +78,7 @@ Therefore if you take a look at the java version [`try-cb-java`](https://github.
 In the .NET implementation of the backend we use WEB API, as this is probably the most popular, flexible and easy way to implement a REST API endpoint in .NET.  
 
 
-###Get set up for the tutorial 
+###Get setup for the tutorial 
 To get propper setup for the tutorial and get ready for the first part, follow these steps:
 
 * git clone https://github.com/couchbaselabs/try-cb-dotnet.git or download the source
@@ -87,7 +87,8 @@ To get propper setup for the tutorial and get ready for the first part, follow t
 * The solution is configured to restore all missing `nuget`packages on every build. Therefore the only thing missing now is to build and run the solution.
 
 >Note:
-	Restoring the missing nuget packages can take some time and is also influenced 	by your network speed.
+>
+>Restoring the missing NuGet Packages can take some time and is also influenced by your network speed.
 
 #Tutorial Step 1 - 5
  
@@ -98,9 +99,9 @@ The focus in part 1 is to show how ASP.NET Web API works and to emphasise that w
 
 It's important to understand that the main task of the backend REST API is to return JSON. This is an important concept to understand that will greatly help you understand and work with ASP.NET Web API.
  
-> Implementing the Web API methods (REST Endpoints) is all about returning the right JSON. Couchbase stores all it's documents in JSON and therefore it is a very good match as a data store for a REST API.
-> 
->If you already feel comfortable working with ASP.NET Web API you can skip this step and go directly to step 2. In step 2 you will learn how to use Couchbase and the Couchbase .NET Client in your .NET projects.
+Implementing the Web API methods (REST Endpoints) is all about returning the right JSON. Couchbase stores all it's documents in JSON and therefore it is a very good match as a data store for a REST API.
+ 
+*If you already feel comfortable working with ASP.NET Web API you can skip this step and go directly to step 2. In step 2 you will learn how to use Couchbase and the Couchbase .NET Client in your .NET projects.*
 
 In this step you will update all Web API methods to return static JSON (string values). This will allow you to run and browse the web application and get an understanding of how the code is organised.
 
@@ -128,7 +129,9 @@ The JWT response should be in a JSON format like this:
 ```JSON
 [{"success":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiZ3Vlc3QiLCJpYXQiOjE0NDE4Njk5NTR9.5jPBtqralE3W3LPtS - j3MClTjwP9ggXSCDt3 - zZOoKU"}]```
 Implement the method to return a "success" JWT token allowing the user to login.
-Later we will implement a JWT token issuer and store user data in Couchbase for later look-up.The token is created for the user:>Note: The login credentials for this JWT token is:
+Later we will implement a JWT token issuer and store user data in Couchbase for later look-up.The token is created for the user:>Note: 
+>
+>The login credentials for this JWT token is:
 >
 >username: guest
 >
@@ -1187,7 +1190,7 @@ public string JWTTokenSecret
 .
 ```
 
-**web.config**
+**Web.Config**
 
 ```XML
 <appSettings>
@@ -1397,7 +1400,7 @@ You can find the final version here:
 
 Use this branch as a reference when creating the previous steps or as a reference app. 
 
-##Comments and Feedback
+#Comments and Feedback
 If you have any comments to the source, tutorial or any content related to this tutorial and/or source please open an ticket in the issues section on GitHub, [here](https://github.com/couchbaselabs/try-cb-dotnet/issues)
 
 Thanks for trying Couchbase with .NET!
