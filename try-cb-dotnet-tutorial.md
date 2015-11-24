@@ -1,24 +1,22 @@
 #Couchbase .NET Client SDK Tutorial
-The .NET SDK tutorial bridges the gap between simple and advanced concepts by walking through a complete web application using Couchbase .NET Client library for N1QL and normal set/get operations.
+This  tutorial bridges the gap between simple and advanced Couchbase concepts by walking through a complete web application using these Couchbase .NET client library, covering N1QL and key-value set/get operations.
 
 The full source code for the tutorial is available on 
 
 GitHub [github.com/couchbaselabs/try-cb-dotnet](https://github.com/couchbaselabs/try-cb-dotnet).
 
-The primary focus of the tutorial is to explain the function and theory behind the Couchbase .NET client and how it works together with Couchbase Server, and especially the new features in Couchbase Server version 4.0 like N1QL. 
-
 This tutorial makes use of the `travel-sample` data-set that comes with Couchbase Server 4.0. 
 
-The HTML/JavaScript code that generates the web application is provided with the source code but it is not the scope of this tutorial to explain any details of the implementation. 
+The HTML/JavaScript code that generates the web application is provided with the source code but this tutorial does not explain that side of the implementation. 
 
-After completing this tutorial you will have learned:
+After completing this tutorial you will have learned how to:
 
-* How to install and configure the Couchbase .NET Client
-* Bootstrap the .NET Client
-* Using LINQ with N1QL
+* install and configure the Couchbase .NET Client
+* bootstrap the .NET Client
+* use LINQ with N1QL
 * Use Couchbase in your own projects.
-* Recommended practices for working with Couchbase with .NET
-* Basic knowlagde about Couchbase, Couchbase Server and usage in .NET
+* use recommended practices for working with Couchbase with .NET
+* apply basic knowlegde of using Couchbase Server from witihn your .NET applications.
 
 ![Application Screen shot](content/images/Screen Shot 2015-11-05 at 11.49.06.png)
 
@@ -27,59 +25,59 @@ You will need to have the following available/installed:
 
 * [Visual Studio 2015](https://www.visualstudio.com/) or newer (The source code is created using VS 2015 Professional)
 * Windows 8.1 or higher (to be able to install and run Visual Studio 2015)
-* Although not a requirement, we recommend you have a Git client for easy source code browsing and making it easy to switch between branches (tutorial steps are split using branches)
-* That's it, your ready to start.
+* Although not a requirement, we recommend you have a Git client for easy source code browsing and making it easy to switch between branches (tutorial steps are split using branches).
+
 
 ##Installing Couchbase Server 4.0
-First things first... we need to install Couchbase Server! You can chose to install it locally on your developer machine or remotely, in this tutorial we will assume that Couchbase Server 4.0 is installed locally on the developer machine along side the web site that we will create.
+First things first: we need to install Couchbase Server! You can chose to install it locally on your developer machine or remotely. In this tutorial we will assume that Couchbase Server 4.0 is installed locally on your development machine alongside the website that we will create.
 
 [Download and installation instructions for Couchbase Server](http://www.couchbase.com/nosql-databases/downloads)
  
-Download Couchbase Server and follow the [instructions](http://developer.couchbase.com/documentation/server/4.0/getting-started/installing.html) for your platform to complet the installation. 
+Download Couchbase Server and follow the [instructions](http://developer.couchbase.com/documentation/server/4.0/getting-started/installing.html) for your platform to complete the installation. 
 
-If this is the first time you setup Couchbase Server, this [detailed guide](http://developer.couchbase.com/documentation/server/4.0/install/init-setup.html#topic12527) will help you through all the steps need and explain the different options. 
+If this is your first time you setting up Couchbase Server, this [detailed guide](http://developer.couchbase.com/documentation/server/4.0/install/init-setup.html#topic12527) will help you through all the steps and explain the different options. 
 
-**Important!** As you follow the download instructions and setup wizard, make sure you keep all the services (data, query, and index) selected and remember to install the sample bucket named `travel-sample` (introduced in CB 4.0). `travel-sample` is the data set that will be used throughout this tutorial.
+**Important!** As you follow the download instructions and setup wizard, make sure you keep all the services (data, query, and index) selected and remember to install the sample bucket named `travel-sample` (introduced in CB 4.0). `travel-sample` is the dataset that we will use throughout this tutorial.
 
 ![Select all services](content/images/setup-01.png)
 
 >TIP: 
-	If you already have Couchbase Server installed but did not install the travel-	sample bucket!
+	If you already have Couchbase Server installed but did not install the travel-sample bucket!
 	
 >Open the Couchbase Web Console and select 'Settings' -> 'Sample Buckets' and select the `travel-sample` check box, and then click Create. 
 	 
->A 	notification box in the upper-right corner will appear and show the progress. When it disappears the bucket is ready to use.
+>A notification box in the upper-right corner will appear and show the progress. When it disappears the bucket is ready to use.
 	
-##Getting Ready
+##Getting ready
 ###Understanding the source code repository 
-The source code is split up into branches, every branch represents a step in the tutorial. Every step (branch) builds on the previous and the final result is in the `master` branch.
+The source code is split into branches. Every branch represents a step in this tutorial and every step builds on the previous step. The final result is in the `master` branch.
 
-* `tutorial-part-1` is the most simple skeleton that can compile and show a UI. But it's not possible to navigate the app yet.
-* `tutorial-part-2` is the result of part 1 and returns static content to allow the user to browse the site. But it returns only static data.
+* `tutorial-part-1` is the most simple skeleton that can compile and show a UI. It's not possible to navigate the app yet.
+* `tutorial-part-2` is the result of part 1 and returns static content to allow the user to browse the site. It returns only static data.
 * `tutorial-part-3` is the result of part 2 and adds queries and live data to the site. It's now possible to navigate the site and get actual data back served from Couchbase Server 4.0.
 * `tutorial-part-4` is the result of part 3 and adds user login and password storage to the site.
-* `tutorial-part-5`is the result of part 4 and shows a few ekstra options in the Couchbase .NET SDK like LINQ support.
+* `tutorial-part-5` is the result of part 4 and shows a few extra options in the Couchbase .NET SDK, such as LINQ support.
 * `master` is the final result after refactoring part 5.
 
 ###A quick note on the source itself
-This source code is split up in three separate parts with their individual purpose.
+This source code is split up into three separate parts.
  
 1. The 'red box' is the Couchbase Server Cluster our data storage
-2. The 'green box' represents the API server, responsible to serve the data to the UI. In this case the backend is build with C# and Web API, but could be implemented in any language. We currently have tutorials for: [Java](https://github.com/couchbaselabs/try-cb-java), [Node.js](https://github.com/couchbaselabs/try-cb-nodejs) and [.net - this tutorial](https://github.com/couchbaselabs/try-cb-dotnet)
-3. The 'blue box' is symbolising the UI it self, this is the part of the application that surfaces the content to the user. It's all static HTML and JavaScript build to consume data from the API. We are not going to change a single line in the UI. 
+2. The 'green box' represents the API server, responsible for serving the data to the UI. In this case the backend is built with C# and Web API, but could be implemented in any language. We currently have tutorials for: [Java](https://github.com/couchbaselabs/try-cb-java), [Node.js](https://github.com/couchbaselabs/try-cb-nodejs) and [.net - this tutorial](https://github.com/couchbaselabs/try-cb-dotnet)
+3. The 'blue box' symbolises the UI itself. This is the part of the application that surfaces the content to the user. It's all static HTML and JavaScript built to consume data from the API. We are not going to change a single line in the UI. 
 
 ![app diagram](content/images/Screen Shot 2015-11-05 at 12.00.18.png)
 
-This application architecture gives a very clean seperation of concerns and would effectively allow us to change the the various parts in the application architecture without influencing the other. This is of course only true if we maintain the REST API methods and responses.
+This application architecture gives a very clean seperation of concerns and would  allow us to change the  various parts in the application architecture without influencing the other parts. This is of course only true if we maintain the REST API methods and responses.
 
-In fact this allows us to change the backend API without touching the front end code. 
-Therefore if you take a look at the java version [`try-cb-java`](https://github.com/couchbaselabs/try-cb-java) you quickly learn that the UI is the same, it's only the backend that has changed.
+In fact, this allows us to change the backend API without touching the front end code. 
+Therefore, if you take a look at the Java version [`try-cb-java`](https://github.com/couchbaselabs/try-cb-java) you quickly learn that the UI is the same: it's only the backend that has changed.
 
 In the .NET implementation of the backend we use WEB API, as this is probably the most popular, flexible and easy way to implement a REST API endpoint in .NET.  
 
 
-###Get setup for the tutorial 
-To get propper setup for the tutorial and get ready for the first part, follow these steps:
+###Get set up for the tutorial 
+To get properly set up for the tutorial, follow these steps:
 
 * git clone https://github.com/couchbaselabs/try-cb-dotnet.git or download the source
 * If you did not install Couchbase Server on `localhost` and want to connect to a remote Couchbase Server, change the `couchbaseServer` key in `web.config`. You can also change the username and password for Couchbase Server.
@@ -97,15 +95,15 @@ The first part of this tutorial is not about how to use the .NET Client for Couc
 
 The focus in part 1 is to show how ASP.NET Web API works and to emphasise that with Web API we have an option to work with and return JSON from the REST endpoints. 
 
-It's important to understand that the main task of the backend REST API is to return JSON. This is an important concept to understand that will greatly help you understand and work with ASP.NET Web API.
+It's important to understand that the main task of the backend REST API is to return JSON. This is an important concept to understand that will greatly help you work with ASP.NET's Web API.
  
-Implementing the Web API methods (REST Endpoints) is all about returning the right JSON. Couchbase stores all it's documents in JSON and therefore it is a very good match as a data store for a REST API.
+Implementing the Web API methods (REST endpoints) is all about returning the right JSON. Couchbase stores all documents in JSON, making it a good data store for a REST API.
  
 *If you already feel comfortable working with ASP.NET Web API you can skip this step and go directly to step 2. In step 2 you will learn how to use Couchbase and the Couchbase .NET Client in your .NET projects.*
 
 In this step you will update all Web API methods to return static JSON (string values). This will allow you to run and browse the web application and get an understanding of how the code is organised.
 
-###Step 1.1 - Implement Login 
+###Step 1.1 - Implement login 
 
 **Where:** `UserController.cs` -> **method:** `Login(string password, string user)`
 
@@ -120,16 +118,22 @@ In this step you will update all Web API methods to return static JSON (string v
 
 `Login(string password, string user)` is a Web API method called using JavaScript from the static HTML page `index.html`. 
 
-The JavaScript used in the static html page expects this "Login" web api call to return a JavaScript Web Token (JWT) "success" status code token. Returning the "success" token will login the user and redirect the user to the flight booking page. 
+The JavaScript used in the static HTML page expects this "Login" web api call to return a JavaScript Web Token (JWT) "success" status code token. Returning the "success" token will log the user in and redirect the user to the flight booking page. 
 
 The JWT token is used to reference and store data about the user's trips/bookings and login credentials.
 
 The JWT response should be in a JSON format like this:
 
 ```JSON
-[{"success":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiZ3Vlc3QiLCJpYXQiOjE0NDE4Njk5NTR9.5jPBtqralE3W3LPtS - j3MClTjwP9ggXSCDt3 - zZOoKU"}]```
-Implement the method to return a "success" JWT token allowing the user to login.
-Later we will implement a JWT token issuer and store user data in Couchbase for later look-up.The token is created for the user:>Note: 
+[{"success":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiZ3Vlc3QiLCJpYXQiOjE0NDE4Njk5NTR9.5jPBtqralE3W3LPtS - j3MClTjwP9ggXSCDt3 - zZOoKU"}]
+```
+
+Implement the method to return a "success" JWT token allowing the user to log in.
+
+Later we will implement a JWT token issuer and store user data in Couchbase for later look-up.
+The token is created for the user:
+
+>Note: 
 >
 >The login credentials for this JWT token is:
 >
@@ -163,20 +167,26 @@ public object Login(string password, string user)
 
 
 **Task:**
-This task is essential the same as `1.1`.
+This task is essentially the same as `1.1`.
 
 `Login(string password, string user)` is a Web API method called using JavaScript from the static HTML page `index.html`. 
 
-The JavaScript used in the static html page expects this "Login" web api call to return a JavaScript Web Token (JWT) "success" status code token. Returning the "success" token will login the user and redirect the user to the flight booking page. 
+The JavaScript used in the static HTML page expects this "Login" web api call to return a JavaScript Web Token (JWT) "success" status code token. Returning the "success" token will login the user and redirect the user to the flight booking page. 
 
 The JWT token is used to reference and store data about the user's trips/bookings and login credentials.
 
 The JWT response should be in a JSON format like this:
 
 ```JSON
-[{"success":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiZ3Vlc3QiLCJpYXQiOjE0NDE4Njk5NTR9.5jPBtqralE3W3LPtS - j3MClTjwP9ggXSCDt3 - zZOoKU"}]```
-Implement the method to return a "success" JWT token allowing the user to login.
-Later we will implement a JWT token issuer and store user data in Couchbase for later look-up.The token is created for the user:>Note: The login credentials for this JWT token is:
+[{"success":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiZ3Vlc3QiLCJpYXQiOjE0NDE4Njk5NTR9.5jPBtqralE3W3LPtS - j3MClTjwP9ggXSCDt3 - zZOoKU"}]
+```
+
+Implement the method to return a "success" JWT token allowing the user to login.
+
+Later we will implement a JWT token issuer and store user data in Couchbase for later look-up.
+The token is created for the user:
+
+>Note: The login credentials for this JWT token is:
 >
 >username: guest
 >
@@ -205,15 +215,15 @@ public object CreateLogin([FromBody] UserModel user)
 
 **Task:**
 
-This is a Web API call, a method that is called from the static html (index.html).
-The JavaScript in the static html expects this "flights" Web APIcall to return
-all bookings done by the logged in user. 
+This is a Web API call, a method that is called from the static HTML (index.html).
+The JavaScript in the static HTML expects this "flights" Web APIcall to return
+all bookings made by the logged in user. 
 
 The JWT token is used to look-up the user and find all bookings.
 
 In this "fake" implementation we are not going to use the JWT Token, but instead return a static list of bookings. The list should be the same for all users.
 
-Response should be in a JSON format like this:
+The response should be in a JSON format like this:
 
 Bookings:
 
@@ -255,10 +265,10 @@ public object Flights(string token)
 **Relevant Documentation Topics:** [ASP.NET WEB API 2](http://www.asp.net/web-api/overview/getting-started-with-aspnet-web-api/tutorial-your-first-web-api)
 
 **Task:**    
-This is a Web API call, a method that is called from the static html (index.html).
-The JavaScript in the static html expects the call to the "flights" Web API method to save the flight bookings for a user. The bookings are saved in a booking's document.
+This is a Web API call, a method that is called from the static HTML (index.html).
+The JavaScript in the static HTML expects the call to the "flights" Web API method to save the flight bookings for a user. The bookings are saved in a bookings document.
  
-The JWT token is used as a key to the users bookings document, this way we can use the JWT token to look-up all bookings for a user.
+The JWT token is used as a key to the user's bookings document, this way we can use the JWT token to look-up all bookings for a user.
 
 In this "fake" implementation we are not going to use the JWT Token, nor store any data about the bookings.
 
@@ -314,9 +324,9 @@ One way trip:
 [{"destinationairport":"SFO","equipment":"738","flight":"AA787","id":5746,"name":"American Airlines","sourceairport":"LAX","utc":"19:06:00","flighttime":1,"price":48},{"destinationairport":"SFO","equipment":"738","flight":"AA279","id":5746,"name":"American Airlines","sourceairport":"LAX","utc":"04:54:00","flighttime":1,"price":49},{"destinationairport":"SFO","equipment":"738","flight":"AA907","id":5746,"name":"American Airlines","sourceairport":"LAX","utc":"00:29:00","flighttime":1,"price":51},{"destinationairport":"SFO","equipment":"E75","flight":"DL273","id":21085,"name":"Delta Air Lines","sourceairport":"LAX","utc":"14:14:00","flighttime":1,"price":51},{"destinationairport":"SFO","equipment":"E75","flight":"DL856","id":21085,"name":"Delta Air Lines","sourceairport":"LAX","utc":"20:08:00","flighttime":1,"price":53},{"destinationairport":"SFO","equipment":"73W 73C 733","flight":"WN543","id":63986,"name":"Southwest Airlines","sourceairport":"LAX","utc":"22:16:00","flighttime":1,"price":50},{"destinationairport":"SFO","equipment":"73W 73C 733","flight":"WN828","id":63986,"name":"Southwest Airlines","sourceairport":"LAX","utc":"04:35:00","flighttime":1,"price":53},{"destinationairport":"SFO","equipment":"738","flight":"US086","id":59532,"name":"US Airways","sourceairport":"LAX","utc":"15:06:00","flighttime":1,"price":53},{"destinationairport":"SFO","equipment":"738","flight":"US150","id":59532,"name":"US Airways","sourceairport":"LAX","utc":"15:44:00","flighttime":1,"price":43},{"destinationairport":"SFO","equipment":"738","flight":"US437","id":59532,"name":"US Airways","sourceairport":"LAX","utc":"23:42:00","flighttime":1,"price":48},{"destinationairport":"SFO","equipment":"739 752 753 319 320 738","flight":"UA978","id":57010,"name":"United Airlines","sourceairport":"LAX","utc":"19:50:00","flighttime":1,"price":48},{"destinationairport":"SFO","equipment":"739 752 753 319 320 738","flight":"UA666","id":57010,"name":"United Airlines","sourceairport":"LAX","utc":"05:11:00","flighttime":1,"price":51},{"destinationairport":"SFO","equipment":"739 752 753 319 320 738","flight":"UA123","id":57010,"name":"United Airlines","sourceairport":"LAX","utc":"21:13:00","flighttime":1,"price":50},{"destinationairport":"SFO","equipment":"320 319","flight":"VX743","id":62018,"name":"Virgin America","sourceairport":"LAX","utc":"10:36:00","flighttime":1,"price":48},{"destinationairport":"SFO","equipment":"320 319","flight":"VX703","id":62018,"name":"Virgin America","sourceairport":"LAX","utc":"05:01:00","flighttime":1,"price":45},{"destinationairport":"SFO","equipment":"320 319","flight":"VX301","id":62018,"name":"Virgin America","sourceairport":"LAX","utc":"01:32:00","flighttime":1,"price":49},{"destinationairport":"SFO","equipment":"320 319","flight":"VX929","id":62018,"name":"Virgin America","sourceairport":"LAX","utc":"00:39:00","flighttime":1,"price":44},{"destinationairport":"SFO","equipment":"320 319","flight":"VX351","id":62018,"name":"Virgin America","sourceairport":"LAX","utc":"01:37:00","flighttime":1,"price":46}]
 ```
 
-As shown above the "trip" data is spilt up in two, one way and round trip (return trip). 
+As shown above, the "trip" data is spilt up in two: one way and round trip (return trip). 
 
-Implement the method to return a "Round trip" from a destination and source airport and back.
+Implement the method to return a "round trip" from a destination and source airport and back.
 
 Later we re-vist this Web API method and update it to use data from Couchbase to do the look-up, but for now a "constant" is returned.          
             
@@ -374,19 +384,23 @@ public object FindAll(string search, string token)
 }
 ```
     
-###Step 1 - Summery
-If done correctly all Web API methods now return a static JSON value. This should enable you to be able to run and browse the application. 
+###Step 1 - Summary
+If done correctly all Web API methods now return a static JSON value. This should enable you to run and browse the application. 
 
 All data is static but never the less it "works". In Step 2 we will update the static JSON returned in the Web API method to return actual data from Couchbase Server 4.    
 
 ##Step 2 - Understand the Couchbase .NET SDK & N1QL
 In this step we will update all ASP.NET Web API methods to return data from Couchbase Server. 
 
-This is the first step that uses Couchbase and therefore we need to add references to the Couchbase Client, LINQ extensions and configure the Couchbase Client also know as bootstrapping. 
+This is the first step that uses Couchbase and therefore we need to bootstrap by:
 
-###Step 2.0 - Referencing and Bootstrapping Couchbase Client for .NET.
+ * adding a reference to the Couchbase Client
+ * adding a reference to the LINQ extensions
+ * configuring the Couchbase Client. 
 
-**Where:** `Solution` (this is a solution wide update)
+###Step 2.0 - Referencing and bootstrapping the Couchbase client for .NET.
+
+**Where:** `Solution` (this is a solution-wide update)
 
 **Goals:** Add a reference to: [CouchbaseNetClient](https://www.nuget.org/packages/CouchbaseNetClient) and [Linq2Couchbase](https://www.nuget.org/packages/Linq2Couchbase) the later is the LINQ to N1QL extensions. 
 
@@ -432,11 +446,11 @@ Using Visual Studio 2015 or later, follow these steps to get started with the Co
 	Using the NuGet view, search for `Couchbase` and set Filter to `Installed` as shown above.
 	Confirm that both `Linq2Couchbase` and `CouchbaseNetClient` are installed.
 
-	That’s it! NuGet has pulled in all required dependencies and reference required dependencies for Couchbase Client and LINQ to N1QL extension. 
+	That’s it! NuGet has pulled in all required dependencies and references required for the Couchbase Client and LINQ to N1QL extension. 
 
 
 ###2.0 - Task 2: Bootstrapping Couchbase Client 
-Bootstrapping is the popular phrase used to describe the task of initialising and configuring a library. In case of the Couchbase .NET Client we need to inform the .NET Client where to find the Couchbase Server and what buckets to use.
+We need to inform the .NET Client where to find the Couchbase Server and what buckets to use.
 
 The Couchbase Client includes a helper class called `ClusterHelper`. This class is a singleton that can be shared globally in the application and should be kept alive for the lifetime of the application. The benefit of using `ClusterHelper` is that resources are shared across the the application and thereby setup and teardown is not done unless explicitly needed. 
 
@@ -602,11 +616,11 @@ Using Visual Studio 2015 or later, follow these steps to bootstrap the Couchbase
 
 	You can change the settings in `web.config` to reflect your actual Couchbase Server setup. 
 	
-	This includes adding username and password if appropriate and correct the cluster url if needed. 
+	This includes adding username and password if appropriate and correct the cluster URL if needed. 
 	
-	The current configuration assumes that Couchbase Server is installed on localhost and no password protection on the bucket.
+	The current configuration assumes that Couchbase Server is installed on localhost and there's no password protection on the bucket.
 
-6. We now have all configurations in place need to initialise the Couchbase .NET Client.
+6. We now have all configurations in place that we need to initialise the Couchbase .NET Client.
 	Open the file `Global.asax.cs` in project root. 
 	
 7. Update the method `Application_Start()` with a call to `CouchbaseConfig.Initialize()` 
@@ -637,13 +651,13 @@ Using Visual Studio 2015 or later, follow these steps to bootstrap the Couchbase
 	}
 	```
 	
-	You're ready to start using the Couchbase .NET Client, happy coding!
+	You're ready to start using the Couchbase .NET Client. Happy coding!
 
 ###Step 2.1 
 
 **Where:** `AirportController.cs` -> **method:** `FindAll(string search, string token)`
 
-**Goals:** Return live data from the Travel Sample data bucket in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
+**Goals:** Return live data from the travel-aample data bucket in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
 
 **Relevant Documentation Topics:** 
 
@@ -655,11 +669,11 @@ In the current implementation the `FindAll(string search, string token)` method 
 
 Update the method to return data from the `travel-sample` bucket using the Couchbase .NET Client and N1QL.
 
-The intention of `FindAll(string search, string token)` is to return a airport name based on the `search` string passed to the method. The `search` string can be in three different formats:
+The intention of `FindAll(string search, string token)` is to return n airport name based on the `search` string passed to the method. The `search` string can be in three different formats:
 
-1. Three letter acronym, one sample could be `LAX` 
-2. Four letter acronym, one sample could be `KLAX`
-3. Free-text search with a partial all complet airport name, one sample could be: `Los Angeles Interna`'
+1. Three letter acronym: eg `LAX` 
+2. Four letter acronym: eg `KLAX`
+3. Free-text search with a partial all complet airport name: eg `Los Angeles Interna`'
 
 In all three cases above the airport name returned should be `Los Angeles International Airport`.
 
@@ -728,7 +742,7 @@ Test the application with various airport names and abbreviations, you can start
 
 **Where:** `FlightPathController.cs` -> **method:** `FindAll(string from, DateTime leave, string to, string token)`
 
-**Goals:** Return live data from the Travel Sample data bucket in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
+**Goals:** Return live data from the travel-sample data bucket in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
 
 **Relevant Documentation Topics:** 
 
@@ -738,7 +752,7 @@ Test the application with various airport names and abbreviations, you can start
 **Task:**
 In the current implementation `FindAll(string from, DateTime leave, string to, string token)` returns static data, using the `travel-sample` bucket, Couchbase .NET Client and N1QL we will update the method to return actual data from Couchbase Server. 
 
-The intention of `FindAll(string from, DateTime leave, string to, string token)` is to search out and find actual route data. Trip data is create by joining `airport` documents with with `routes`.
+The intention of `FindAll(string from, DateTime leave, string to, string token)` is to search out and find actual route data. Trip data is created by joining `airport` documents with `routes`.
 
 Implement the method to return all trips that match the selected source `from` and destination `to` airport name for the given date interval `leave`.
 
@@ -748,9 +762,9 @@ Implement the method to return all trips that match the selected source `from` a
 >
 >The `travel-sample` does not contain any `trip` documents therefore you will need to use `join` to build a result-set to represent `trips`.
 
-This is a two step process, where each step will perform it's own N1QL query.
+This is a two step process, where each step will perform its own N1QL query.
 
-1. This API method is called with the `from` and `to` values witch represent the full airport names.
+1. This API method is called with the `from` and `to` values which represent the full airport names.
 
 	The `join` that we will create in step 2, needs the FAA (three letter abbreviation for the airport name)
 
@@ -759,7 +773,7 @@ This is a two step process, where each step will perform it's own N1QL query.
 2. This part is a bit tricky as it uses one of the more advanced features in N1QL, the `JOIN` and `UNNEST` statement.
 	Below you can find a template version of the query.
 	
-    This will allow you to understand the query in it's full detail and examin the parameters needed for this query.
+    This will allow you to understand the query in its full detail and examin the parameters needed for this query.
 
 ```SQL
 SELECT r.id, a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment FROM 
@@ -834,7 +848,7 @@ public object FindAll(string from, DateTime leave, string to, string token)
 
 **Where:** `UserController.cs` -> **method:** `Flights(string token)`
 
-**Goals:** Return live data from about the user's travel bookings stored in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
+**Goals:** Return live data about the user's travel bookings stored in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
 
 **Relevant Documentation Topics:** 
 
@@ -846,7 +860,7 @@ The intention of `Flights(string token)` is to return a list of all travel booki
 
 In the current implementation `Flights(string token)` returns static data.
 
-Using the `travel-sample` bucket, Couchbase .NET Client and N1QL we will update the Web API method to return actual data stored about the users bookings. 
+Using the `travel-sample` bucket, Couchbase .NET Client and N1QL we will update the Web API method to return actual data stored about the user's bookings. 
 All data is stored in Couchbase Server in the `travel-sample` bucket.
 
 The `JWT token` id is used to look-up the user and find all bookings for that logged in user.
@@ -860,7 +874,7 @@ Implement the method to return all bookings for the logged-in user.
 	`bookings::token`
     Where `token` is the JWT Token id.
     
-    The great thing with using Couchbase (or any JSON document store) is that we don't need to convert the value,
+    The great thing with using Couchbase, as it is a JSON document store, is that we don't need to convert the value,
     we can just return the actual document retrieved from Couchbase Server.
  
 >Hint:
