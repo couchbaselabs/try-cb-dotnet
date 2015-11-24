@@ -14,9 +14,9 @@ After completing this tutorial you will have learned how to:
 * install and configure the Couchbase .NET Client
 * bootstrap the .NET Client
 * use LINQ with N1QL
-* Use Couchbase in your own projects.
+* use Couchbase in your own projects.
 * use recommended practices for working with Couchbase with .NET
-* apply basic knowlegde of using Couchbase Server from witihn your .NET applications.
+* apply basic knowledge of using Couchbase Server from within your .NET applications.
 
 ![Application Screen shot](content/images/Screen Shot 2015-11-05 at 11.49.06.png)
 
@@ -216,7 +216,7 @@ public object CreateLogin([FromBody] UserModel user)
 **Task:**
 
 This is a Web API call, a method that is called from the static HTML (index.html).
-The JavaScript in the static HTML expects this "flights" Web APIcall to return
+The JavaScript in the static HTML expects this "flights" Web API call to return
 all bookings made by the logged in user. 
 
 The JWT token is used to look-up the user and find all bookings.
@@ -409,9 +409,9 @@ When the references are in place we need to bootstrap (configuration and initial
 **Relevant Documentation Topics:** 
 
 * [N1QL intro](http://developer.couchbase.com/documentation/server/4.0/n1ql/n1ql-intro/data-access-using-n1ql.html)
-* [Couchbase .NET Client - github](https://github.com/couchbase/couchbase-net-client)
+* [Couchbase .NET Client - GitHub](https://github.com/couchbase/couchbase-net-client)
 * [Couchbase .NET Client - docs](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/getting-started.html)
-* [Linq2Couchbase - github](https://github.com/couchbaselabs/Linq2Couchbase)
+* [Linq2Couchbase - GitHub](https://github.com/couchbaselabs/Linq2Couchbase)
 * [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
 
 ### 2.0 - Task 1: Referencing Couchbase Client and LINQ to N1QL Extensions
@@ -657,11 +657,11 @@ Using Visual Studio 2015 or later, follow these steps to bootstrap the Couchbase
 
 **Where:** `AirportController.cs` -> **method:** `FindAll(string search, string token)`
 
-**Goals:** Return live data from the travel-aample data bucket in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
+**Goals:** Return live data from the travel-sample data bucket in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
 
 **Relevant Documentation Topics:** 
 
-* [Linq2Couchbase - github](https://github.com/couchbaselabs/Linq2Couchbase)
+* [Linq2Couchbase - GitHub](https://github.com/couchbaselabs/Linq2Couchbase)
 * [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
 
 **Task:**
@@ -746,7 +746,7 @@ Test the application with various airport names and abbreviations, you can start
 
 **Relevant Documentation Topics:** 
 
-* [Linq2Couchbase - github](https://github.com/couchbaselabs/Linq2Couchbase)
+* [Linq2Couchbase - GitHub](https://github.com/couchbaselabs/Linq2Couchbase)
 * [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
 
 **Task:**
@@ -852,7 +852,7 @@ public object FindAll(string from, DateTime leave, string to, string token)
 
 **Relevant Documentation Topics:** 
 
-* [Linq2Couchbase - github](https://github.com/couchbaselabs/Linq2Couchbase)
+* [Linq2Couchbase - GitHub](https://github.com/couchbaselabs/Linq2Couchbase)
 * [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
 
 **Task:**
@@ -903,7 +903,7 @@ public object Flights(string token)
 
 **Relevant Documentation Topics:** 
 
-* [Linq2Couchbase - github](https://github.com/couchbaselabs/Linq2Couchbase)
+* [Linq2Couchbase - GitHub](https://github.com/couchbaselabs/Linq2Couchbase)
 * [Hello World - Couchbase .NET](http://developer.couchbase.com/documentation/server/4.0/sdks/dotnet-2.2/hello-couchbase.html)
 
 **Task:**
