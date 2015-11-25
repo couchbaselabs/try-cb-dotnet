@@ -1,5 +1,5 @@
 #Couchbase .NET Client SDK Tutorial
-This  tutorial bridges the gap between simple and advanced Couchbase concepts by walking through a complete web application using these Couchbase .NET client library, covering N1QL and key-value set/get operations.
+This tutorial bridges the gap between simple and advanced Couchbase concepts by walking through a complete web application using these Couchbase .NET client library, covering N1QL and key-value set/get operations.
 
 The full source code for the tutorial is available on 
 
