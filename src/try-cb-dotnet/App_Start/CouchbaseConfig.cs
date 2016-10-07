@@ -1,41 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using Couchbase;
 using Couchbase.Configuration.Client;
 
-namespace try_cb_dotnet.App_Start
+namespace try_cb_dotnet
 {
     public static class CouchbaseConfig
     {
-        public static void Initialize()
+        public static void Register()
         {
-            var config = new ClientConfiguration();
-            config.BucketConfigs.Clear();
-
-            config.Servers = new List<Uri>(new Uri[] { new Uri(CouchbaseConfigHelper.Instance.Server) });
-
-            config.BucketConfigs.Add(
-                CouchbaseConfigHelper.Instance.Bucket,
-                new BucketConfiguration
-                {
-                    BucketName = CouchbaseConfigHelper.Instance.Bucket,
-                    Username = CouchbaseConfigHelper.Instance.User,
-                    Password = CouchbaseConfigHelper.Instance.Password
-                });
-
-            config.BucketConfigs.Add(
-                "default",
-                new BucketConfiguration
-                {
-                    BucketName = "default",
-                    Username = CouchbaseConfigHelper.Instance.User,
-                    Password = CouchbaseConfigHelper.Instance.Password
-                });
-
-            ClusterHelper.Initialize(config);
+            var couchbaseServer = ConfigurationManager.AppSettings.Get("couchbaseServer");
+            ClusterHelper.Initialize(new ClientConfiguration
+            {
+                Servers = new List<Uri> { new Uri(couchbaseServer) }
+            });
         }
 
-        public static void Close()
+        public static void CleanUp()
         {
             ClusterHelper.Close();
         }

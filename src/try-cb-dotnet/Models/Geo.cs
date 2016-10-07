@@ -1,9 +1,9 @@
 ﻿using Couchbase.Linq.Filters;
 using Newtonsoft.Json;
 
-namespace Couchbase.Linq.SampleBuckets.Documents.TravelDocuments
+namespace try_cb_dotnet.Models
 {
-    [EntityTypeFilter("geo")]
+    [DocumentTypeFilter("geo")]
     public class Geo
     {
         [JsonProperty("alt")]
@@ -16,13 +16,3 @@ namespace Couchbase.Linq.SampleBuckets.Documents.TravelDocuments
         public double Lon { get; set; }
     }
 }
-
-/*
-
-{
-    "alt": 40,
-    "lat": 59.3675,
-    "lon": -2.43444
-}
-
-*/

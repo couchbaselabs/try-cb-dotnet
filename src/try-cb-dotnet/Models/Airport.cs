@@ -1,9 +1,9 @@
 ﻿using Couchbase.Linq.Filters;
 using Newtonsoft.Json;
 
-namespace Couchbase.Linq.SampleBuckets.Documents.TravelDocuments
+namespace try_cb_dotnet.Models
 {
-    [EntityTypeFilter("airport")]
+    [DocumentTypeFilter("airport")]
     public class Airport
     {
         [JsonProperty("airportname")]
@@ -34,23 +34,3 @@ namespace Couchbase.Linq.SampleBuckets.Documents.TravelDocuments
         public string Tz { get; set; }
     }
 }
-
-/*
-
-{
-    "airportname": "North Ronaldsay Airport",
-    "city": "North Ronaldsay",
-    "country": "United Kingdom",
-    "faa": "NRL",
-    "geo": {
-        "alt": 40,
-        "lat": 59.3675,
-        "lon": -2.43444
-    },
-    "icao": "EGEN",
-    "id": 5566,
-    "type": "airport",
-    "tz": "Europe/London"
-    }
-
-*/
