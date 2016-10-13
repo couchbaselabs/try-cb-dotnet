@@ -12,7 +12,7 @@ using try_cb_dotnet.Models;
 
 namespace try_cb_dotnet.Controllers
 {
-    [RoutePrefix("api/hotels")]
+    [RoutePrefix("api/hotel")]
     public class HotelController : ApiController
     {
         private readonly IBucket _bucket = ClusterHelper.GetBucket(ConfigurationManager.AppSettings.Get("couchbaseTravelBucket"));
