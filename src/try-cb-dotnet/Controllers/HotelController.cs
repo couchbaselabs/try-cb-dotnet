@@ -48,7 +48,7 @@ namespace try_cb_dotnet.Controllers
             search.Query = query;
             search.Limit(10);
 
-            var queryJson = ""; query.Export().ToString(Formatting.None);
+            var queryJson = query.Export().ToString(Formatting.None);
             var hotels = new List<dynamic>();
 
             var result = _bucket.Query(search);
