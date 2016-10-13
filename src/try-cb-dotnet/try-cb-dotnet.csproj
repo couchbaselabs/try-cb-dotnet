@@ -123,16 +123,16 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="wwwroot\89889688147bd7575d6327160d64e760.svg" />
-    <Content Include="wwwroot\assets\CBTravel.LOGO.png" />
-    <Content Include="wwwroot\assets\poweredBy.01.png" />
+    <Content Include="89889688147bd7575d6327160d64e760.svg" />
+    <Content Include="assets\CBTravel.LOGO.png" />
+    <Content Include="assets\poweredBy.01.png" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
-    <Content Include="wwwroot\index.html" />
-    <Content Include="wwwroot\inline.js" />
-    <Content Include="wwwroot\main.84b1dbea86633cf099af.bundle.js" />
-    <Content Include="wwwroot\scripts.a38ffa5ab523dd1d9422.bundle.js" />
-    <Content Include="wwwroot\styles.2fb15c2cca7f1d28d803.bundle.js" />
+    <Content Include="index.html" />
+    <Content Include="inline.js" />
+    <Content Include="main.84b1dbea86633cf099af.bundle.js" />
+    <Content Include="scripts.a38ffa5ab523dd1d9422.bundle.js" />
+    <Content Include="styles.2fb15c2cca7f1d28d803.bundle.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -142,13 +142,13 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="wwwroot\448c34a56d699c29117adc64c43affeb.woff2" />
-    <Content Include="wwwroot\e18bbf611f2a2e43afc071aa2f4e1512.ttf" />
-    <Content Include="wwwroot\f4769f9bdb7466be65088239c12046d1.eot" />
-    <Content Include="wwwroot\fa2772327f55d8198301fdb8bcfc8158.woff" />
-    <Content Include="wwwroot\main.84b1dbea86633cf099af.bundle.js.gz" />
-    <Content Include="wwwroot\scripts.a38ffa5ab523dd1d9422.bundle.js.gz" />
-    <Content Include="wwwroot\styles.2fb15c2cca7f1d28d803.bundle.js.gz" />
+    <Content Include="448c34a56d699c29117adc64c43affeb.woff2" />
+    <Content Include="e18bbf611f2a2e43afc071aa2f4e1512.ttf" />
+    <Content Include="f4769f9bdb7466be65088239c12046d1.eot" />
+    <Content Include="fa2772327f55d8198301fdb8bcfc8158.woff" />
+    <Content Include="main.84b1dbea86633cf099af.bundle.js.gz" />
+    <Content Include="scripts.a38ffa5ab523dd1d9422.bundle.js.gz" />
+    <Content Include="styles.2fb15c2cca7f1d28d803.bundle.js.gz" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
@@ -171,7 +171,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>1439</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:1439/</IISUrl>
+          <IISUrl>http://localhost:8080/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
