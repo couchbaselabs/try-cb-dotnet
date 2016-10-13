@@ -16,13 +16,8 @@ namespace try_cb_dotnet.Controllers
 
         [Route("")]
         [HttpGet]
-        public IHttpActionResult Search(string search = null)
+        public IHttpActionResult Search(string search = "")
         {
-            if (string.IsNullOrEmpty(search))
-            {
-                return Content(HttpStatusCode.BadRequest, new Error("Missing or empty query string parameter 'search'"));
-            }
-
             string query;
             IEnumerable<string> airports;
             if (IsFaaCode(search))
@@ -41,16 +36,13 @@ namespace try_cb_dotnet.Controllers
             }
             else
             {
-                query = $"SELECT airportname FROM `travel-sample` WHERE type = 'airport' AND airportname LIKE '{search}'";
+                query = $"SELECT airportname FROM `travel-sample` WHERE type = 'airport' AND airportname LIKE '%{search}%'";
                 airports = _context.Query<Airport>()
                     .Where(x => x.Airportname.Contains(search))
                     .Select(x => x.Airportname);
             }
 
-            var data = new
-            {
-                airports = airports.Select(airportname => new {airportname})
-            };
+            var data = airports.Select(airportname => new {airportname});
             return Content(HttpStatusCode.OK, new Result(data, query));
         }
 
