@@ -3,8 +3,10 @@ using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Couchbase;
 using Couchbase.Core;
@@ -21,45 +23,45 @@ namespace try_cb_dotnet.Controllers
 
         [Route("login")]
         [HttpPost]
-        public HttpResponseMessage Login([FromBody] LoginModel model)
+        public async Task<IHttpActionResult> Login([FromBody] LoginModel model)
         {
             if (string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
             {
-                return Request.CreateResponse(HttpStatusCode.BadRequest, new Error("Expected 'username' and 'password' in message body"));
+                return Content(HttpStatusCode.BadRequest, new Error("Expected 'username' and 'password' in message body"));
             }
 
-            var result = _bucket.GetDocument<User>($"user::{model.Username}");
+            var result = await _bucket.GetAsync<User>($"user::{model.Username}");
             if (!result.Success)
             {
-                return Request.CreateResponse(HttpStatusCode.Unauthorized, new Error("Invalid username or password"));
+                return Content(HttpStatusCode.Unauthorized, new Error("Invalid username or password"));
             }
 
-            var user = result.Content;
+            var user = result.Value;
             if (user.Password != CalcuateMd5Hash(model.Password))
             {
-                return Request.CreateResponse(HttpStatusCode.Unauthorized, new Error("Invalid username or password"));
+                return Content(HttpStatusCode.Unauthorized, new Error("Invalid username or password"));
             }
 
             var data = new
             {
                 token = BuildToken(user.Username)
             };
-            return Request.CreateResponse(HttpStatusCode.OK, new Result(data));
+            return Content(HttpStatusCode.OK, new Result(data));
         }
 
         [Route("signup")]
         [HttpPost]
-        public HttpResponseMessage SignUp([FromBody] LoginModel model)
+        public async Task<IHttpActionResult> SignUp([FromBody] LoginModel model)
         {
             if (string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
             {
-                return Request.CreateResponse(HttpStatusCode.BadRequest, new Error("Invalid username or password"));
+                return Content(HttpStatusCode.BadRequest, new Error("Invalid username or password"));
             }
 
             var userKey = $"user::{model.Username}";
-            if (_bucket.Exists(userKey))
+            if (await _bucket.ExistsAsync(userKey))
             {
-                return Request.CreateResponse(HttpStatusCode.Conflict, new Error("Username already exists"));
+                return Content(HttpStatusCode.Conflict, new Error("Username already exists"));
             }
 
             var userDoc = new Document<User>
@@ -73,10 +75,10 @@ namespace try_cb_dotnet.Controllers
                 Expiry = model.Expiry
             };
 
-            var result = _bucket.Insert(userDoc);
+            var result = await _bucket.InsertAsync(userDoc);
             if (!result.Success)
             {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, new Error(result.Message));
+                return Content(HttpStatusCode.InternalServerError, new Error(result.Message));
             }
 
             var data = new
@@ -84,53 +86,53 @@ namespace try_cb_dotnet.Controllers
                 token = BuildToken(model.Username)
             };
             var context = $"Created user with ID '{userKey}' in bucket '{_bucket.Name}' that expires in {userDoc.Expiry}ms";
-            return Request.CreateResponse(HttpStatusCode.Created, new Result(data, context));
+            return Content(HttpStatusCode.Created, new Result(data, context));
         }
 
         [Route("{username}/flights")]
         [HttpGet]
-        public HttpResponseMessage GetFlightsForUser(string username)
+        public async Task<IHttpActionResult> GetFlightsForUser(string username)
         {
-            if (Request.Headers.Authorization == null || Request.Headers.Authorization.Scheme != "Bearer")
+            var authHeaderValue = GetAuthHeaderValue(Request.Headers);
+            if (string.IsNullOrEmpty(authHeaderValue))
             {
-                return Request.CreateResponse(HttpStatusCode.Unauthorized);
+                return Content(HttpStatusCode.Unauthorized, string.Empty);
+            }
+            if (!VerifyToken(authHeaderValue, username))
+            {
+                return Content(HttpStatusCode.Forbidden, string.Empty);
             }
 
-            if (!VerifyToken(Request.Headers.Authorization.Parameter, username))
+            var result = await _bucket.GetAsync<User>($"user::{username}");
+            if (!result.Success)
             {
-                return Request.CreateResponse(HttpStatusCode.Forbidden);
-            }
-
-            var userDoc = _bucket.Get<User>($"user::{username}");
-            if (!userDoc.Success)
-            {
-                return Request.CreateResponse(HttpStatusCode.Forbidden);
+                return Content(HttpStatusCode.Forbidden, string.Empty);
             }
 
             var data = new
             {
-                flights = userDoc.Value.Flights
+                flights = result.Value.Flights
             };
-            return Request.CreateResponse(HttpStatusCode.OK, new Result(data));
+            return Ok(new Result(data));
         }
 
         [Route("{username}/flights")]
         [HttpPost]
-        public HttpResponseMessage RegisterFlightForUser(string username, [FromBody] List<Flight> flights)
+        public async Task<IHttpActionResult> RegisterFlightForUser(string username, [FromBody] List<Flight> flights)
         {
-            if (Request.Headers.Authorization == null || Request.Headers.Authorization.Scheme != "Bearer")
+            var authHeaderValue = GetAuthHeaderValue(Request.Headers);
+            if (string.IsNullOrEmpty(authHeaderValue))
             {
-                return Request.CreateResponse(HttpStatusCode.Unauthorized);
+                return Content(HttpStatusCode.Unauthorized, string.Empty);
             }
-
-            if (!VerifyToken(Request.Headers.Authorization.Parameter, username))
+            if (!VerifyToken(authHeaderValue, username))
             {
-                return Request.CreateResponse(HttpStatusCode.Forbidden);
+                return Content(HttpStatusCode.Forbidden, string.Empty);
             }
 
             if (flights == null || !flights.Any())
             {
-                return Request.CreateResponse(HttpStatusCode.BadRequest);
+                return Content(HttpStatusCode.BadRequest, string.Empty);
             }
 
             foreach (var flight in flights)
@@ -139,25 +141,36 @@ namespace try_cb_dotnet.Controllers
             }
 
             var userKey = $"user::{username}";
-            var user = _bucket.Get<User>(userKey);
+            var user = await _bucket.GetAsync<User>(userKey);
             if (!user.Success)
             {
-                return Request.CreateResponse(HttpStatusCode.Forbidden);
+                return Content(HttpStatusCode.Forbidden, string.Empty);
             }
 
             user.Value.Flights.AddRange(flights);
 
-            var result = _bucket.Replace(userKey, user.Value);
+            var result = await _bucket.ReplaceAsync(userKey, user.Value);
             if (!result.Success)
             {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, result.Message);
+                return Content(HttpStatusCode.InternalServerError, result.Message);
             }
 
             var data = new
             {
                 added = flights
             };
-            return Request.CreateResponse(HttpStatusCode.Accepted, new Result(data));
+            return Content(HttpStatusCode.Accepted, new Result(data));
+        }
+
+        private static string GetAuthHeaderValue(HttpRequestHeaders headers)
+        {
+            IEnumerable<string> headerValues;
+            if (!headers.TryGetValues("authentication", out headerValues))
+            {
+                return null;
+            }
+
+            return headerValues.FirstOrDefault(x => x.StartsWith("Bearer"));
         }
 
         private static string CalcuateMd5Hash(string password)
@@ -194,6 +207,7 @@ namespace try_cb_dotnet.Controllers
                 return false;
             }
 
+            token = token.Substring(7);
             Dictionary<string, string> claims;
             try
             {
