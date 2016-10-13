@@ -66,15 +66,17 @@ namespace try_cb_dotnet.Controllers
             var flightTime = Math.Round(distance/150);
             var price = Math.Round(distance*1.5, 2);
 
-            var flightQuery = "SELECT a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment " +
-                              "FROM `travel-sample` AS r " +
-                              "UNNEST r.schedule AS s " +
-                              "JOIN `travel-sample` AS a ON KEYS r.airlineid " +
-                             $"WHERE r.sourceairport = '{fromAirport.fromAirport}' " +
-                             $"AND r.destinationairport = '{toAirport.toAirport}' " +
-                             $"AND s.day = {dayOfWeek} " +
-                              "ORDER BY a.name ASC;";
-            queries.Add(flightQuery);
+            var flightQuery = new QueryRequest()
+                .Statement("SELECT a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment " +
+                           "FROM `travel-sample` AS r " +
+                           "UNNEST r.schedule AS s " +
+                           "JOIN `travel-sample` AS a ON KEYS r.airlineid " +
+                           "WHERE r.sourceairport = $1 " +
+                           "AND r.destinationairport = $2 " +
+                           "AND s.day = $3 " +
+                           "ORDER BY a.name ASC;")
+                .AddPositionalParameter((string) fromAirport.fromAirport, (string) toAirport.toAirport, dayOfWeek);
+            queries.Add(flightQuery.GetOriginalStatement());
 
             var flightQueryResult = await _bucket.QueryAsync<dynamic>(flightQuery);
             if (!flightQueryResult.Success)
@@ -89,7 +91,7 @@ namespace try_cb_dotnet.Controllers
                 flight.price = Math.Round(_random.NextDouble()*price/100, 2); // TODO: fix calculation
             }
 
-            return Ok(new Result(flights, queries.ToArray()));
+            return Content(HttpStatusCode.OK, new Result(flights, queries.ToArray()));
         }
     }
 }
