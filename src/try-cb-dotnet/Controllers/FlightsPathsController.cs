@@ -36,11 +36,11 @@ namespace try_cb_dotnet.Controllers
             var airportQuery = new QueryRequest()
                 .Statement("SELECT faa AS fromAirport, geo.lat, geo.lon " +
                            "FROM `travel-sample` " +
-                           "WHERE airportname = '$1' " +
+                           "WHERE airportname = $1 " +
                            "UNION " +
                            "SELECT faa AS toAirport, geo.lat, geo.lon " +
                            "FROM `travel-sample` " +
-                           "WHERE airportname = '$2';")
+                           "WHERE airportname = $2;")
                 .AddPositionalParameter(from, to);
             queries.Add(airportQuery.GetOriginalStatement());
 
