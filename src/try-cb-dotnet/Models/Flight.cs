@@ -26,5 +26,8 @@ namespace try_cb_dotnet.Models
 
         [JsonProperty("bookedon")]
         public string BookedOn { get; set; }
+
+        [JsonProperty("type")]
+        public string Type => "flight";
     }
 }

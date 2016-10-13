@@ -15,5 +15,8 @@ namespace try_cb_dotnet.Models
 
         [JsonProperty("flights")]
         public List<Flight> Flights { get; set; }
+
+        [JsonProperty("type")]
+        public string Type => "user";
     }
 }

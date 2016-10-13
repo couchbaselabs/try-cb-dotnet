@@ -76,7 +76,7 @@ namespace try_cb_dotnet.Controllers
                 .AddPositionalParameter((string) fromAirport.fromAirport, (string) toAirport.toAirport, dayOfWeek);
             queries.Add(flightQuery.GetOriginalStatement());
 
-            var flightQueryResult = await _bucket.QueryAsync<dynamic>(flightQuery);
+            var flightQueryResult = await _bucket.QueryAsync<Route>(flightQuery);
             if (!flightQueryResult.Success)
             {
                 return Content(HttpStatusCode.InternalServerError, new Error(flightQueryResult.Message));
@@ -85,8 +85,8 @@ namespace try_cb_dotnet.Controllers
             var flights = flightQueryResult.Rows;
             foreach (var flight in flights)
             {
-                flight.flighttime = flightTime;
-                flight.price = _random.Next(2000);
+                flight.FlightTime = flightTime;
+                flight.Price = _random.Next(2000);
             }
 
             return Content(HttpStatusCode.OK, new Result(flights, queries.ToArray()));

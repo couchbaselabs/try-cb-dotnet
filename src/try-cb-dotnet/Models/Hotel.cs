@@ -25,6 +25,9 @@ namespace try_cb_dotnet.Models
         [JsonProperty("country")]
         public string Country { get; set; }
 
+        [JsonProperty("type")]
+        public string Type => "hotel";
+
         public string GetFullAddress()
         {
             return string.Join(", ", new[]

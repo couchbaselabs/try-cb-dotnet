@@ -17,10 +17,7 @@ namespace try_cb_dotnet.Models
 
         [JsonProperty("faa")]
         public string Faa { get; set; }
-
-        [JsonProperty("geo")]
-        public Geo Geo { get; set; }
-
+        
         [JsonProperty("icao")]
         public string Icao { get; set; }
 
@@ -28,9 +25,6 @@ namespace try_cb_dotnet.Models
         public string Id { get; set; }
 
         [JsonProperty("type")]
-        public string Type { get; set; }
-
-        [JsonProperty("tz")]
-        public string Tz { get; set; }
+        public string Type => "airport";
     }
 }

@@ -116,10 +116,10 @@
     <Compile Include="Models\BookFlightModel.cs" />
     <Compile Include="Models\Error.cs" />
     <Compile Include="Models\Flight.cs" />
-    <Compile Include="Models\Geo.cs" />
     <Compile Include="Models\Hotel.cs" />
     <Compile Include="Models\LoginModel.cs" />
     <Compile Include="Models\Result.cs" />
+    <Compile Include="Models\Route.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
