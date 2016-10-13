@@ -2,7 +2,6 @@
 using System.Configuration;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
@@ -109,16 +108,13 @@ namespace try_cb_dotnet.Controllers
                 return Content(HttpStatusCode.Forbidden, string.Empty);
             }
 
-            var data = new
-            {
-                flights = result.Value.Flights
-            };
+            var data = result.Value.Flights;
             return Ok(new Result(data));
         }
 
         [Route("{username}/flights")]
         [HttpPost]
-        public async Task<IHttpActionResult> RegisterFlightForUser(string username, [FromBody] List<Flight> flights)
+        public async Task<IHttpActionResult> RegisterFlightForUser(string username, BookFlightModel model)
         {
             var authHeaderValue = GetAuthHeaderValue(Request.Headers);
             if (string.IsNullOrEmpty(authHeaderValue))
@@ -130,12 +126,12 @@ namespace try_cb_dotnet.Controllers
                 return Content(HttpStatusCode.Forbidden, string.Empty);
             }
 
-            if (flights == null || !flights.Any())
+            if (model == null || !model.Flights.Any())
             {
                 return Content(HttpStatusCode.BadRequest, string.Empty);
             }
 
-            foreach (var flight in flights)
+            foreach (var flight in model.Flights)
             {
                 flight.BookedOn = "try-cb-dotnet";
             }
@@ -147,7 +143,11 @@ namespace try_cb_dotnet.Controllers
                 return Content(HttpStatusCode.Forbidden, string.Empty);
             }
 
-            user.Value.Flights.AddRange(flights);
+            if (user.Value.Flights == null)
+            {
+                user.Value.Flights = new List<Flight>();
+            }
+            user.Value.Flights.AddRange(model.Flights);
 
             var result = await _bucket.ReplaceAsync(userKey, user.Value);
             if (!result.Success)
@@ -157,12 +157,12 @@ namespace try_cb_dotnet.Controllers
 
             var data = new
             {
-                added = flights
+                added = model.Flights
             };
             return Content(HttpStatusCode.Accepted, new Result(data));
         }
 
-        private static string GetAuthHeaderValue(HttpRequestHeaders headers)
+        private static string GetAuthHeaderValue(HttpHeaders headers)
         {
             IEnumerable<string> headerValues;
             if (!headers.TryGetValues("authentication", out headerValues))

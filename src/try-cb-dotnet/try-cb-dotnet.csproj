@@ -113,6 +113,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Airport.cs" />
+    <Compile Include="Models\BookFlightModel.cs" />
     <Compile Include="Models\Error.cs" />
     <Compile Include="Models\Flight.cs" />
     <Compile Include="Models\Geo.cs" />
