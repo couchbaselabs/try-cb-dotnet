@@ -19,6 +19,7 @@ namespace try_cb_dotnet.Controllers
     {
         private readonly Random _random = new Random();
         private readonly IBucket _bucket = ClusterHelper.GetBucket(ConfigurationManager.AppSettings.Get("couchbaseTravelBucket"));
+        private static readonly double AverageFlightSpeed = double.Parse(ConfigurationManager.AppSettings.Get("averageFlightSpeed"));
 
         [Route("{from}/{to}")]
         [HttpGet]
@@ -61,10 +62,7 @@ namespace try_cb_dotnet.Controllers
             var fromCoordinate = new GeoCoordinate((double) fromAirport.lat, (double) fromAirport.lon);
             var toCoordinate = new GeoCoordinate((double) toAirport.lat, (double) toAirport.lon);
             var distance = fromCoordinate.GetDistanceTo(toCoordinate);
-
-            //TODO: get real calulations
-            var flightTime = Math.Round(distance/150);
-            var price = Math.Round(distance*1.5, 2);
+            var flightTime = Math.Round(distance/AverageFlightSpeed, 2);
 
             var flightQuery = new QueryRequest()
                 .Statement("SELECT a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment " +
@@ -88,7 +86,7 @@ namespace try_cb_dotnet.Controllers
             foreach (var flight in flights)
             {
                 flight.flighttime = flightTime;
-                flight.price = Math.Round(_random.NextDouble()*price/100, 2); // TODO: fix calculation
+                flight.price = _random.Next(2000);
             }
 
             return Content(HttpStatusCode.OK, new Result(flights, queries.ToArray()));
