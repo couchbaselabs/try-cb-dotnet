@@ -2,7 +2,6 @@
 using System.Configuration;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 using Couchbase;
 using Couchbase.Linq;
@@ -17,11 +16,11 @@ namespace try_cb_dotnet.Controllers
 
         [Route("")]
         [HttpGet]
-        public HttpResponseMessage Search(string search = null)
+        public IHttpActionResult Search(string search = null)
         {
             if (string.IsNullOrEmpty(search))
             {
-                return Request.CreateResponse(HttpStatusCode.BadRequest, new Models.Error("Missing or empty query string parameter 'search'"));
+                return Content(HttpStatusCode.BadRequest, new Error("Missing or empty query string parameter 'search'"));
             }
 
             string query;
@@ -50,9 +49,9 @@ namespace try_cb_dotnet.Controllers
 
             var data = new
             {
-                airports = airports.Select(airportname => new { airportname })
+                airports = airports.Select(airportname => new {airportname})
             };
-            return Request.CreateResponse(new Result(data, query));
+            return Content(HttpStatusCode.OK, new Result(data, query));
         }
 
         private static bool IsFaaCode(string search)
