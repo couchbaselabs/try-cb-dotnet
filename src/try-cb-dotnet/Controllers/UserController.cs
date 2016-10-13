@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Couchbase;
 using Couchbase.Core;
+using Couchbase.IO;
 using JWT;
 using try_cb_dotnet.Models;
 
@@ -22,23 +23,28 @@ namespace try_cb_dotnet.Controllers
 
         [Route("login")]
         [HttpPost]
-        public async Task<IHttpActionResult> Login([FromBody] LoginModel model)
+        public async Task<IHttpActionResult> Login(LoginModel model)
         {
-            if (string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
+            if (model == null || !model.IsValid())
             {
-                return Content(HttpStatusCode.BadRequest, new Error("Expected 'username' and 'password' in message body"));
+                return Content(HttpStatusCode.BadRequest, new Error("Missing or empty 'user' and 'password' properties in message body"));
             }
 
-            var result = await _bucket.GetAsync<User>($"user::{model.Username}");
+            var userKey = CreateUserKey(model.Username);
+            var result = await _bucket.GetAsync<User>(userKey);
             if (!result.Success)
             {
-                return Content(HttpStatusCode.Unauthorized, new Error("Invalid username or password"));
+                if (result.Status == ResponseStatus.KeyNotFound)
+                {
+                    return Content(HttpStatusCode.Unauthorized, new Error("Invalid username and/or password"));
+                }
+                return Content(HttpStatusCode.InternalServerError, new Error(result.Message));
             }
 
             var user = result.Value;
             if (user.Password != CalcuateMd5Hash(model.Password))
             {
-                return Content(HttpStatusCode.Unauthorized, new Error("Invalid username or password"));
+                return Content(HttpStatusCode.Unauthorized, new Error("Invalid username and/or password"));
             }
 
             var data = new
@@ -50,17 +56,17 @@ namespace try_cb_dotnet.Controllers
 
         [Route("signup")]
         [HttpPost]
-        public async Task<IHttpActionResult> SignUp([FromBody] LoginModel model)
+        public async Task<IHttpActionResult> SignUp(LoginModel model)
         {
-            if (string.IsNullOrEmpty(model.Username) || string.IsNullOrEmpty(model.Password))
+            if (model == null || !model.IsValid())
             {
-                return Content(HttpStatusCode.BadRequest, new Error("Invalid username or password"));
+                return Content(HttpStatusCode.BadRequest, new Error("Invalid username and/or password"));
             }
 
-            var userKey = $"user::{model.Username}";
+            var userKey = CreateUserKey(model.Username);
             if (await _bucket.ExistsAsync(userKey))
             {
-                return Content(HttpStatusCode.Conflict, new Error("Username already exists"));
+                return Content(HttpStatusCode.Conflict, new Error($"Username '{model.Username}' already exists"));
             }
 
             var userDoc = new Document<User>
@@ -85,7 +91,7 @@ namespace try_cb_dotnet.Controllers
                 token = BuildToken(model.Username)
             };
             var context = $"Created user with ID '{userKey}' in bucket '{_bucket.Name}' that expires in {userDoc.Expiry}ms";
-            return Content(HttpStatusCode.Created, new Result(data, context));
+            return Content(HttpStatusCode.Accepted, new Result(data, context));
         }
 
         [Route("{username}/flights")]
@@ -109,7 +115,7 @@ namespace try_cb_dotnet.Controllers
             }
 
             var data = result.Value.Flights;
-            return Ok(new Result(data));
+            return Content(HttpStatusCode.OK, new Result(data));
         }
 
         [Route("{username}/flights")]
@@ -136,20 +142,27 @@ namespace try_cb_dotnet.Controllers
                 flight.BookedOn = "try-cb-dotnet";
             }
 
-            var userKey = $"user::{username}";
-            var user = await _bucket.GetAsync<User>(userKey);
-            if (!user.Success)
+            var userKey = CreateUserKey(username);
+            var getUserResult = await _bucket.GetAsync<User>(userKey);
+            if (!getUserResult.Success)
             {
-                return Content(HttpStatusCode.Forbidden, string.Empty);
+                if (getUserResult.Status == ResponseStatus.KeyNotFound)
+                {
+                    return Content(HttpStatusCode.Forbidden, string.Empty);
+                }
+                return Content(HttpStatusCode.InternalServerError, new Error(getUserResult.Message));
             }
 
-            if (user.Value.Flights == null)
+            if (getUserResult.Value.Flights == null)
             {
-                user.Value.Flights = new List<Flight>();
+                getUserResult.Value.Flights = new List<Flight>(model.Flights);
             }
-            user.Value.Flights.AddRange(model.Flights);
+            else
+            {
+                getUserResult.Value.Flights.AddRange(model.Flights);
+            }
 
-            var result = await _bucket.ReplaceAsync(userKey, user.Value);
+            var result = await _bucket.ReplaceAsync(userKey, getUserResult.Value);
             if (!result.Success)
             {
                 return Content(HttpStatusCode.InternalServerError, result.Message);
@@ -160,6 +173,11 @@ namespace try_cb_dotnet.Controllers
                 added = model.Flights
             };
             return Content(HttpStatusCode.Accepted, new Result(data));
+        }
+
+        private static string CreateUserKey(string username)
+        {
+            return $"user::{username}";
         }
 
         private static string GetAuthHeaderValue(HttpHeaders headers)

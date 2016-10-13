@@ -12,5 +12,11 @@ namespace try_cb_dotnet.Models
 
         [JsonProperty("expiry")]
         public uint Expiry { get; set; }
+
+        public bool IsValid()
+        {
+            return !string.IsNullOrEmpty(Username) &&
+                   !string.IsNullOrEmpty(Password);
+        }
     }
 }
