@@ -4,11 +4,13 @@ using System.Configuration;
 using System.Device.Location;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Couchbase;
 using Couchbase.Core;
+using Couchbase.N1QL;
 using try_cb_dotnet.Models;
+using Error = try_cb_dotnet.Models.Error;
 
 namespace try_cb_dotnet.Controllers
 {
@@ -20,35 +22,37 @@ namespace try_cb_dotnet.Controllers
 
         [Route("{from}/{to}")]
         [HttpGet]
-        public HttpResponseMessage GetFlights(string from, string to, string leave)
+        public async Task<IHttpActionResult> GetFlights(string from, string to, string leave)
         {
             DateTime leaveDate;
             if (!DateTime.TryParse(leave, out leaveDate))
             {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, new Error("Missing or invalid leave date"));
+                return Content(HttpStatusCode.InternalServerError, new Error("Missing or invalid leave date"));
             }
 
             var queries = new List<string>();
             var dayOfWeek = (int) leaveDate.DayOfWeek + 1;
 
-            var airportQuery = "SELECT faa AS fromAirport, geo.lat, geo.lon " +
-                               "FROM `travel-sample` " +
-                              $"WHERE airportname = '{from}' " +
-                               "UNION " +
-                               "SELECT faa AS toAirport, geo.lat, geo.lon " +
-                               "FROM `travel-sample` " +
-                              $"WHERE airportname = '{to}';";
-            queries.Add(airportQuery);
+            var airportQuery = new QueryRequest()
+                .Statement("SELECT faa AS fromAirport, geo.lat, geo.lon " +
+                           "FROM `travel-sample` " +
+                           "WHERE airportname = '$1' " +
+                           "UNION " +
+                           "SELECT faa AS toAirport, geo.lat, geo.lon " +
+                           "FROM `travel-sample` " +
+                           "WHERE airportname = '$2';")
+                .AddPositionalParameter(from, to);
+            queries.Add(airportQuery.GetOriginalStatement());
 
-            var airportQueryResult = _bucket.Query<dynamic>(airportQuery);
+            var airportQueryResult = await _bucket.QueryAsync<dynamic>(airportQuery);
             if (!airportQueryResult.Success)
             {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, new Error(airportQueryResult.Message));
+                return Content(HttpStatusCode.InternalServerError, new Error(airportQueryResult.Message));
             }
 
             if (airportQueryResult.Rows.Count != 2)
             {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, new Error($"Could not find both source '{from}' and destination '{to}' airports"));
+                return Content(HttpStatusCode.InternalServerError, new Error($"Could not find both source '{from}' and destination '{to}' airports"));
             }
 
             dynamic fromAirport = airportQueryResult.Rows.First(x => x.fromAirport != null);
@@ -72,10 +76,10 @@ namespace try_cb_dotnet.Controllers
                               "ORDER BY a.name ASC;";
             queries.Add(flightQuery);
 
-            var flightQueryResult = _bucket.Query<dynamic>(flightQuery);
+            var flightQueryResult = await _bucket.QueryAsync<dynamic>(flightQuery);
             if (!flightQueryResult.Success)
             {
-                return Request.CreateResponse(HttpStatusCode.InternalServerError, new Error(flightQueryResult.Message));
+                return Content(HttpStatusCode.InternalServerError, new Error(flightQueryResult.Message));
             }
 
             var flights = flightQueryResult.Rows;
@@ -85,7 +89,7 @@ namespace try_cb_dotnet.Controllers
                 flight.price = Math.Round(_random.NextDouble()*price/100, 2); // TODO: fix calculation
             }
 
-            return Request.CreateResponse(new Result(flights, queries.ToArray()));
+            return Ok(new Result(flights, queries.ToArray()));
         }
     }
 }
