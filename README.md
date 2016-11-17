@@ -18,7 +18,7 @@ To download the application you can either download [the archive]() or clone the
 $ git clone https://github.com/couchbaselabs/try-cb-dotnet.git
 ```
 
-Open Visual Studio and open _src/try-cb-dotnet.sln_ from where you downloaded or cloned the source repository. Run (F5 or Debug > Start Debugging) and if all goes well, this will start a start IIS Express running the application on http://localhost:8080.
+Open Visual Studio and open _src/try-cb-dotnet.sln_ from where you downloaded or cloned the source repository. Run (F5 or Debug > Start Debugging) and if all goes well, this will start an IIS Express instance running the application on http://localhost:8080.
 
 Note that when you run the application for the first time, it will make sure that all indexes are created for best performance, so it might take a bit longer.
 
