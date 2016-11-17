@@ -1394,10 +1394,10 @@ public object FindAll(string from, DateTime leave, string to, string token)
 }
 ```
 
-###Step 4 - Summery
+###Step 4 - Summary
 In part 4 you learned how to use LINQ with N1QL. 
 
-The benefits of using LINQ with N1QL is code completion, type safety and compile time checks of you queries. On the other hand there is an ekstra step required when creating the PoCo classes in converting the JSON structures to C# class's. 
+The benefits of using LINQ with N1QL is code completion, type safety and compile time checks of you queries. On the other hand there is an extra step required when creating the PoCo classes in converting the JSON structures to C# class's. 
 
 It's entirely up to you to decide what approach fits best to your temper and or projects. 
  
