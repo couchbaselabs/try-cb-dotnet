@@ -1,11 +1,9 @@
 #Couchbase .NET Client SDK Tutorial
 This tutorial bridges the gap between simple and advanced Couchbase concepts by walking through a complete web application using these Couchbase .NET client library, covering N1QL and key-value set/get operations.
 
-The full source code for the tutorial is available on 
+The full source code for the tutorial is available on GitHub: [github.com/couchbaselabs/try-cb-dotnet](https://github.com/couchbaselabs/try-cb-dotnet).
 
-GitHub [github.com/couchbaselabs/try-cb-dotnet](https://github.com/couchbaselabs/try-cb-dotnet).
-
-This tutorial makes use of the `travel-sample` data-set that comes with Couchbase Server 4.0. 
+This tutorial makes use of the `travel-sample` data-set that comes with Couchbase Server. 
 
 The HTML/JavaScript code that generates the web application is provided with the source code but this tutorial does not explain that side of the implementation. 
 
@@ -28,14 +26,12 @@ You will need to have the following available/installed:
 * Although not a requirement, we recommend you have a Git client for easy source code browsing and making it easy to switch between branches (tutorial steps are split using branches).
 
 
-##Installing Couchbase Server 4.0
-First things first: we need to install Couchbase Server! You can chose to install it locally on your developer machine or remotely. In this tutorial we will assume that Couchbase Server 4.0 is installed locally on your development machine alongside the website that we will create.
+##Installing Couchbase Server
+First things first: we need to install Couchbase Server! You can chose to install it locally on your developer machine or remotely. In this tutorial we will assume that Couchbase Server (4.0 or greater) is installed locally on your development machine alongside the website that we will create.
 
-[Download and installation instructions for Couchbase Server](http://www.couchbase.com/nosql-databases/downloads)
- 
-Download Couchbase Server and follow the [instructions](http://developer.couchbase.com/documentation/server/4.0/getting-started/installing.html) for your platform to complete the installation. 
+Download Couchbase Server and follow the [instructions](http://developer.couchbase.com/documentation/server/current/getting-started/installing.html) for your platform to complete the installation. 
 
-If this is your first time you setting up Couchbase Server, this [detailed guide](http://developer.couchbase.com/documentation/server/4.0/install/init-setup.html#topic12527) will help you through all the steps and explain the different options. 
+If this is your first time setting up Couchbase Server, this [detailed guide](http://developer.couchbase.com/documentation/server/current/install/init-setup.html#topic12527) will help you through all the steps and explain the different options. 
 
 **Important!** As you follow the download instructions and setup wizard, make sure you keep all the services (data, query, and index) selected and remember to install the sample bucket named `travel-sample` (introduced in CB 4.0). `travel-sample` is the dataset that we will use throughout this tutorial.
 
@@ -54,21 +50,21 @@ The source code is split into branches. Every branch represents a step in this t
 
 * `tutorial-part-1` is the most simple skeleton that can compile and show a UI. It's not possible to navigate the app yet.
 * `tutorial-part-2` is the result of part 1 and returns static content to allow the user to browse the site. It returns only static data.
-* `tutorial-part-3` is the result of part 2 and adds queries and live data to the site. It's now possible to navigate the site and get actual data back served from Couchbase Server 4.0.
+* `tutorial-part-3` is the result of part 2 and adds queries and live data to the site. It's now possible to navigate the site and get actual data back served from Couchbase Server.
 * `tutorial-part-4` is the result of part 3 and adds user login and password storage to the site.
 * `tutorial-part-5` is the result of part 4 and shows a few extra options in the Couchbase .NET SDK, such as LINQ support.
 * `master` is the final result after refactoring part 5.
 
 ###A quick note on the source itself
-This source code is split up into three separate parts.
+This source code is split up into three separate parts, shown in the following diagram.
  
-1. The 'red box' is the Couchbase Server Cluster our data storage
-2. The 'green box' represents the API server, responsible for serving the data to the UI. In this case the backend is built with C# and Web API, but could be implemented in any language. We currently have tutorials for: [Java](https://github.com/couchbaselabs/try-cb-java), [Node.js](https://github.com/couchbaselabs/try-cb-nodejs) and [.net - this tutorial](https://github.com/couchbaselabs/try-cb-dotnet)
-3. The 'blue box' symbolises the UI itself. This is the part of the application that surfaces the content to the user. It's all static HTML and JavaScript built to consume data from the API. We are not going to change a single line in the UI. 
+1. Couchbase: The red box is the Couchbase Server Cluster serving our data
+2. Backend: The green box represents the API server, responsible for serving the data to the UI. In this case the backend is built with C# and Web API, but could be implemented in any language. We currently have tutorials for: [Java](https://github.com/couchbaselabs/try-cb-java), [Node.js](https://github.com/couchbaselabs/try-cb-nodejs) and [.net - this tutorial](https://github.com/couchbaselabs/try-cb-dotnet)
+3. Frontend: The blue box symbolises the UI itself. This is the part of the application that surfaces the content to the user. It's all static HTML and JavaScript built to consume data from the API. We are not going to change a single line in the UI. 
 
 ![app diagram](content/images/Screen Shot 2015-11-05 at 12.00.18.png)
 
-This application architecture gives a very clean seperation of concerns and would  allow us to change the  various parts in the application architecture without influencing the other parts. This is of course only true if we maintain the REST API methods and responses.
+This application architecture gives a very clean separation of concerns and would allow us to change the various parts in the application architecture without influencing the other parts. This is, of course, only true if we maintain the REST API methods and responses.
 
 In fact, this allows us to change the backend API without touching the front end code. 
 Therefore, if you take a look at the Java version [`try-cb-java`](https://github.com/couchbaselabs/try-cb-java) you quickly learn that the UI is the same: it's only the backend that has changed.
@@ -387,7 +383,7 @@ public object FindAll(string search, string token)
 ###Step 1 - Summary
 If done correctly all Web API methods now return a static JSON value. This should enable you to run and browse the application. 
 
-All data is static but never the less it "works". In Step 2 we will update the static JSON returned in the Web API method to return actual data from Couchbase Server 4.    
+All data is static but never the less it "works". In Step 2 we will update the static JSON returned in the Web API method to return actual data from Couchbase Server.    
 
 ##Step 2 - Understand the Couchbase .NET SDK & N1QL
 In this step we will update all ASP.NET Web API methods to return data from Couchbase Server. 
@@ -657,7 +653,7 @@ Using Visual Studio 2015 or later, follow these steps to bootstrap the Couchbase
 
 **Where:** `AirportController.cs` -> **method:** `FindAll(string search, string token)`
 
-**Goals:** Return live data from the travel-sample data bucket in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
+**Goals:** Return live data from the travel-sample data bucket in Couchbase Server and learn more about how to use Couchbase with .NET
 
 **Relevant Documentation Topics:** 
 
@@ -742,7 +738,7 @@ Test the application with various airport names and abbreviations, you can start
 
 **Where:** `FlightPathController.cs` -> **method:** `FindAll(string from, DateTime leave, string to, string token)`
 
-**Goals:** Return live data from the travel-sample data bucket in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
+**Goals:** Return live data from the travel-sample data bucket in Couchbase Server and learn more about how to use Couchbase with .NET
 
 **Relevant Documentation Topics:** 
 
@@ -848,7 +844,7 @@ public object FindAll(string from, DateTime leave, string to, string token)
 
 **Where:** `UserController.cs` -> **method:** `Flights(string token)`
 
-**Goals:** Return live data about the user's travel bookings stored in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
+**Goals:** Return live data about the user's travel bookings stored in Couchbase Server and learn more about how to use Couchbase with .NET
 
 **Relevant Documentation Topics:** 
 
@@ -899,7 +895,7 @@ public object Flights(string token)
 
 **Where:** `UserController.cs` -> **method:** `BookFlights([FromBody] dynamic request)`
 
-**Goals:** Persist data about the user's travel bookings, persist them in Couchbase Server 4.0 and learn more about how to use Couchbase with .NET
+**Goals:** Persist data about the user's travel bookings, persist them in Couchbase Server and learn more about how to use Couchbase with .NET
 
 **Relevant Documentation Topics:** 
 
