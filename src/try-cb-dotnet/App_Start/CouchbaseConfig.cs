@@ -1,41 +1,67 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
 using Couchbase;
 using Couchbase.Configuration.Client;
 
-namespace try_cb_dotnet.App_Start
+namespace try_cb_dotnet
 {
     public static class CouchbaseConfig
     {
-        public static void Initialize()
+        private static readonly List<string> TravelSampleIndexNames = new List<string>
         {
-            var config = new ClientConfiguration();
-            config.BucketConfigs.Clear();
+            "def_sourceairport",
+            "def_airportname",
+            "def_type",
+            "def_faa",
+            "def_icao",
+            "def_city"
+        };
 
-            config.Servers = new List<Uri>(new Uri[] { new Uri(CouchbaseConfigHelper.Instance.Server) });
+        public static void Register()
+        {
+            var couchbaseServer = ConfigurationManager.AppSettings.Get("CouchbaseServer");
+            ClusterHelper.Initialize(new ClientConfiguration
+            {
+                Servers = new List<Uri> { new Uri(couchbaseServer) }
+            });
 
-            config.BucketConfigs.Add(
-                CouchbaseConfigHelper.Instance.Bucket,
-                new BucketConfiguration
-                {
-                    BucketName = CouchbaseConfigHelper.Instance.Bucket,
-                    Username = CouchbaseConfigHelper.Instance.User,
-                    Password = CouchbaseConfigHelper.Instance.Password
-                });
+            var bucketName = ConfigurationManager.AppSettings.Get("CouchbaseTravelBucket");
+            var username = ConfigurationManager.AppSettings.Get("CouchbaseUser");
+            var password = ConfigurationManager.AppSettings.Get("CouchbasePassword");
 
-            config.BucketConfigs.Add(
-                "default",
-                new BucketConfiguration
-                {
-                    BucketName = "default",
-                    Username = CouchbaseConfigHelper.Instance.User,
-                    Password = CouchbaseConfigHelper.Instance.Password
-                });
-
-            ClusterHelper.Initialize(config);
+            EnsureIndexes(bucketName, username, password);
         }
 
-        public static void Close()
+        private static void EnsureIndexes(string bucketName, string username, string password)
+        {
+            var bucket = ClusterHelper.GetBucket(bucketName);
+            var bucketManager = bucket.CreateManager(username, password);
+
+            var indexes = bucketManager.ListN1qlIndexes();
+            if (!indexes.Any(index => index.IsPrimary))
+            {
+                bucketManager.CreateN1qlPrimaryIndex(true);
+            }
+
+            var missingIndexes = TravelSampleIndexNames.Except(indexes.Where(x => !x.IsPrimary).Select(x => x.Name)).ToList();
+            if (!missingIndexes.Any())
+            {
+                return;
+            }
+
+            foreach (var missingIndex in missingIndexes)
+            {
+                var propertyName = missingIndex.Replace("def_", string.Empty);
+                bucketManager.CreateN1qlIndex(missingIndex, true, propertyName);
+            }
+
+            bucketManager.BuildN1qlDeferredIndexes();
+            bucketManager.WatchN1qlIndexes(missingIndexes, TimeSpan.FromSeconds(30));
+        }
+
+        public static void CleanUp()
         {
             ClusterHelper.Close();
         }
