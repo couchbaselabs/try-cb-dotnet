@@ -106,7 +106,7 @@
     <Compile Include="App_Start\CouchbaseConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AirportController.cs" />
-    <Compile Include="Controllers\FlightsPathsController.cs" />
+    <Compile Include="Controllers\FlightsController.cs" />
     <Compile Include="Controllers\HotelController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Global.asax.cs">

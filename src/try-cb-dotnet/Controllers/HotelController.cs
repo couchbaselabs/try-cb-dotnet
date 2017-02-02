@@ -15,7 +15,7 @@ namespace try_cb_dotnet.Controllers
     [RoutePrefix("api/hotel")]
     public class HotelController : ApiController
     {
-        private readonly IBucket _bucket = ClusterHelper.GetBucket(ConfigurationManager.AppSettings.Get("couchbaseTravelBucket"));
+        private readonly IBucket _bucket = ClusterHelper.GetBucket(ConfigurationManager.AppSettings.Get("CouchbaseTravelBucket"));
 
         [Route("{description?}/{location?}")]
         [HttpGet]

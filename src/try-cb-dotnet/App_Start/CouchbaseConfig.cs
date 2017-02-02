@@ -9,46 +9,43 @@ namespace try_cb_dotnet
 {
     public static class CouchbaseConfig
     {
+        private static readonly List<string> TravelSampleIndexNames = new List<string>
+        {
+            "def_sourceairport",
+            "def_airportname",
+            "def_type",
+            "def_faa",
+            "def_icao",
+            "def_city"
+        };
+
         public static void Register()
         {
-            var couchbaseServer = ConfigurationManager.AppSettings.Get("couchbaseServer");
+            var couchbaseServer = ConfigurationManager.AppSettings.Get("CouchbaseServer");
             ClusterHelper.Initialize(new ClientConfiguration
             {
                 Servers = new List<Uri> { new Uri(couchbaseServer) }
             });
 
-            EnsureIndexes();
+            var bucketName = ConfigurationManager.AppSettings.Get("CouchbaseTravelBucket");
+            var username = ConfigurationManager.AppSettings.Get("CouchbaseUser");
+            var password = ConfigurationManager.AppSettings.Get("CouchbasePassword");
+
+            EnsureIndexes(bucketName, username, password);
         }
 
-        private static void EnsureIndexes()
+        private static void EnsureIndexes(string bucketName, string username, string password)
         {
-            var indexNames = new List<string>
-                {"def_sourceairport", "def_airportname", "def_type", "def_faa", "def_icao", "def_city"};
+            var bucket = ClusterHelper.GetBucket(bucketName);
+            var bucketManager = bucket.CreateManager(username, password);
 
-            var bucket = ClusterHelper.GetBucket("travel-sample");
-            var result = bucket.Query<dynamic>("SELECT indexes.* FROM system:indexes WHERE keyspace_id = 'travel-sample';");
-
-
-            var foundIndexes = new List<string>();
-            var hasPrimary = false;
-            foreach (var row in result.Rows)
+            var indexes = bucketManager.ListN1qlIndexes();
+            if (!indexes.Any(index => index.IsPrimary))
             {
-                if (row.is_primary == "true")
-                {
-                    hasPrimary = true;
-                }
-                else
-                {
-                    foundIndexes.Add((string) row.name);
-                }
+                bucketManager.CreateN1qlPrimaryIndex(true);
             }
 
-            if (!hasPrimary)
-            {
-                bucket.Query<dynamic>("CREATE PRIMARY INDEX `def_primary` ON `travel-sample`;");
-            }
-
-            var missingIndexes = indexNames.Where(index => !foundIndexes.Contains(index)).ToList();
+            var missingIndexes = TravelSampleIndexNames.Except(indexes.Where(x => !x.IsPrimary).Select(x => x.Name)).ToList();
             if (!missingIndexes.Any())
             {
                 return;
@@ -57,10 +54,11 @@ namespace try_cb_dotnet
             foreach (var missingIndex in missingIndexes)
             {
                 var propertyName = missingIndex.Replace("def_", string.Empty);
-                bucket.Query<dynamic>($"CREATE INDEX `{missingIndex}` ON `travel-sample`(`{propertyName}`);");
+                bucketManager.CreateN1qlIndex(missingIndex, true, propertyName);
             }
 
-            bucket.Query<dynamic>($"BUILD INDEX ON `travel-sample` ({string.Join(", ", missingIndexes)});");
+            bucketManager.BuildN1qlDeferredIndexes();
+            bucketManager.WatchN1qlIndexes(missingIndexes, TimeSpan.FromSeconds(30));
         }
 
         public static void CleanUp()

@@ -12,7 +12,7 @@ namespace try_cb_dotnet.Controllers
     [RoutePrefix("api/airports")]
     public class AirportController : ApiController
     {
-        private readonly IBucketContext _context = new BucketContext(ClusterHelper.GetBucket(ConfigurationManager.AppSettings.Get("couchbaseTravelBucket")));
+        private readonly IBucketContext _context = new BucketContext(ClusterHelper.GetBucket(ConfigurationManager.AppSettings.Get("CouchbaseTravelBucket")));
 
         [Route("")]
         [HttpGet]

@@ -18,13 +18,18 @@ namespace try_cb_dotnet.Controllers
     public class FlightsController : ApiController
     {
         private readonly Random _random = new Random();
-        private readonly IBucket _bucket = ClusterHelper.GetBucket(ConfigurationManager.AppSettings.Get("couchbaseTravelBucket"));
-        private static readonly double AverageFlightSpeed = double.Parse(ConfigurationManager.AppSettings.Get("averageFlightSpeed"));
+        private readonly IBucket _bucket = ClusterHelper.GetBucket(ConfigurationManager.AppSettings.Get("CouchbaseTravelBucket"));
+        private static readonly double AverageFlightSpeed = double.Parse(ConfigurationManager.AppSettings.Get("AverageFlightSpeed"));
 
         [Route("{from}/{to}")]
         [HttpGet]
         public async Task<IHttpActionResult> GetFlights(string from, string to, string leave)
         {
+            if (string.IsNullOrEmpty(from) || string.IsNullOrEmpty(to))
+            {
+                return Content(HttpStatusCode.InternalServerError, new Error("Missing or invalid from and/or to airports"));
+            }
+
             DateTime leaveDate;
             if (!DateTime.TryParse(leave, out leaveDate))
             {
@@ -32,7 +37,7 @@ namespace try_cb_dotnet.Controllers
             }
 
             var queries = new List<string>();
-            var dayOfWeek = (int) leaveDate.DayOfWeek + 1;
+            var dayOfWeek = (int) leaveDate.DayOfWeek + 1; // Get weekday number
 
             var airportQuery = new QueryRequest()
                 .Statement("SELECT faa AS fromAirport, geo.lat, geo.lon " +

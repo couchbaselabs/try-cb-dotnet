@@ -18,41 +18,8 @@ namespace try_cb_dotnet.Controllers
     [RoutePrefix("api/user")]
     public class UserController : ApiController
     {
-        private readonly IBucket _bucket = ClusterHelper.GetBucket(ConfigurationManager.AppSettings.Get("couchbaseUserBucket"));
+        private readonly IBucket _bucket = ClusterHelper.GetBucket(ConfigurationManager.AppSettings.Get("CouchbaseUserBucket"));
         private readonly string _secretKey = ConfigurationManager.AppSettings["JWTTokenSecret"];
-
-        [Route("login")]
-        [HttpPost]
-        public async Task<IHttpActionResult> Login(LoginModel model)
-        {
-            if (model == null || !model.IsValid())
-            {
-                return Content(HttpStatusCode.BadRequest, new Error("Missing or empty 'user' and 'password' properties in message body"));
-            }
-
-            var userKey = CreateUserKey(model.Username);
-            var result = await _bucket.GetAsync<User>(userKey);
-            if (!result.Success)
-            {
-                if (result.Status == ResponseStatus.KeyNotFound)
-                {
-                    return Content(HttpStatusCode.Unauthorized, new Error("Invalid username and/or password"));
-                }
-                return Content(HttpStatusCode.InternalServerError, new Error(result.Message));
-            }
-
-            var user = result.Value;
-            if (user.Password != CalcuateMd5Hash(model.Password))
-            {
-                return Content(HttpStatusCode.Unauthorized, new Error("Invalid username and/or password"));
-            }
-
-            var data = new
-            {
-                token = BuildToken(user.Username)
-            };
-            return Content(HttpStatusCode.OK, new Result(data));
-        }
 
         [Route("signup")]
         [HttpPost]
@@ -94,6 +61,40 @@ namespace try_cb_dotnet.Controllers
             return Content(HttpStatusCode.Accepted, new Result(data, context));
         }
 
+        [Route("login")]
+        [HttpPost]
+        public async Task<IHttpActionResult> Login(LoginModel model)
+        {
+            if (model == null || !model.IsValid())
+            {
+                return Content(HttpStatusCode.BadRequest, new Error("Missing or empty 'user' and 'password' properties in message body"));
+            }
+
+            var userKey = CreateUserKey(model.Username);
+            var userDocument = await _bucket.GetDocumentAsync<User>(userKey);
+            if (!userDocument.Success)
+            {
+                if (userDocument.Status == ResponseStatus.KeyNotFound)
+                {
+                    return Content(HttpStatusCode.Unauthorized, new Error("Invalid username and/or password"));
+                }
+                return Content(HttpStatusCode.InternalServerError, new Error(userDocument.Message));
+            }
+            
+            var user = userDocument.Content;
+            if (user.Password != CalcuateMd5Hash(model.Password))
+            {
+                return Content(HttpStatusCode.Unauthorized, new Error("Invalid username and/or password"));
+            }
+
+            var data = new
+            {
+                token = BuildToken(user.Username)
+            };
+            var context = $"User {model.Username} logged in successfully";
+            return Content(HttpStatusCode.OK, new Result(data, context));
+        }
+        
         [Route("{username}/flights")]
         [HttpGet]
         public async Task<IHttpActionResult> GetFlightsForUser(string username)
@@ -108,14 +109,16 @@ namespace try_cb_dotnet.Controllers
                 return Content(HttpStatusCode.Forbidden, string.Empty);
             }
 
-            var result = await _bucket.GetAsync<User>($"user::{username}");
-            if (!result.Success)
+            var userKey = CreateUserKey(username);
+            var userDocument = await _bucket.GetDocumentAsync<User>(userKey);
+            if (!userDocument.Success)
             {
                 return Content(HttpStatusCode.Forbidden, string.Empty);
             }
 
-            var data = result.Value.Flights;
-            return Content(HttpStatusCode.OK, new Result(data));
+            var data = userDocument.Content.Flights;
+            var context = $"Retrieved flights for user {username}.";
+            return Content(HttpStatusCode.OK, new Result(data, context));
         }
 
         [Route("{username}/flights")]
@@ -143,26 +146,26 @@ namespace try_cb_dotnet.Controllers
             }
 
             var userKey = CreateUserKey(username);
-            var getUserResult = await _bucket.GetAsync<User>(userKey);
-            if (!getUserResult.Success)
+            var userDocument = await _bucket.GetDocumentAsync<User>(userKey);
+            if (!userDocument.Success)
             {
-                if (getUserResult.Status == ResponseStatus.KeyNotFound)
+                if (userDocument.Status == ResponseStatus.KeyNotFound)
                 {
                     return Content(HttpStatusCode.Forbidden, string.Empty);
                 }
-                return Content(HttpStatusCode.InternalServerError, new Error(getUserResult.Message));
+                return Content(HttpStatusCode.InternalServerError, new Error(userDocument.Message));
             }
 
-            if (getUserResult.Value.Flights == null)
+            if (userDocument.Content.Flights == null)
             {
-                getUserResult.Value.Flights = new List<Flight>(model.Flights);
+                userDocument.Content.Flights = new List<Flight>(model.Flights);
             }
             else
             {
-                getUserResult.Value.Flights.AddRange(model.Flights);
+                userDocument.Content.Flights.AddRange(model.Flights);
             }
 
-            var result = await _bucket.ReplaceAsync(userKey, getUserResult.Value);
+            var result = await _bucket.ReplaceAsync(userKey, userDocument);
             if (!result.Success)
             {
                 return Content(HttpStatusCode.InternalServerError, result.Message);
