@@ -24,4 +24,4 @@ Note that when you run the application for the first time, it will make sure tha
 
 ## Configuration Options
 
-By default the application will connect to the Couchbase Server on http://127.0.0.1:8091 and use the _travel-sample_ bucket. It will however separate user account data into the _default_ bucket (and these documents can be set to expire). All these options can be modified in `src/Web.Config`.
+By default the application will connect to the Couchbase Server on http://localhost:8091 and use the _travel-sample_ bucket. It will however separate user account data into the _default_ bucket (and these documents can be set to expire). All these options can be modified in `src/Web.Config`.
