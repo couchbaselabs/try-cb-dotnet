@@ -46,7 +46,7 @@ namespace try_cb_dotnet.Controllers
             var search = new SearchQuery();
             search.Index = "hotel";
             search.Query = query;
-            search.Limit(10);
+            search.Limit(100);
 
             var queryJson = query.Export().ToString(Formatting.None);
             var hotels = new List<dynamic>();
