@@ -165,7 +165,7 @@ namespace try_cb_dotnet.Controllers
                 userDocument.Content.Flights.AddRange(model.Flights);
             }
 
-            var result = await _bucket.ReplaceAsync(userKey, userDocument);
+            var result = await _bucket.ReplaceAsync(userKey, userDocument.Content);
             if (!result.Success)
             {
                 return Content(HttpStatusCode.InternalServerError, result.Message);
@@ -186,7 +186,7 @@ namespace try_cb_dotnet.Controllers
         private static string GetAuthHeaderValue(HttpHeaders headers)
         {
             IEnumerable<string> headerValues;
-            if (!headers.TryGetValues("authentication", out headerValues))
+            if (!headers.TryGetValues("Authorization", out headerValues))
             {
                 return null;
             }

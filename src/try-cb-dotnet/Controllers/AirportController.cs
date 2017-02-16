@@ -42,7 +42,8 @@ namespace try_cb_dotnet.Controllers
                     .Select(x => x.Airportname);
             }
 
-            var data = airports.Select(airportname => new {airportname});
+            var airportNames = airports.ToList();
+            var data = airportNames.Select(airportname => new {airportname}).ToArray();
             return Content(HttpStatusCode.OK, new Result(data, query));
         }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Configuration;
+using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using Couchbase;
@@ -54,7 +55,7 @@ namespace try_cb_dotnet.Controllers
             var result = _bucket.Query(search);
             foreach (var row in result)
             {
-                var fragment = _bucket.LookupIn<Hotel>(row.Id)
+                var fragment = _bucket.LookupIn<dynamic>(row.Id)
                     .Get("name")
                     .Get("description")
                     .Get("address")
@@ -63,11 +64,19 @@ namespace try_cb_dotnet.Controllers
                     .Get("country")
                     .Execute();
 
+                var address = string.Join(", ", new[]
+                {
+                    fragment.Content<string>("address"),
+                    fragment.Content<string>("city"),
+                    fragment.Content<string>("state"),
+                    fragment.Content<string>("country")
+                }.Where(x => !string.IsNullOrEmpty(x)));
+
                 hotels.Add(new
                 {
-                    name = fragment.Value.Name,
-                    description = fragment.Value.Description,
-                    address = fragment.Value.GetFullAddress()
+                    name = fragment.Content<string>("name"),
+                    description = fragment.Content<string>("description"),
+                    address = address
                 });
             }
 
