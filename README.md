@@ -27,4 +27,4 @@ Note that when you run the application for the first time, it will make sure tha
 By default the application will connect to the Couchbase Server on _localhost:8091_ and use the _travel-sample_ bucket. It will however separate user account data into the _default_ bucket (and these documents can be set to expire). All these options can be modified in `src/Web.Config`.
 
 ## Couchbase Server 5.0
-There is a branch for the upcoming Couchbase Server 5.0 that has additional changes: https://github.com/couchbaselabs/try-cb-dotnet/tree/5.0-updates
+There is a [5.0-updates](https://github.com/couchbaselabs/try-cb-dotnet/tree/5.0-updates) branch for the upcoming Couchbase Server 5.0 that has additional changes.
