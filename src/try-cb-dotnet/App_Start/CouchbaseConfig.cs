@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using Couchbase;
+using Couchbase.Authentication;
 using Couchbase.Configuration.Client;
 
 namespace try_cb_dotnet
@@ -31,13 +32,16 @@ namespace try_cb_dotnet
             var username = ConfigurationManager.AppSettings.Get("CouchbaseUser");
             var password = ConfigurationManager.AppSettings.Get("CouchbasePassword");
 
-            EnsureIndexes(bucketName, username, password);
+			// provide authentication to cluster
+	        ClusterHelper.Get().Authenticate(new PasswordAuthenticator(username, password));
+
+	        EnsureIndexes(bucketName);
         }
 
-        private static void EnsureIndexes(string bucketName, string username, string password)
+        private static void EnsureIndexes(string bucketName)
         {
             var bucket = ClusterHelper.GetBucket(bucketName);
-            var bucketManager = bucket.CreateManager(username, password);
+            var bucketManager = bucket.CreateManager();
 
             var indexes = bucketManager.ListN1qlIndexes();
             if (!indexes.Any(index => index.IsPrimary))
