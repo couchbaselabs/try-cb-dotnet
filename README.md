@@ -1,30 +1,27 @@
-# Couchbase .NET travel-sample Application
-This is a sample application for getting started with Couchbase Server 4.5 and the .NET SDK. The application runs a single page UI for demonstrating SQL for Documents (N1QL) and Full Text Search (FTS) querying capabilities. It uses Couchbase Server 4.5 together with ASP.NET Web API 2, Angular2 and Bootstrap.
-
-The application is a flight planner that allows the user to search for and select a flight route (including the return flight) based on airports and dates. Airport selection is done dynamically using an angular autocomplete box bound to N1QL queries on the server side. After selecting a date, it then searches for applicable air flight routes from a previously populated database. An additional page allows users to search for Hotels using less structured keywords.
-
-![Application](content/images/app.png)
+# Couchbase Sample Application
 
 ## Prerequisites
-The following pieces need to be in place in order to run the application.
 
-* Couchbase Server 4.5 or later with the travel-sample bucket setup
-* Visual Studio 2015 Community or Professional
+[.NET SDK](https://dotnet.microsoft.com/download) (2.1 or greater) - Note .NET Core is cross-platform that can run on Windows, MacOS and Linux.
 
-## Running the application
-To download the application you can either download [the archive]() or clone the repository:
+## Building
 
+First, you need to get a copy of the code. The easiest way to to do that is to clone the git repository.
+
+```bash
+git clone https://github.com/couchbaselabs/try-cb-dotnet.git
 ```
-$ git clone https://github.com/couchbaselabs/try-cb-dotnet.git
+
+NOTE: The SDK 3.0 sample app is currently in it's own branch, so you need to switch over to that.
+
+```bash
+git checkout sdk-3.0
 ```
 
-Open Visual Studio and open _src/try-cb-dotnet.sln_ from where you downloaded or cloned the source repository. Run (F5 or Debug > Start Debugging) and if all goes well, this will start an IIS Express instance running the application on http://localhost:8080.
+You can build and run the application using the `dotnet` CLI as follows. This will start the application, which can be seen at http://localhost:5000.
 
-Note that when you run the application for the first time, it will make sure that all indexes are created for best performance, so it might take a bit longer.
+```bash
+dotnet run --project try-cb-dotnet/try-cb-dotnet.csproj
+```
 
-## Configuration Options
-
-By default the application will connect to the Couchbase Server on _localhost:8091_ and use the _travel-sample_ bucket. It will however separate user account data into the _default_ bucket (and these documents can be set to expire). All these options can be modified in `src/Web.Config`.
-
-## Couchbase Server 5.0
-There is a [5.0-updates](https://github.com/couchbaselabs/try-cb-dotnet/tree/5.0-updates) branch for the upcoming Couchbase Server 5.0 that has additional changes.
+Alternatively, if you're using [VSCode](https://code.visualstudio.com/), there is a debug task configured which will both build and run the sample application.
