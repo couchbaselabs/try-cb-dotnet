@@ -2,19 +2,14 @@
 
 ## Prerequisites
 
-[.NET SDK](https://dotnet.microsoft.com/download) (2.1 or greater) - Note .NET Core is cross-platform that can run on Windows, MacOS and Linux.
+[.NET SDK](https://dotnet.microsoft.com/download) (2.1 or greater). _Note: .NET Core is cross-platform that can run on Windows, MacOS and Linux._
 
 ## Building
 
-First, you need to get a copy of the code. The easiest way to to do that is to clone the git repository.
+First, you need to get a copy of the code. The easiest way to to do that is to clone the git repository and switch to the `sdk-3.0` branch.
 
 ```bash
 git clone https://github.com/couchbaselabs/try-cb-dotnet.git
-```
-
-NOTE: The SDK 3.0 sample app is currently in it's own branch, so you need to switch over to that.
-
-```bash
 git checkout sdk-3.0
 ```
 
