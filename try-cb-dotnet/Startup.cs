@@ -14,11 +14,11 @@ namespace try_cb_dotnet
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
-        { }
+        {
+            services.AddMvc();
+        }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
@@ -26,8 +26,14 @@ namespace try_cb_dotnet
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseDefaultFiles();
+            // normally index would be provided via MCV, but we want to use a static html file instead
+            var options = new DefaultFilesOptions();
+            options.DefaultFileNames.Clear();
+            options.DefaultFileNames.Add("index.html");
+            app.UseDefaultFiles(options);
+
             app.UseStaticFiles();
+            app.UseMvc();
         }
     }
 }
