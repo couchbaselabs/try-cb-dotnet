@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using try_cb_dotnet.Helpers;
 
 namespace try_cb_dotnet
 {
@@ -17,6 +18,10 @@ namespace try_cb_dotnet
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+
+            // configure strongly typed settings objects
+            var appSettingsSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
