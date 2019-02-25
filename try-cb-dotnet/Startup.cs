@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using try_cb_dotnet.Helpers;
+using try_cb_dotnet.Services;
 
 namespace try_cb_dotnet
 {
@@ -25,6 +26,9 @@ namespace try_cb_dotnet
             // configure strongly typed settings objects
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
+
+            // configure Couchbase connection
+            services.AddSingleton<ICouchbaseService, CouchbaseService>();
 
             // configure JWT authentication
             var appSettings = appSettingsSection.Get<AppSettings>();
