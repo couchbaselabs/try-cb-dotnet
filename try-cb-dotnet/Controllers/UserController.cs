@@ -22,9 +22,7 @@ namespace try_cb_dotnet.Controllers
         [HttpPost, Route("signup")]
         public async Task<ActionResult> SignUp([FromBody] LoginModel model)
         {
-            // TODO: use exists instead
-            var user = await _userService.Authenticate(model.Username, model.Password);
-            if (user != null)
+            if (await _userService.Exists(model.Username))
             {
                 return Conflict($"Username '{model.Username}' already exists");
             }

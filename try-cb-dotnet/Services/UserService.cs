@@ -22,9 +22,10 @@ namespace try_cb_dotnet.Services
             _couchbaseService = couchbaseService;
         }
 
-        public Task<bool> Exists(string username)
+        public async Task<bool> Exists(string username)
         {
-            throw new NotImplementedException();
+            var result = await _couchbaseService.Collection.Exists($"user::{username}");
+            return result.Exists;
         }
 
         public async Task<User> CreateUser(string username, string password, uint expiry)
@@ -52,7 +53,7 @@ namespace try_cb_dotnet.Services
             User user;
             try
             {
-                var result =  await _couchbaseService.Collection.Get($"user::{username}");
+                var result =  await _couchbaseService.Collection.Get($"user::{username}", projections: new string[0]);
                 user = result.ContentAs<User>();
             }
             catch (Exception)
