@@ -30,7 +30,7 @@ namespace try_cb_dotnet.Services
             {
                 Subject = new ClaimsIdentity(new [] 
                 {
-                    new Claim(ClaimTypes.Name, username)
+                    new Claim("user", username)
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
