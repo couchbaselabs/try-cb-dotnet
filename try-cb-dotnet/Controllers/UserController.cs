@@ -22,19 +22,12 @@ namespace try_cb_dotnet.Controllers
         [HttpPost, Route("signup")]
         public async Task<ActionResult> SignUp([FromBody] LoginModel model)
         {
-            if (await _userService.Exists(model.Username))
+            if (await _userService.UserExists(model.Username))
             {
                 return Conflict($"Username '{model.Username}' already exists");
             }
 
-            try
-            {
-                await _userService.CreateUser(model.Username, model.Password, model.Expiry);
-            }
-            catch (Exception)
-            {
-                return BadRequest();
-            }
+            await _userService.CreateUser(model.Username, model.Password, model.Expiry);
 
             var data = new {token = _authTokenService.CreateToken(model.Username)};
             return Accepted(new Result(data));
@@ -43,7 +36,7 @@ namespace try_cb_dotnet.Controllers
         [HttpPost, Route("login")]
         public async Task<ActionResult> Login([FromBody] LoginModel model)
         {
-            var user = await _userService.Authenticate(model.Username, model.Password);
+            var user = await _userService.GetAndAuthenticateUser(model.Username, model.Password);
             if (user == null)
             {
                 return BadRequest("Invalid username / password");
@@ -56,7 +49,15 @@ namespace try_cb_dotnet.Controllers
         [HttpGet, Route("{username}/flights")]
         public async Task<ActionResult> GetFlightsForUser(string username)
         {
-            throw new NotImplementedException();
+            //_authTokenService.VerifyToken();
+
+            var user = await _userService.GetUser(username);
+            if (user == null)
+            {
+                return BadRequest("Invalid username");
+            }
+
+            return Ok(new Result(user.Flights));
         }
 
         [HttpPost, Route("{username}/flights")]

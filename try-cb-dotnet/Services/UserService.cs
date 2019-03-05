@@ -10,9 +10,10 @@ namespace try_cb_dotnet.Services
 {
     public interface IUserService
     {
-        Task<bool> Exists(string username);
+        Task<bool> UserExists(string username);
         Task<User> CreateUser(string username, string password, uint expiry);
-        Task<User> Authenticate(string username, string password);
+        Task<User> GetUser(string username);
+        Task<User> GetAndAuthenticateUser(string username, string password);
         Task<IEnumerable<Flight>> GetFlightsForUser(string username);
     }
 
@@ -25,7 +26,7 @@ namespace try_cb_dotnet.Services
             _couchbaseService = couchbaseService;
         }
 
-        public async Task<bool> Exists(string username)
+        public async Task<bool> UserExists(string username)
         {
             var result = await _couchbaseService.Collection.Exists($"user::{username}");
             return result.Exists;
@@ -51,15 +52,23 @@ namespace try_cb_dotnet.Services
             return user;
         }
 
-        public async Task<User> Authenticate(string username, string password)
+        public async Task<User> GetUser(string username)
         {
-            User user;
             try
             {
-                var result =  await _couchbaseService.Collection.Get($"user::{username}", projections: new string[0]);
-                user = result.ContentAs<User>();
+                var result =  await _couchbaseService.Collection.Get($"user::{username}");
+                return result.ContentAs<User>();
             }
             catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<User> GetAndAuthenticateUser(string username, string password)
+        {
+            var user = await GetUser(username);
+            if (user == null)
             {
                 return null;
             }
@@ -74,7 +83,7 @@ namespace try_cb_dotnet.Services
 
         public Task<IEnumerable<Flight>> GetFlightsForUser(string username)
         {
-            throw new NotSupportedException();
+            throw new NotImplementedException();
         }
 
         private static string CalculateMd5Hash(string password)
