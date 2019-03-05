@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using try_cb_dotnet.Models;
 
@@ -33,14 +36,14 @@ namespace try_cb_dotnet.Services
             var user = new User
             {
                 Username = username,
-                Password = password
+                Password = CalculateMd5Hash(password)
             };
 
             try
             {
                 await _couchbaseService.Collection.Insert($"user::{username}", user);
             }
-            catch (Exception)
+            catch
             {
                 return null;
             }
@@ -56,19 +59,31 @@ namespace try_cb_dotnet.Services
                 var result =  await _couchbaseService.Collection.Get($"user::{username}", projections: new string[0]);
                 user = result.ContentAs<User>();
             }
-            catch (Exception)
+            catch
             {
                 return null;
             }
 
-            //TODO: verify password
+            if (user.Password != CalculateMd5Hash(password))
+            {
+                return null;
+            }
 
             return user;
         }
 
-        public async Task<IEnumerable<Flight>> GetFlightsForUser(string username)
+        public Task<IEnumerable<Flight>> GetFlightsForUser(string username)
         {
             throw new NotSupportedException();
+        }
+
+        private static string CalculateMd5Hash(string password)
+        {
+            using (var md5 = MD5.Create())
+            {
+                var bytes = md5.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return string.Concat(bytes.Select(x => x.ToString("x2")));
+            }
         }
     }
 }
