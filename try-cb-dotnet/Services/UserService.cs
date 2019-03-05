@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -14,7 +12,6 @@ namespace try_cb_dotnet.Services
         Task<User> CreateUser(string username, string password, uint expiry);
         Task<User> GetUser(string username);
         Task<User> GetAndAuthenticateUser(string username, string password);
-        Task<IEnumerable<Flight>> GetFlightsForUser(string username);
     }
 
     public class UserService : IUserService
@@ -79,11 +76,6 @@ namespace try_cb_dotnet.Services
             }
 
             return user;
-        }
-
-        public Task<IEnumerable<Flight>> GetFlightsForUser(string username)
-        {
-            throw new NotImplementedException();
         }
 
         private static string CalculateMd5Hash(string password)

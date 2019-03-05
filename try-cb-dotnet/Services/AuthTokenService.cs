@@ -1,5 +1,6 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
@@ -11,6 +12,7 @@ namespace try_cb_dotnet.Services
     public interface IAuthTokenService
     {
         string CreateToken(string username);
+        bool VerifyToken(string encodedToken, string username);
     }
 
     public class AuthTokenService : IAuthTokenService
@@ -24,7 +26,6 @@ namespace try_cb_dotnet.Services
 
         public string CreateToken(string username)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -35,10 +36,23 @@ namespace try_cb_dotnet.Services
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
 
-            // write auth token and remove password before returning
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+
+        public bool VerifyToken(string encodedToken, string username)
+        {
+            if (encodedToken.StartsWith("Bearer "))
+            {
+                encodedToken = encodedToken.Substring(7);
+            }
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.ReadJwtToken(encodedToken);
+
+            return token.Claims.Any(x => x.Type == "user" && x.Value == username);
         }
     }
 }

@@ -19,7 +19,7 @@ namespace try_cb_dotnet.Controllers
             _authTokenService = authTokenService;
         }
 
-        [HttpPost, Route("signup")]
+        [HttpPost("signup")]
         public async Task<ActionResult> SignUp([FromBody] LoginModel model)
         {
             if (await _userService.UserExists(model.Username))
@@ -33,7 +33,7 @@ namespace try_cb_dotnet.Controllers
             return Accepted(new Result(data));
         }
 
-        [HttpPost, Route("login")]
+        [HttpPost("login")]
         public async Task<ActionResult> Login([FromBody] LoginModel model)
         {
             var user = await _userService.GetAndAuthenticateUser(model.Username, model.Password);
@@ -46,10 +46,13 @@ namespace try_cb_dotnet.Controllers
             return Ok(new Result(data));
         }
 
-        [HttpGet, Route("{username}/flights")]
+        [HttpGet("{username}/flights")]
         public async Task<ActionResult> GetFlightsForUser(string username)
         {
-            //_authTokenService.VerifyToken();
+            if (!_authTokenService.VerifyToken(Request.Headers["Authorization"], username))
+            {
+                return Unauthorized();
+            }
 
             var user = await _userService.GetUser(username);
             if (user == null)
@@ -60,7 +63,7 @@ namespace try_cb_dotnet.Controllers
             return Ok(new Result(user.Flights));
         }
 
-        [HttpPost, Route("{username}/flights")]
+        [HttpPost("{username}/flights")]
         public Task<ActionResult> RegisterFlightForUser(string username, BookFlightModel model)
         {
             throw new NotImplementedException();
