@@ -25,7 +25,7 @@ namespace try_cb_dotnet.Services
 
         public async Task<bool> UserExists(string username)
         {
-            var result = await _couchbaseService.Collection.Exists($"user::{username}");
+            var result = await _couchbaseService.DefaultCollection.Exists($"user::{username}");
             return result.Exists;
         }
 
@@ -39,7 +39,7 @@ namespace try_cb_dotnet.Services
 
             try
             {
-                await _couchbaseService.Collection.Insert($"user::{username}", user);
+                await _couchbaseService.DefaultCollection.Insert($"user::{username}", user);
             }
             catch
             {
@@ -53,7 +53,7 @@ namespace try_cb_dotnet.Services
         {
             try
             {
-                var result =  await _couchbaseService.Collection.Get($"user::{username}");
+                var result =  await _couchbaseService.DefaultCollection.Get($"user::{username}");
                 return result.ContentAs<User>();
             }
             catch

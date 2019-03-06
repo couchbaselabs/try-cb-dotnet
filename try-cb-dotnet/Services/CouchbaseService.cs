@@ -6,15 +6,15 @@ namespace try_cb_dotnet.Services
     public interface ICouchbaseService
     {
         ICluster Cluster { get; }
-        IBucket Bucket { get; }
-        ICollection Collection { get; }
+        IBucket DefaultBucket { get; }
+        ICollection DefaultCollection { get; }
     }
 
     public class CouchbaseService : ICouchbaseService
     {
         public ICluster Cluster { get; private set; }
-        public IBucket Bucket { get; private set; }
-        public ICollection Collection { get; private set; }
+        public IBucket DefaultBucket { get; private set; }
+        public ICollection DefaultCollection { get; private set; }
 
         public CouchbaseService()
         {
@@ -24,13 +24,13 @@ namespace try_cb_dotnet.Services
                 await cluster.Initialize(
                     new Configuration()
                         .WithServers("couchbase://10.112.193.101")
-                        .WithBucket("default")
+                        .WithBucket("default", "travel-sample")
                         .WithCredentials("Administrator", "password")
                 ).ConfigureAwait(false);
 
                 Cluster = cluster;
-                Bucket = await Cluster.Bucket("default").ConfigureAwait(false);
-                Collection = await Bucket.DefaultCollection.ConfigureAwait(false);
+                DefaultBucket = await Cluster.Bucket("default").ConfigureAwait(false);
+                DefaultCollection = await DefaultBucket.DefaultCollection.ConfigureAwait(false);
 
                 return Task.CompletedTask;
             });
