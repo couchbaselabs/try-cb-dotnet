@@ -24,7 +24,7 @@ namespace try_cb_dotnet.Services
                 await cluster.Initialize(
                     new Configuration()
                         .WithServers("couchbase://10.112.193.101")
-                        .WithBucket("default", "travel-sample")
+                        .WithBucket("default")
                         .WithCredentials("Administrator", "password")
                 ).ConfigureAwait(false);
 
