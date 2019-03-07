@@ -44,13 +44,29 @@ namespace try_cb_dotnet.Services
                 options => options.UseStreaming(false)
             );
 
-            if (airportQueryResult.Status != QueryStatus.Success || airportQueryResult.Rows.Any())
+            if (airportQueryResult.Status != QueryStatus.Success)
             {
                 return null;
             }
 
-            var fromAirport = airportQueryResult.Rows.First(x => x.fromAirport != null);
-            var toAirport = airportQueryResult.Rows.First(x => x.toAirport != null);
+            dynamic fromAirport = null, toAirport = null;
+
+            foreach (var row in airportQueryResult)
+            {
+                if (row.fromAirport != null)
+                {
+                    fromAirport = row;
+                }
+                else if (row.toAirport != null)
+                {
+                    toAirport = row;
+                }
+            }
+
+            if (fromAirport == null || toAirport == null)
+            {
+                return null;
+            }
 
             var fromCoordinate = new GeoCoordinate((double)fromAirport.lat, (double)fromAirport.lon);
             var toCoordinate = new GeoCoordinate((double)toAirport.lat, (double)toAirport.lon);
@@ -77,11 +93,13 @@ namespace try_cb_dotnet.Services
                 return null;
             }
 
-            var flights = flightQueryResult.Rows;
-            foreach (var flight in flights)
+            var flights = new List<Route>();
+            foreach (var flight in flightQueryResult)
             {
                 flight.FlightTime = flightTime;
                 flight.Price = Random.Next(2000);
+
+                flights.Add(flight);
             }
 
             return flights;
