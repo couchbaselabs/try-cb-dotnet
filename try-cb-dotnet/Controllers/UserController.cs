@@ -64,7 +64,7 @@ namespace try_cb_dotnet.Controllers
         }
 
         [HttpPost("{username}/flights")]
-        public async Task<ActionResult> RegisterFlightForUser(string username, BookFlightModel model)
+        public async Task<ActionResult> BookFlightsForUser(string username, BookFlightModel model)
         {
             if (!_authTokenService.VerifyToken(Request.Headers["Authorization"], username))
             {
@@ -91,7 +91,7 @@ namespace try_cb_dotnet.Controllers
 
             await _userService.UpdateUser(user);
 
-            return Accepted();
+            return Accepted(new Result(model.Flights));
         }
     }
 }
