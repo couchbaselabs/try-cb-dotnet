@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using try_cb_dotnet.Models;
@@ -64,9 +64,34 @@ namespace try_cb_dotnet.Controllers
         }
 
         [HttpPost("{username}/flights")]
-        public Task<ActionResult> RegisterFlightForUser(string username, BookFlightModel model)
+        public async Task<ActionResult> RegisterFlightForUser(string username, BookFlightModel model)
         {
-            throw new NotImplementedException();
+            if (!_authTokenService.VerifyToken(Request.Headers["Authorization"], username))
+            {
+                return Unauthorized();
+            }
+
+            var user = await _userService.GetUser(username);
+            if (user == null)
+            {
+                return BadRequest("Invalid username");
+            }
+
+            foreach (var flight in model.Flights)
+            {
+                flight.BookedOn = "try-cb-dotnet";
+            }
+
+            if (user.Flights == null)
+            {
+                user.Flights = new List<Flight>();
+            }
+
+            user.Flights.AddRange(model.Flights);
+
+            await _userService.UpdateUser(user);
+
+            return Accepted();
         }
     }
 }

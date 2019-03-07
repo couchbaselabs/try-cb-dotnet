@@ -12,6 +12,7 @@ namespace try_cb_dotnet.Services
         Task<User> CreateUser(string username, string password, uint expiry);
         Task<User> GetUser(string username);
         Task<User> GetAndAuthenticateUser(string username, string password);
+        Task UpdateUser(User user);
     }
 
     public class UserService : IUserService
@@ -76,6 +77,11 @@ namespace try_cb_dotnet.Services
             }
 
             return user;
+        }
+
+        public async Task UpdateUser(User user)
+        {
+            await _couchbaseService.DefaultCollection.Replace($"user::{user.Username}", user);
         }
 
         private static string CalculateMd5Hash(string password)
