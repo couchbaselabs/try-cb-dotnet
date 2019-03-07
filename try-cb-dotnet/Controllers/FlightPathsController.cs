@@ -17,8 +17,7 @@ namespace try_cb_dotnet.Controllers
             _flightService = flightService;
         }
 
-        [Route("{from}/{to}")]
-        [HttpGet]
+        [HttpGet("{from}/{to}")]
         public async Task<ActionResult> GetFlights(string from, string to, string leave)
         {
             if (string.IsNullOrEmpty(from) || string.IsNullOrEmpty(to))
