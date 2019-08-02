@@ -3,7 +3,7 @@ This is a sample application for getting started with Couchbase Server 5.0 and t
 
 The application is a flight planner that allows the user to search for and select a flight route (including the return flight) based on airports and dates. Airport selection is done dynamically using an angular autocomplete box bound to N1QL queries on the server side. After selecting a date, it then searches for applicable air flight routes from a previously populated database. An additional page allows users to search for Hotels using less structured keywords.
 
-## NOTE: Not supported under Couchbase Enterprise Support Subscriptions! ##
+*NOTE:* Not supported under Couchbase Enterprise Support Subscriptions!
 
 ![Application](content/images/app.png)
 
