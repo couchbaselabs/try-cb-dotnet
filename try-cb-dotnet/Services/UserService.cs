@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using try_cb_dotnet.Models;
+using Couchbase;
 
 namespace try_cb_dotnet.Services
 {
@@ -26,7 +27,7 @@ namespace try_cb_dotnet.Services
 
         public async Task<bool> UserExists(string username)
         {
-            var result = await _couchbaseService.DefaultCollection.Exists($"user::{username}");
+            var result = await _couchbaseService.DefaultCollection.ExistsAsync($"user::{username}");
             return result.Exists;
         }
 
@@ -40,7 +41,7 @@ namespace try_cb_dotnet.Services
 
             try
             {
-                await _couchbaseService.DefaultCollection.Insert($"user::{username}", user);
+                await _couchbaseService.DefaultCollection.InsertAsync($"user::{username}", user);
             }
             catch
             {
@@ -54,7 +55,7 @@ namespace try_cb_dotnet.Services
         {
             try
             {
-                var result =  await _couchbaseService.DefaultCollection.Get($"user::{username}");
+                var result =  await _couchbaseService.DefaultCollection.GetAsync($"user::{username}");
                 return result.ContentAs<User>();
             }
             catch
@@ -81,7 +82,7 @@ namespace try_cb_dotnet.Services
 
         public async Task UpdateUser(User user)
         {
-            await _couchbaseService.DefaultCollection.Replace($"user::{user.Username}", user);
+            await _couchbaseService.DefaultCollection.ReplaceAsync($"user::{user.Username}", user);
         }
 
         private static string CalculateMd5Hash(string password)

@@ -6,6 +6,7 @@ using Couchbase.Services.Query;
 using Microsoft.Extensions.Options;
 using try_cb_dotnet.Models;
 using try_cb_dotnet.Helpers;
+using Couchbase;
 
 namespace try_cb_dotnet.Services
 {
@@ -31,7 +32,7 @@ namespace try_cb_dotnet.Services
         {
             var dayOfWeek = (int)leaveDate.DayOfWeek + 1; // Get weekday number
 
-            var airportQueryResult = await _couchbaseService.Cluster.Query<dynamic>(
+            var airportQueryResult = await _couchbaseService.Cluster.QueryAsync<dynamic>(
                 "SELECT faa AS fromAirport, geo.lat, geo.lon " +
                 "FROM `travel-sample` " +
                 "WHERE faa = $1 " +
@@ -73,7 +74,7 @@ namespace try_cb_dotnet.Services
             var distance = fromCoordinate.GetDistanceTo(toCoordinate);
             var flightTime = Math.Round(distance / _appSettings.AverageFlightSpeed, 2);
 
-            var flightQueryResult = await _couchbaseService.Cluster.Query<Route>(
+            var flightQueryResult = await _couchbaseService.Cluster.QueryAsync<Route>(
                 "SELECT a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment " +
                 "FROM `travel-sample` AS r " +
                 "UNNEST r.schedule AS s " +
