@@ -29,6 +29,8 @@ namespace try_cb_dotnet
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<IAuthTokenService, AuthTokenService>();
             services.AddSingleton<IFlightService, FlightService>();
+            services.AddSingleton<IAirportsService, AirportsService>();
+            services.AddSingleton<IHotelService, HotelService>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

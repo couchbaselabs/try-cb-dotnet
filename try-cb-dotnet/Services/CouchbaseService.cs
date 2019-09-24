@@ -20,17 +20,15 @@ namespace try_cb_dotnet.Services
         {
             var task = Task.Factory.StartNew(async () =>
             {
-                var cluster = new Cluster();
-                await cluster.Initialize(
+                var cluster = new Cluster(
                     new Configuration()
-                        .WithServers("couchbase://10.112.193.101")
-                        .WithBucket("default")
-                        .WithCredentials("Administrator", "password")
-                ).ConfigureAwait(false);
-
+                        .WithServers("couchbase://10.143.191.101")
+                        .WithBucket("travel-sample")
+                        .WithCredentials("Danzibob", "C0uchbase123")
+                );
                 Cluster = cluster;
-                DefaultBucket = await Cluster.Bucket("default").ConfigureAwait(false);
-                DefaultCollection = await DefaultBucket.DefaultCollection.ConfigureAwait(false);
+                DefaultBucket = await Cluster.BucketAsync("travel-sample");
+                DefaultCollection = await DefaultBucket.DefaultCollectionAsync();
 
                 return Task.CompletedTask;
             });
