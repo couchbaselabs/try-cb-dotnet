@@ -26,7 +26,7 @@ namespace try_cb_dotnet.Services
 
         public async Task<bool> UserExists(string username)
         {
-            var result = await _couchbaseService.DefaultCollection.Exists($"user::{username}");
+            var result = await _couchbaseService.DefaultCollection.ExistsAsync($"user::{username}", new Couchbase.ExistsOptions());
             return result.Exists;
         }
 
@@ -40,7 +40,7 @@ namespace try_cb_dotnet.Services
 
             try
             {
-                await _couchbaseService.DefaultCollection.Insert($"user::{username}", user);
+                await _couchbaseService.DefaultCollection.InsertAsync($"user::{username}", user, new Couchbase.InsertOptions());
             }
             catch
             {
@@ -54,7 +54,7 @@ namespace try_cb_dotnet.Services
         {
             try
             {
-                var result =  await _couchbaseService.DefaultCollection.Get($"user::{username}");
+                var result =  await _couchbaseService.DefaultCollection.GetAsync($"user::{username}", new Couchbase.GetOptions());
                 return result.ContentAs<User>();
             }
             catch
@@ -81,7 +81,7 @@ namespace try_cb_dotnet.Services
 
         public async Task UpdateUser(User user)
         {
-            await _couchbaseService.DefaultCollection.Replace($"user::{user.Username}", user);
+            await _couchbaseService.DefaultCollection.ReplaceAsync($"user::{user.Username}", user, new Couchbase.ReplaceOptions());
         }
 
         private static string CalculateMd5Hash(string password)

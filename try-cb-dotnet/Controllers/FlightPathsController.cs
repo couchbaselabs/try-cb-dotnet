@@ -30,8 +30,8 @@ namespace try_cb_dotnet.Controllers
                 return BadRequest("Unable to parse leave date");
             }
 
-            var routes = await _flightService.GetFlights(from, to, leaveDate);
-            return Ok(new Result(routes));
+            var (routes, context) = await _flightService.GetFlights(from, to, leaveDate);
+            return Ok(new Result(routes, context));
         }
     }
 }

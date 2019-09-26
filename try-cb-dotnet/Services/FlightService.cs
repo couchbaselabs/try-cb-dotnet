@@ -6,12 +6,13 @@ using Couchbase.Services.Query;
 using Microsoft.Extensions.Options;
 using try_cb_dotnet.Models;
 using try_cb_dotnet.Helpers;
+using Couchbase;
 
 namespace try_cb_dotnet.Services
 {
     public interface IFlightService
     {
-        Task<IEnumerable<Route>> GetFlights(string from, string to, DateTime leaveDate);
+        Task<(IEnumerable<Route>, string[])> GetFlights(string from, string to, DateTime leaveDate);
     }
 
     public class FlightService : IFlightService
@@ -27,26 +28,37 @@ namespace try_cb_dotnet.Services
             _appSettings = appSettings.Value;
         }
 
-        public async Task<IEnumerable<Route>> GetFlights(string from, string to, DateTime leaveDate)
+        public async Task<(IEnumerable<Route>, string[])> GetFlights(string from, string to, DateTime leaveDate)
         {
             var dayOfWeek = (int)leaveDate.DayOfWeek + 1; // Get weekday number
 
-            var airportQueryResult = await _couchbaseService.Cluster.Query<dynamic>(
+            var airportQueryResult = await _couchbaseService.Cluster.QueryAsync<dynamic>(
                 "SELECT faa AS fromAirport, geo.lat, geo.lon " +
                 "FROM `travel-sample` " +
-                "WHERE faa = $1 " +
+                "WHERE airportname = $1 " +
                 "UNION " +
                 "SELECT faa AS toAirport, geo.lat, geo.lon " +
                 "FROM `travel-sample` " +
-                "WHERE faa = $2;",
+                "WHERE airportname = $2;",
                 parameters => parameters.Add(from)
                     .Add(to),
                 options => options.UseStreaming(false)
             );
 
+            var ctx1 = "SELECT faa AS fromAirport, geo.lat, geo.lon " +
+                "FROM `travel-sample` " +
+                "WHERE airportname = $1 " +
+                "UNION " +
+                "SELECT faa AS toAirport, geo.lat, geo.lon " +
+                "FROM `travel-sample` " +
+                "WHERE airportname = $2;"
+                .Replace("$1", from)
+                .Replace("$2", to);
+
+
             if (airportQueryResult.Status != QueryStatus.Success)
             {
-                return null;
+                return (null, new string[] { "First query failed:", ctx1 });
             }
 
             dynamic fromAirport = null, toAirport = null;
@@ -65,7 +77,7 @@ namespace try_cb_dotnet.Services
 
             if (fromAirport == null || toAirport == null)
             {
-                return null;
+                return (null, new string[] { "One or more airports was invalid", ctx1 });
             }
 
             var fromCoordinate = new GeoCoordinate((double)fromAirport.lat, (double)fromAirport.lon);
@@ -73,24 +85,32 @@ namespace try_cb_dotnet.Services
             var distance = fromCoordinate.GetDistanceTo(toCoordinate);
             var flightTime = Math.Round(distance / _appSettings.AverageFlightSpeed, 2);
 
-            var flightQueryResult = await _couchbaseService.Cluster.Query<Route>(
-                "SELECT a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment " +
+            var qTemplate = "SELECT a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment " +
                 "FROM `travel-sample` AS r " +
                 "UNNEST r.schedule AS s " +
                 "JOIN `travel-sample` AS a ON KEYS r.airlineid " +
                 "WHERE r.sourceairport = $1 " +
                 "AND r.destinationairport = $2 " +
                 "AND s.day = $3 " +
-                "ORDER BY a.name ASC;",
-                parameters => parameters.Add((string) fromAirport.fromAirport)
+                "ORDER BY a.name ASC;";
+
+            var flightQueryResult = await _couchbaseService.Cluster.QueryAsync<Route>(
+                qTemplate,
+                parameters => parameters
+                    .Add((string) fromAirport.fromAirport)
                     .Add((string) toAirport.toAirport)
                     .Add(dayOfWeek),
                 options => options.UseStreaming(false)
             );
 
+            var ctx2 = qTemplate
+                .Replace("$1", (string)fromAirport.fromAirport)
+                .Replace("$2", (string)toAirport.toAirport)
+                .Replace("$3", dayOfWeek.ToString());
+
             if (flightQueryResult.Status != QueryStatus.Success)
             {
-                return null;
+                return (null, new string[] { "Second query failed:", ctx2 });
             }
 
             var flights = new List<Route>();
@@ -102,7 +122,7 @@ namespace try_cb_dotnet.Services
                 flights.Add(flight);
             }
 
-            return flights;
+            return (flights, new string[] { ctx1, ctx2 });
         }
     }
 }
