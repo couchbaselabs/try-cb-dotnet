@@ -22,9 +22,9 @@ namespace try_cb_dotnet.Services
             {
                 var cluster = new Cluster(
                     new Configuration()
-                        .WithServers("couchbase://10.143.191.101")
+                        .WithServers("couchbase://10.112.193.101")
                         .WithBucket("travel-sample")
-                        .WithCredentials("Danzibob", "C0uchbase123")
+                        .WithCredentials("Administrator", "password")
                 );
                 Cluster = cluster;
                 DefaultBucket = await Cluster.BucketAsync("travel-sample");
