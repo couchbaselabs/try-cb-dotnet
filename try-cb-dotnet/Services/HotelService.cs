@@ -31,9 +31,7 @@ namespace try_cb_dotnet.Services
 
         public async Task<IEnumerable<dynamic>> FindHotel(string description, string location)
         {
-            var query = new ConjunctionQuery(
-                new TermQuery("hotel").Field("type")
-            );
+            var query = new ConjunctionQuery();
 
             if (!string.IsNullOrEmpty(description) && description != "*")
             {
@@ -52,17 +50,18 @@ namespace try_cb_dotnet.Services
                     new PhraseQuery(location).Field("country")
                 ));
             }
+            var Q = new SearchQuery { Query = query };
 
-            var queryString = (new SearchQuery { Query = query }).ToJson();
+            var queryString = (Q).ToJson();
 
             var opts = new SearchOptions();
-            opts.Limit(100);
+            //opts.Limit(100);
 
             // TODO: this still returns nothing every time
             // Wireshark claims wrong URL is being hit (just ://IP:8094, no endpoint)
             var result = await _couchbaseService.Cluster.SearchQueryAsync(
-                "Hotels",
-                new SearchQuery { Query = query },
+                "hotels",
+                Q,
                 opts
             );
 

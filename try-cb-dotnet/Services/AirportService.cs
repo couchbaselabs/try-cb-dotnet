@@ -12,7 +12,7 @@ namespace try_cb_dotnet.Services
 {
     public interface IAirportsService
     {
-        Task<IEnumerable<Airport>> GetAirports(string search);
+        Task<(IEnumerable<Airport>, string[])> GetAirports(string search);
     }
 
     public class AirportsService : IAirportsService
@@ -26,7 +26,7 @@ namespace try_cb_dotnet.Services
             _appSettings = appSettings.Value;
         }
 
-        public async Task<IEnumerable<Airport>> GetAirports(string search)
+        public async Task<(IEnumerable<Airport>, string[])> GetAirports(string search)
         {
             var q = "SELECT airportname FROM `travel-sample` WHERE ";
 
@@ -44,7 +44,7 @@ namespace try_cb_dotnet.Services
                 search = char.ToUpper(search[0]) + search.Substring(1) + '%';
             }
 
-            Console.WriteLine(q);
+            var queryString = q.Replace("$1", search);
 
             var airportsResult = await _couchbaseService.Cluster.QueryAsync<Airport>(
                 q,
@@ -55,7 +55,7 @@ namespace try_cb_dotnet.Services
             if (airportsResult.Status != QueryStatus.Success)
             {
                 Console.WriteLine(airportsResult.Errors.OfType<string>());
-                return null;
+                return (null, new string[] { "Query Failed." });
             }
 
             var airports = new List<Airport>();
@@ -66,7 +66,7 @@ namespace try_cb_dotnet.Services
 
             Console.WriteLine(airports);
 
-            return airports;
+            return (airports, new string[] { queryString });
         }
     }
 }

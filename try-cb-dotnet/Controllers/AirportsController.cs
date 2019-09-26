@@ -25,8 +25,8 @@ namespace try_cb_dotnet.Controllers
                 return BadRequest("Missing / invalid arguments.");
             }
 
-            var routes = await _airportService.GetAirports(search);
-            return Ok(new Result(routes));
+            var (routes, context) = await _airportService.GetAirports(search);
+            return Ok(new Result(routes, context));
         }
     }
 }
