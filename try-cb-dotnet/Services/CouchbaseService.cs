@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Couchbase;
+using Couchbase.KeyValue;
 
 namespace try_cb_dotnet.Services
 {
@@ -7,24 +8,26 @@ namespace try_cb_dotnet.Services
     {
         ICluster Cluster { get; }
         IBucket DefaultBucket { get; }
-        ICollection DefaultCollection { get; }
+        ICouchbaseCollection DefaultCollection { get; }
     }
 
     public class CouchbaseService : ICouchbaseService
     {
         public ICluster Cluster { get; private set; }
         public IBucket DefaultBucket { get; private set; }
-        public ICollection DefaultCollection { get; private set; }
+        public ICouchbaseCollection DefaultCollection { get; private set; }
 
         public CouchbaseService()
         {
             var task = Task.Factory.StartNew(async () =>
             {
-                var cluster = new Cluster(
-                    new Configuration()
-                        .WithServers("couchbase://10.112.193.101")
-                        .WithBucket("travel-sample")
-                        .WithCredentials("Administrator", "password")
+                 var options = new ClusterOptions
+                {
+                    UserName = "Administrator",
+                    Password = "password"
+                };
+                var cluster = await Couchbase.Cluster.ConnectAsync(
+                    "couchbase://10.112.193.101"
                 );
                 Cluster = cluster;
                 DefaultBucket = await Cluster.BucketAsync("travel-sample");

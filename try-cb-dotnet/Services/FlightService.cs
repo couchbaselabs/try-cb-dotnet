@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Couchbase.Services.Query;
+using Couchbase.Query;
 using Microsoft.Extensions.Options;
 using try_cb_dotnet.Models;
 using try_cb_dotnet.Helpers;
@@ -32,38 +32,32 @@ namespace try_cb_dotnet.Services
         {
             var dayOfWeek = (int)leaveDate.DayOfWeek + 1; // Get weekday number
 
-            var airportQueryResult = await _couchbaseService.Cluster.QueryAsync<dynamic>(
+            String q1 =
                 "SELECT faa AS fromAirport, geo.lat, geo.lon " +
                 "FROM `travel-sample` " +
                 "WHERE airportname = $1 " +
                 "UNION " +
                 "SELECT faa AS toAirport, geo.lat, geo.lon " +
                 "FROM `travel-sample` " +
-                "WHERE airportname = $2;",
-                parameters => parameters.Add(from)
-                    .Add(to),
-                options => options.UseStreaming(false)
-            );
+                "WHERE airportname = $2;";
 
-            var ctx1 = "SELECT faa AS fromAirport, geo.lat, geo.lon " +
-                "FROM `travel-sample` " +
-                "WHERE airportname = $1 " +
-                "UNION " +
-                "SELECT faa AS toAirport, geo.lat, geo.lon " +
-                "FROM `travel-sample` " +
-                "WHERE airportname = $2;"
+            var ctx1 = q1
                 .Replace("$1", from)
                 .Replace("$2", to);
 
+            var airportQueryResult = await _couchbaseService.Cluster.QueryAsync<dynamic>(
+                q1,
+                options => options.Parameter(from).Parameter(to)
+            );
 
-            if (airportQueryResult.Status != QueryStatus.Success)
+            if (airportQueryResult.MetaData.Status != QueryStatus.Success)
             {
                 return (null, new string[] { "First query failed:", ctx1 });
             }
 
             dynamic fromAirport = null, toAirport = null;
 
-            foreach (var row in airportQueryResult)
+            await foreach (var row in airportQueryResult)
             {
                 if (row.fromAirport != null)
                 {
@@ -85,7 +79,7 @@ namespace try_cb_dotnet.Services
             var distance = fromCoordinate.GetDistanceTo(toCoordinate);
             var flightTime = Math.Round(distance / _appSettings.AverageFlightSpeed, 2);
 
-            var qTemplate = "SELECT a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment " +
+            var q2 = "SELECT a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment " +
                 "FROM `travel-sample` AS r " +
                 "UNNEST r.schedule AS s " +
                 "JOIN `travel-sample` AS a ON KEYS r.airlineid " +
@@ -94,27 +88,26 @@ namespace try_cb_dotnet.Services
                 "AND s.day = $3 " +
                 "ORDER BY a.name ASC;";
 
-            var flightQueryResult = await _couchbaseService.Cluster.QueryAsync<Route>(
-                qTemplate,
-                parameters => parameters
-                    .Add((string) fromAirport.fromAirport)
-                    .Add((string) toAirport.toAirport)
-                    .Add(dayOfWeek),
-                options => options.UseStreaming(false)
-            );
-
-            var ctx2 = qTemplate
+            var ctx2 = q2
                 .Replace("$1", (string)fromAirport.fromAirport)
                 .Replace("$2", (string)toAirport.toAirport)
                 .Replace("$3", dayOfWeek.ToString());
 
-            if (flightQueryResult.Status != QueryStatus.Success)
+            var flightQueryResult = await _couchbaseService.Cluster.QueryAsync<Route>(
+                q2,
+                options => options
+                    .Parameter((string) fromAirport.fromAirport)
+                    .Parameter((string) toAirport.toAirport)
+                    .Parameter(dayOfWeek)
+            );
+
+            if (flightQueryResult.MetaData.Status != QueryStatus.Success)
             {
                 return (null, new string[] { "Second query failed:", ctx2 });
             }
 
             var flights = new List<Route>();
-            foreach (var flight in flightQueryResult)
+            await foreach (var flight in flightQueryResult)
             {
                 flight.FlightTime = flightTime;
                 flight.Price = Random.Next(2000);
@@ -124,5 +117,7 @@ namespace try_cb_dotnet.Services
 
             return (flights, new string[] { ctx1, ctx2 });
         }
+
+
     }
 }

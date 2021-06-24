@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Couchbase.Services.Query;
+using Couchbase.Query;
 using Microsoft.Extensions.Options;
 using try_cb_dotnet.Models;
 using try_cb_dotnet.Helpers;
 using Couchbase;
-using Couchbase.Services.Search;
-using Couchbase.Services.Search.Queries.Simple;
-using Couchbase.Services.Search.Queries.Compound;
+using Couchbase.Search;
+using Couchbase.Search.Queries.Simple;
+using Couchbase.Search.Queries.Compound;
+using Couchbase.KeyValue;
 
 namespace try_cb_dotnet.Services
 {
@@ -50,9 +51,9 @@ namespace try_cb_dotnet.Services
                     new PhraseQuery(location).Field("country")
                 ));
             }
-            var Q = new SearchQuery { Query = query };
+            // var Q = new SearchQuery { Query = query };
 
-            var queryString = (Q).ToJson();
+            // var queryString = (Q).ToJson();
 
             var opts = new SearchOptions();
             //opts.Limit(100);
@@ -61,7 +62,7 @@ namespace try_cb_dotnet.Services
             // Wireshark claims wrong URL is being hit (just ://IP:8094, no endpoint)
             var result = await _couchbaseService.Cluster.SearchQueryAsync(
                 "hotels",
-                Q,
+                query,
                 opts
             );
 
@@ -69,13 +70,16 @@ namespace try_cb_dotnet.Services
 
             foreach (var row in result)
             {
-                var fragment = await _couchbaseService.DefaultCollection.LookupInAsync(row.Id,
-                    ops => ops.Get("name")   //0
-                    .Get("description")      //1
-                    .Get("address")          //2
-                    .Get("city")             //3
-                    .Get("state")            //4
-                    .Get("country"));        //5
+                var fragment = await _couchbaseService.DefaultCollection.LookupInAsync(
+                    row.Id,
+                    new List<LookupInSpec>{
+                         LookupInSpec.Get("name"),         //0
+                         LookupInSpec.Get("description"),  //1
+                         LookupInSpec.Get("address"),      //2
+                         LookupInSpec.Get("city"),         //3
+                         LookupInSpec.Get("state"),        //4
+                         LookupInSpec.Get("country")       //5
+                    });
 
                 var address = string.Join(", ", new[]
                 {

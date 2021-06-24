@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Couchbase.Services.Query;
+using Couchbase.Query;
 using Microsoft.Extensions.Options;
 using try_cb_dotnet.Models;
 using try_cb_dotnet.Helpers;
@@ -48,18 +48,17 @@ namespace try_cb_dotnet.Services
 
             var airportsResult = await _couchbaseService.Cluster.QueryAsync<Airport>(
                 q,
-                parameters => parameters.Add(search),
-                options => options.UseStreaming(false)
+                options => options.Parameter(search)
             );
 
-            if (airportsResult.Status != QueryStatus.Success)
+            if (airportsResult.MetaData.Status != QueryStatus.Success)
             {
                 Console.WriteLine(airportsResult.Errors.OfType<string>());
                 return (null, new string[] { "Query Failed." });
             }
 
             var airports = new List<Airport>();
-            foreach (var airport in airportsResult)
+            await foreach (var airport in airportsResult)
             {
                 airports.Add(airport);
             }
