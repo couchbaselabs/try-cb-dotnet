@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
+
 using try_cb_dotnet.Helpers;
 using try_cb_dotnet.Services;
 
@@ -19,6 +21,11 @@ namespace try_cb_dotnet
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Travel Sample", Version = "v1" });
+            });
+
             services.AddRazorPages();
 
             // configure strongly typed settings objects
@@ -43,7 +50,14 @@ namespace try_cb_dotnet
 
             app.UseRouting();
 
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger.json", "travel-sample API");
+                c.RoutePrefix = "apidocs";
+            });
+
             app.UseAuthorization();
+            app.UseStaticFiles();
 
             app.UseEndpoints(endpoints =>
             {
