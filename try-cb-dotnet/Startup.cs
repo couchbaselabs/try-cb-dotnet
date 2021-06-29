@@ -41,14 +41,6 @@ namespace try_cb_dotnet
                 app.UseDeveloperExceptionPage();
             }
 
-            // normally index would be provided via MCV, but we want to use a static html file instead
-            var options = new DefaultFilesOptions();
-            options.DefaultFileNames.Clear();
-            options.DefaultFileNames.Add("index.html");
-            app.UseDefaultFiles(options);
-
-            app.UseStaticFiles();
-
             app.UseRouting();
 
             app.UseAuthorization();
@@ -56,6 +48,7 @@ namespace try_cb_dotnet
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+                endpoints.MapControllers();
             });
         }
     }
