@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Couchbase;
 using Couchbase.KeyValue;
@@ -19,24 +20,22 @@ namespace try_cb_dotnet.Services
 
         public CouchbaseService()
         {
-            var task = Task.Factory.StartNew(async () =>
-            {
-                 var options = new ClusterOptions
-                {
-                    UserName = "Administrator",
-                    Password = "password"
-                };
-                var cluster = await Couchbase.Cluster.ConnectAsync(
-                    "couchbase://10.112.193.101"
-                );
-                Cluster = cluster;
-                DefaultBucket = await Cluster.BucketAsync("travel-sample");
-                DefaultCollection = await DefaultBucket.DefaultCollectionAsync();
+            try {
+                var task = Task.Run(async () => {
+                    var cluster = await Couchbase.Cluster.ConnectAsync(
+                        "couchbase://localhost",
+                        "Administrator",
+                        "password");
 
-                return Task.CompletedTask;
-            });
-            task.ConfigureAwait(false);
-            task.Wait();
+                    Cluster = cluster;
+                    DefaultBucket = await Cluster.BucketAsync("travel-sample");
+                    DefaultCollection = await DefaultBucket.DefaultCollectionAsync();
+                });
+                task.Wait();
+            }
+            catch (AggregateException ae) {
+                ae.Handle((x) => throw x);
+            }
         }
     }
 }
