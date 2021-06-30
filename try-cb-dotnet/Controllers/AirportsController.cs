@@ -7,7 +7,7 @@ using try_cb_dotnet.Services;
 namespace try_cb_dotnet.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/airports")]
     public class AirportsController : ControllerBase
     {
         private readonly IAirportsService _airportService;
