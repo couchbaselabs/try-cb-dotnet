@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ using try_cb_dotnet.Services;
 namespace try_cb_dotnet.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/tenants/{tenant}/user")]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -20,9 +21,9 @@ namespace try_cb_dotnet.Controllers
         }
 
         [HttpPost("signup")]
-        public async Task<ActionResult> SignUp([FromBody] LoginModel model)
+        public async Task<ActionResult> SignUp(string tenant, LoginModel model)
         {
-            if (await _userService.UserExists(model.Username))
+            if (await _userService.UserExists(tenant, model.Username))
             {
                 return Conflict($"Username '{model.Username}' already exists");
             }
@@ -34,7 +35,7 @@ namespace try_cb_dotnet.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult> Login([FromBody] LoginModel model)
+        public async Task<ActionResult> Login(string tenant, [FromBody] LoginModel model)
         {
             var user = await _userService.GetAndAuthenticateUser(model.Username, model.Password);
             if (user == null)
@@ -47,7 +48,7 @@ namespace try_cb_dotnet.Controllers
         }
 
         [HttpGet("{username}/flights")]
-        public async Task<ActionResult> GetFlightsForUser(string username)
+        public async Task<ActionResult> GetFlightsForUser(string tenant, string username)
         {
             if (!_authTokenService.VerifyToken(Request.Headers["Authorization"], username))
             {
@@ -64,7 +65,7 @@ namespace try_cb_dotnet.Controllers
         }
 
         [HttpPost("{username}/flights")]
-        public async Task<ActionResult> BookFlightsForUser(string username, BookFlightModel model)
+        public async Task<ActionResult> BookFlightsForUser(string tenant, string username, BookFlightModel model)
         {
             if (!_authTokenService.VerifyToken(Request.Headers["Authorization"], username))
             {

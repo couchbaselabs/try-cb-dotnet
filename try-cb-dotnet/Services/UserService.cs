@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,7 +9,7 @@ namespace try_cb_dotnet.Services
 {
     public interface IUserService
     {
-        Task<bool> UserExists(string username);
+        Task<bool> UserExists(string tenant, string username);
         Task<User> CreateUser(string username, string password, uint expiry);
         Task<User> GetUser(string username);
         Task<User> GetAndAuthenticateUser(string username, string password);
@@ -24,9 +25,12 @@ namespace try_cb_dotnet.Services
             _couchbaseService = couchbaseService;
         }
 
-        public async Task<bool> UserExists(string username)
+        public async Task<bool> UserExists(string tenant, string username)
         {
-            var result = await _couchbaseService.DefaultCollection.ExistsAsync($"user::{username}", new Couchbase.KeyValue.ExistsOptions());
+            var userCollection = await _couchbaseService.TenantCollection(tenant, "users");
+            var result = await userCollection.ExistsAsync(
+                $"user::{username}",
+                new Couchbase.KeyValue.ExistsOptions());
             return result.Exists;
         }
 

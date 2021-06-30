@@ -9,14 +9,18 @@ namespace try_cb_dotnet.Services
     {
         ICluster Cluster { get; }
         IBucket DefaultBucket { get; }
+        IBucket TravelSampleBucket { get; }
         ICouchbaseCollection DefaultCollection { get; }
+        public Task<ICouchbaseCollection> TenantCollection(string tenant, string collection);
     }
 
     public class CouchbaseService : ICouchbaseService
     {
         public ICluster Cluster { get; private set; }
         public IBucket DefaultBucket { get; private set; }
+        public IBucket TravelSampleBucket { get; private set; }
         public ICouchbaseCollection DefaultCollection { get; private set; }
+
 
         public CouchbaseService()
         {
@@ -28,7 +32,8 @@ namespace try_cb_dotnet.Services
                         "password");
 
                     Cluster = cluster;
-                    DefaultBucket = await Cluster.BucketAsync("travel-sample");
+                    TravelSampleBucket = await Cluster.BucketAsync("travel-sample");
+                    DefaultBucket = TravelSampleBucket;
                     DefaultCollection = await DefaultBucket.DefaultCollectionAsync();
                 });
                 task.Wait();
@@ -36,6 +41,13 @@ namespace try_cb_dotnet.Services
             catch (AggregateException ae) {
                 ae.Handle((x) => throw x);
             }
+        }
+
+        public async Task<ICouchbaseCollection> TenantCollection(string tenant, string collection)
+        {
+            var tenantScope = await TravelSampleBucket.ScopeAsync(tenant);
+            var tenantCollection = await tenantScope.CollectionAsync(collection);
+            return tenantCollection;
         }
     }
 }
