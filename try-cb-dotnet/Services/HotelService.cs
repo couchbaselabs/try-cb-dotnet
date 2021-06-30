@@ -61,7 +61,7 @@ namespace try_cb_dotnet.Services
             // TODO: this still returns nothing every time
             // Wireshark claims wrong URL is being hit (just ://IP:8094, no endpoint)
             var result = await _couchbaseService.Cluster.SearchQueryAsync(
-                "hotels",
+                "hotels-index",
                 query,
                 opts
             );
@@ -73,12 +73,12 @@ namespace try_cb_dotnet.Services
                 var fragment = await _couchbaseService.DefaultCollection.LookupInAsync(
                     row.Id,
                     new List<LookupInSpec>{
-                         LookupInSpec.Get("name"),         //0
-                         LookupInSpec.Get("description"),  //1
-                         LookupInSpec.Get("address"),      //2
-                         LookupInSpec.Get("city"),         //3
-                         LookupInSpec.Get("state"),        //4
-                         LookupInSpec.Get("country")       //5
+                        LookupInSpec.Get("name"),         //0
+                        LookupInSpec.Get("description"),  //1
+                        LookupInSpec.Get("address"),      //2
+                        LookupInSpec.Get("city"),         //3
+                        LookupInSpec.Get("state"),        //4
+                        LookupInSpec.Get("country")       //5
                     });
 
                 var address = string.Join(", ", new[]
