@@ -11,8 +11,8 @@ namespace try_cb_dotnet.Services
 {
     public interface IAuthTokenService
     {
-        string CreateToken(string username);
-        bool VerifyToken(string encodedToken, string username);
+        string CreateToken(string tenant, string username);
+        bool VerifyToken(string encodedToken, string tenant, string username);
     }
 
     public class AuthTokenService : IAuthTokenService
@@ -24,13 +24,14 @@ namespace try_cb_dotnet.Services
             _appSettings = appSettings.Value;
         }
 
-        public string CreateToken(string username)
+        public string CreateToken(string tenant, string username)
         {
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new [] 
+                Subject = new ClaimsIdentity(new []
                 {
+                    new Claim("tenant", tenant),
                     new Claim("user", username)
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
@@ -42,7 +43,7 @@ namespace try_cb_dotnet.Services
             return tokenHandler.WriteToken(token);
         }
 
-        public bool VerifyToken(string encodedToken, string username)
+        public bool VerifyToken(string encodedToken, string tenant, string username)
         {
             if (encodedToken.StartsWith("Bearer "))
             {
@@ -52,7 +53,8 @@ namespace try_cb_dotnet.Services
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.ReadJwtToken(encodedToken);
 
-            return token.Claims.Any(x => x.Type == "user" && x.Value == username);
+            return token.Claims.Any(x => x.Type == "user" && x.Value == username)
+                && token.Claims.Any(x => x.Type == "tenant" && x.Value == tenant);
         }
     }
 }

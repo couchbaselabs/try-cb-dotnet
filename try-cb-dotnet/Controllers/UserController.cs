@@ -23,39 +23,42 @@ namespace try_cb_dotnet.Controllers
         [HttpPost("signup")]
         public async Task<ActionResult> SignUp(string tenant, LoginModel model)
         {
-            if (await _userService.UserExists(tenant, model.Username))
+            string username = model.Username;
+
+            if (await _userService.UserExists(tenant, username))
             {
-                return Conflict($"Username '{model.Username}' already exists");
+                return Conflict($"Username '{username}' already exists");
             }
 
-            await _userService.CreateUser(model.Username, model.Password, model.Expiry);
+            await _userService.CreateUser(tenant, username, model.Password, model.Expiry);
 
-            var data = new {token = _authTokenService.CreateToken(model.Username)};
+            var data = new {
+                token = _authTokenService.CreateToken(tenant, username)};
             return Accepted(new Result(data));
         }
 
         [HttpPost("login")]
         public async Task<ActionResult> Login(string tenant, [FromBody] LoginModel model)
         {
-            var user = await _userService.GetAndAuthenticateUser(model.Username, model.Password);
+            var user = await _userService.GetAndAuthenticateUser(tenant, model.Username, model.Password);
             if (user == null)
             {
                 return BadRequest("Invalid username / password");
             }
 
-            var data = new {token = _authTokenService.CreateToken(user.Username)};
+            var data = new {token = _authTokenService.CreateToken(tenant, user.Username)};
             return Ok(new Result(data));
         }
 
         [HttpGet("{username}/flights")]
         public async Task<ActionResult> GetFlightsForUser(string tenant, string username)
         {
-            if (!_authTokenService.VerifyToken(Request.Headers["Authorization"], username))
+            if (!_authTokenService.VerifyToken(Request.Headers["Authorization"], tenant, username))
             {
                 return Unauthorized();
             }
 
-            var user = await _userService.GetUser(username);
+            var user = await _userService.GetUser(tenant, username);
             if (user == null)
             {
                 return BadRequest("Invalid username");
@@ -67,12 +70,12 @@ namespace try_cb_dotnet.Controllers
         [HttpPost("{username}/flights")]
         public async Task<ActionResult> BookFlightsForUser(string tenant, string username, BookFlightModel model)
         {
-            if (!_authTokenService.VerifyToken(Request.Headers["Authorization"], username))
+            if (!_authTokenService.VerifyToken(Request.Headers["Authorization"], tenant, username))
             {
                 return Unauthorized();
             }
 
-            var user = await _userService.GetUser(username);
+            var user = await _userService.GetUser(tenant, username);
             if (user == null)
             {
                 return BadRequest("Invalid username");

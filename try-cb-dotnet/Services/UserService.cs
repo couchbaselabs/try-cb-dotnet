@@ -10,9 +10,9 @@ namespace try_cb_dotnet.Services
     public interface IUserService
     {
         Task<bool> UserExists(string tenant, string username);
-        Task<User> CreateUser(string username, string password, uint expiry);
-        Task<User> GetUser(string username);
-        Task<User> GetAndAuthenticateUser(string username, string password);
+        Task<User> CreateUser(string tenant, string username, string password, uint expiry);
+        Task<User> GetUser(string tenant, string username);
+        Task<User> GetAndAuthenticateUser(string tenant, string username, string password);
         Task UpdateUser(User user);
     }
 
@@ -34,7 +34,7 @@ namespace try_cb_dotnet.Services
             return result.Exists;
         }
 
-        public async Task<User> CreateUser(string username, string password, uint expiry)
+        public async Task<User> CreateUser(string tenant, string username, string password, uint expiry)
         {
             var user = new User
             {
@@ -44,7 +44,8 @@ namespace try_cb_dotnet.Services
 
             try
             {
-                await _couchbaseService.DefaultCollection.InsertAsync($"user::{username}", user, new Couchbase.KeyValue.InsertOptions());
+                var userCollection = await _couchbaseService.TenantCollection(tenant, "users");
+                await userCollection.InsertAsync($"user::{username}", user, new Couchbase.KeyValue.InsertOptions());
             }
             catch
             {
@@ -54,11 +55,12 @@ namespace try_cb_dotnet.Services
             return user;
         }
 
-        public async Task<User> GetUser(string username)
+        public async Task<User> GetUser(string tenant, string username)
         {
             try
             {
-                var result =  await _couchbaseService.DefaultCollection.GetAsync($"user::{username}", new Couchbase.KeyValue.GetOptions());
+                var userCollection = await _couchbaseService.TenantCollection(tenant, "users");
+                var result =  await userCollection.GetAsync($"user::{username}", new Couchbase.KeyValue.GetOptions());
                 return result.ContentAs<User>();
             }
             catch
@@ -67,16 +69,18 @@ namespace try_cb_dotnet.Services
             }
         }
 
-        public async Task<User> GetAndAuthenticateUser(string username, string password)
+        public async Task<User> GetAndAuthenticateUser(string tenant, string username, string password)
         {
-            var user = await GetUser(username);
+            var user = await GetUser(tenant, username);
             if (user == null)
             {
+                Console.WriteLine("User not found!");
                 return null;
             }
 
             if (user.Password != CalculateMd5Hash(password))
             {
+                Console.WriteLine("User password wrong");
                 return null;
             }
 
