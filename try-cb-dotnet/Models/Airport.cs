@@ -1,28 +1,29 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace try_cb_dotnet.Models
 {
     public class Airport
     {
-        [JsonProperty("airportname")]
+        [JsonPropertyName("airportname")]
         public string Airportname { get; set; }
 
-        [JsonProperty("city")]
+        [JsonPropertyName("city")]
         public string City { get; set; }
 
-        [JsonProperty("country")]
+        [JsonPropertyName("country")]
         public string Country { get; set; }
 
-        [JsonProperty("faa")]
+        [JsonPropertyName("faa")]
         public string Faa { get; set; }
 
-        [JsonProperty("icao")]
+        [JsonPropertyName("icao")]
         public string Icao { get; set; }
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public string Id { get; set; }
 
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string Type => "airport";
     }
 }

@@ -1,34 +1,35 @@
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace try_cb_dotnet.Models
 {
     public class Route
     {
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty("flight")]
+        [JsonPropertyName("flight")]
         public string Flight { get; set; }
 
-        [JsonProperty("utc")]
+        [JsonPropertyName("utc")]
         public string Time { get; set; }
 
-        [JsonProperty("sourceairport")]
+        [JsonPropertyName("sourceairport")]
         public string SourceAirport { get; set; }
 
-        [JsonProperty("destinationairport")]
+        [JsonPropertyName("destinationairport")]
         public string DestinationAirport { get; set; }
 
-        [JsonProperty("equipment")]
+        [JsonPropertyName("equipment")]
         public string Equipment { get; set; }
 
-        [JsonProperty("flighttime")]
+        [JsonPropertyName("flighttime")]
         public double FlightTime { get; set; }
 
-        [JsonProperty("price")]
+        [JsonPropertyName("price")]
         public int Price { get; set; }
 
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string Type => "route";
     }
 }

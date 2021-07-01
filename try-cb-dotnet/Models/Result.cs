@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace try_cb_dotnet.Models
 {
@@ -11,10 +12,10 @@ namespace try_cb_dotnet.Models
             Context = contexts ?? new string[] {};
         }
 
-        [JsonProperty("data")]
+        [JsonPropertyName("data")]
         public dynamic Data { get; }
 
-        [JsonProperty("context")]
+        [JsonPropertyName("context")]
         public IEnumerable<string> Context { get; }
     }
 }
