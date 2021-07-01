@@ -19,8 +19,22 @@ namespace try_cb_dotnet
 
         public IConfiguration Configuration { get; }
 
+        readonly string FrontendOrigin = "_FrontendOrigin";
+
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy(
+                    name: FrontendOrigin,
+                    builder => builder
+                        .WithOrigins("http://localhost:8081")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        // .AllowCredentials()
+                );
+            });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Travel Sample", Version = "v1" });
@@ -49,6 +63,8 @@ namespace try_cb_dotnet
             }
 
             app.UseRouting();
+
+            app.UseCors(FrontendOrigin);
 
             app.UseSwaggerUI(c =>
             {
