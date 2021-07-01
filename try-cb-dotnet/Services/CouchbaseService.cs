@@ -8,19 +8,16 @@ namespace try_cb_dotnet.Services
     public interface ICouchbaseService
     {
         ICluster Cluster { get; }
-        IBucket DefaultBucket { get; }
         IBucket TravelSampleBucket { get; }
-        ICouchbaseCollection DefaultCollection { get; }
+        ICouchbaseCollection HotelCollection { get; }
         public Task<ICouchbaseCollection> TenantCollection(string tenant, string collection);
     }
 
     public class CouchbaseService : ICouchbaseService
     {
         public ICluster Cluster { get; private set; }
-        public IBucket DefaultBucket { get; private set; }
         public IBucket TravelSampleBucket { get; private set; }
-        public ICouchbaseCollection DefaultCollection { get; private set; }
-
+        public ICouchbaseCollection HotelCollection { get; private set; }
 
         public CouchbaseService()
         {
@@ -33,8 +30,8 @@ namespace try_cb_dotnet.Services
 
                     Cluster = cluster;
                     TravelSampleBucket = await Cluster.BucketAsync("travel-sample");
-                    DefaultBucket = TravelSampleBucket;
-                    DefaultCollection = await DefaultBucket.DefaultCollectionAsync();
+                    var inventoryScope = await TravelSampleBucket.ScopeAsync("inventory");
+                    HotelCollection = await inventoryScope.CollectionAsync("hotel");
                 });
                 task.Wait();
             }

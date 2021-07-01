@@ -51,15 +51,11 @@ namespace try_cb_dotnet.Services
                     new PhraseQuery(location).Field("country")
                 ));
             }
-            // var Q = new SearchQuery { Query = query };
+            // // uncomment next line to show representation of the query in JSON
+            // Console.WriteLine(query.Export());
 
-            // var queryString = (Q).ToJson();
+            var opts = new SearchOptions().Limit(100);
 
-            var opts = new SearchOptions();
-            //opts.Limit(100);
-
-            // TODO: this still returns nothing every time
-            // Wireshark claims wrong URL is being hit (just ://IP:8094, no endpoint)
             var result = await _couchbaseService.Cluster.SearchQueryAsync(
                 "hotels-index",
                 query,
@@ -70,9 +66,10 @@ namespace try_cb_dotnet.Services
 
             foreach (var row in result)
             {
-                var fragment = await _couchbaseService.DefaultCollection.LookupInAsync(
+                var fragment = await _couchbaseService.HotelCollection.LookupInAsync(
                     row.Id,
-                    new List<LookupInSpec>{
+                    new List<LookupInSpec>
+                    {
                         LookupInSpec.Get("name"),         //0
                         LookupInSpec.Get("description"),  //1
                         LookupInSpec.Get("address"),      //2
@@ -81,7 +78,7 @@ namespace try_cb_dotnet.Services
                         LookupInSpec.Get("country")       //5
                     });
 
-                var address = string.Join(", ", new[]
+                var address = string.Join(", ", new []
                 {
                     fragment.ContentAs<string>(2),
                     fragment.ContentAs<string>(3),
