@@ -67,7 +67,7 @@ namespace try_cb_dotnet.Controllers
             return Ok(new Result(user.Flights));
         }
 
-        [HttpPost("{username}/flights")]
+        [HttpPut("{username}/flights")]
         public async Task<ActionResult> BookFlightsForUser(string tenant, string username, BookFlightModel model)
         {
             if (!_authTokenService.VerifyToken(Request.Headers["Authorization"], tenant, username))
@@ -93,7 +93,7 @@ namespace try_cb_dotnet.Controllers
 
             user.Flights.AddRange(model.Flights);
 
-            await _userService.UpdateUser(user);
+            await _userService.UpdateUser(tenant, user);
 
             return Accepted(new Result(model.Flights));
         }
