@@ -7,6 +7,9 @@
 *.userosscache
 *.sln.docstates
 
+## travel-sample specific files
+*.out
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

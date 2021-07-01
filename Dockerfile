@@ -4,6 +4,10 @@ LABEL maintainer="Couchbase"
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    jq curl
+
 ADD . /app 
 
 ENV ASPNETCORE_URLS=http://+:8080 
@@ -12,4 +16,4 @@ ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
 
 # Set the entrypoint 
-ENTRYPOINT ["dotnet", "run", "--project", "try-cb-dotnet/try-cb-dotnet.csproj"]
+ENTRYPOINT ["./wait-for-couchbase.sh", "dotnet", "run", "--project", "try-cb-dotnet/try-cb-dotnet.csproj"]
