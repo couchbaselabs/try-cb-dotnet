@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Couchbase;
 using Couchbase.KeyValue;
 
+
 namespace try_cb_dotnet.Services
 {
     public interface ICouchbaseService
@@ -13,6 +14,12 @@ namespace try_cb_dotnet.Services
         public Task<ICouchbaseCollection> TenantCollection(string tenant, string collection);
     }
 
+    public static class StringExtension
+    {
+        public static string DefaultIfEmpty(this string str, string defaultValue)
+            => string.IsNullOrWhiteSpace(str) ? defaultValue : str;
+    }
+
     public class CouchbaseService : ICouchbaseService
     {
         public ICluster Cluster { get; private set; }
@@ -21,12 +28,20 @@ namespace try_cb_dotnet.Services
 
         public CouchbaseService()
         {
+            // TODO: get these variables via DI, possibly overriding config in appsettings.json
+            var CB_HOST = Environment.GetEnvironmentVariable("CB_HOST").DefaultIfEmpty("localhost");
+            var CB_USER = Environment.GetEnvironmentVariable("CB_USER").DefaultIfEmpty("Administrator");
+            var CB_PSWD = Environment.GetEnvironmentVariable("CB_PSWD").DefaultIfEmpty("password");
+
+            Console.WriteLine(
+                $"Connecting to couchbase://{CB_HOST} with {CB_USER} / {CB_PSWD}");
+
             try {
                 var task = Task.Run(async () => {
                     var cluster = await Couchbase.Cluster.ConnectAsync(
-                        "couchbase://localhost",
-                        "Administrator",
-                        "password");
+                        $"couchbase://{CB_HOST}",
+                        CB_USER,
+                        CB_PSWD);
 
                     Cluster = cluster;
                     TravelSampleBucket = await Cluster.BucketAsync("travel-sample");

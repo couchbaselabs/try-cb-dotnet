@@ -1,8 +1,8 @@
-# Couchbase Node.js travel-sample Application REST Backend
+# Couchbase .Net travel-sample Application REST Backend
 
-This is a sample application for getting started with [Couchbase Server] and the Node.js SDK.
+This is a sample application for getting started with [Couchbase Server] and the .Net SDK.
 The application runs a single page web UI for demonstrating SQL for Documents (N1QL), Sub-document requests and Full Text Search (FTS) querying capabilities.
-It uses Couchbase Server together with the [Express] web framework for [Node.js], [Swagger] for API documentation, [Vue] and [Bootstrap].
+It uses Couchbase Server together with the [ASP] web framework for [.Net], [Swagger] for API documentation, [Vue] and [Bootstrap].
 
 The application is a flight planner that allows the user to search for and select a flight route (including the return flight) based on airports and dates.
 Airport selection is done dynamically using an autocomplete box bound to N1QL queries on the server side. After selecting a date, it then searches
@@ -13,9 +13,9 @@ for applicable air flight routes from a previously populated database. An additi
 
 ## Prerequisites
 
-To download the application you can either download [the archive](https://github.com/couchbaselabs/try-cb-nodejs/archive/master.zip) or clone the repository:
+To download the application you can either download [the archive](https://github.com/couchbaselabs/try-cb-dotnet/archive/master.zip) or clone the repository:
 
-    git clone https://github.com/couchbaselabs/try-cb-nodejs.git
+    git clone https://github.com/couchbaselabs/try-cb-dotnet.git
 
 We recommend running the application with Docker, which starts up all components for you,
 but you can also run it in a Mix-and-Match style, which we'll decribe below.
@@ -23,7 +23,7 @@ but you can also run it in a Mix-and-Match style, which we'll decribe below.
 
 ## Running the application with Docker
 
-You will need [Docker](https://docs.docker.com/get-docker/) installed on your machine in order to run this application as we have defined a [_Dockerfile_](Dockerfile) and a [_docker-compose.yml_](docker-compose.yml) to run Couchbase Server 7.0.0 beta, the front-end [Vue app](https://github.com/couchbaselabs/try-cb-frontend-v2.git) and the Node.js REST API.
+You will need [Docker](https://docs.docker.com/get-docker/) installed on your machine in order to run this application as we have defined a [_Dockerfile_](Dockerfile) and a [_docker-compose.yml_](docker-compose.yml) to run Couchbase Server 7.0.0 beta, the front-end [Vue app](https://github.com/couchbaselabs/try-cb-frontend-v2.git) and the .NET REST API.
 
 To launch the full application, simply run this command from a terminal:
 
@@ -31,7 +31,7 @@ To launch the full application, simply run this command from a terminal:
 
 > **_NOTE:_** When you run the application for the first time, it will pull/build the relevant docker images, so it might take a bit of time.
 
-This will start the Node.js backend, Couchbase Server 7.0.0-beta and the Vue frontend app.
+This will start the .NET backend, Couchbase Server 7.0.0-beta and the Vue frontend app.
 
 You can access the backend API on http://localhost:8080/, the UI on
 http://localhost:8081/ and Couchbase Server at http://localhost:8091/
@@ -39,7 +39,7 @@ http://localhost:8081/ and Couchbase Server at http://localhost:8091/
     ❯ docker-compose up
     Docker Compose is now in the Docker CLI, try `docker compose up`
 
-    Creating network "try-cb-nodejs_default" with the default driver
+    Creating network "try-cb-dotnet_default" with the default driver
     Pulling db (couchbase/server-sandbox:7.0.0-beta)...
     ...
     Building backend
@@ -127,18 +127,19 @@ The Docker image will run the same checks as usual, and also create the
 `hotels-index` if it does not already exist.
 
 
-### Running the Node.js API application manually
+### Running the .NET API application manually
 
-You may want to run the Node.js application yourself, to make rapid changes to it,
+You may want to run the .NET application yourself, to make rapid changes to it,
 and try out the features of the Couchbase API, without having to re-build the Docker
 image. You may still use Docker to run the Database and Frontend components if desired.
 
-Install the dependencies:
+Simply run the project with:
 
-    npm install
+    dotnet run --project try-cb-dotnet/try-cb-dotnet.csproj
 
-Note that `nodemon` is installed as a dev-dependency, so you can run the server with
-the benefit of automatic restarting as you make changes.
+You may wish to take advantage of .NET's `watch` command to restart the server as you make changes:
+
+    dotnet watch --project try-cb-dotnet/try-cb-dotnet.csproj run
 
 You will have to point your application at the Couchbase server with the
 `CB_HOST` environment variable.
@@ -147,16 +148,15 @@ The first time you run against a new database image, you may want to use the pro
 `wait-for-couchbase.sh` wrapper to ensure that all indexes are created.
 For example, using the Docker image provided:
 
-
     docker-compose -f mix-and-match.yml up db
 
     export CB_HOST=localhost
     ./wait-for-couchbase.sh echo "Couchbase is ready!"
-    npx nodemon index.js
+    dotnet run --project try-cb-dotnet/try-cb-dotnet.csproj
 
 If you already have an existing Couchbase server running and correctly configured, you might run:
 
-    CB_HOST=10.144.211.101 CB_USER=Administrator CB_PSWD=password npx nodemon index.js
+    CB_HOST=10.144.211.101 CB_USER=Administrator CB_PSWD=password dotnet run --project try-cb-dotnet/try-cb-dotnet.csproj
 
 Finally, if you want to see how the sample frontend Vue application works with your changes,
 run it with:
@@ -176,9 +176,8 @@ We've integrated Swagger/OpenApi version 3 documentation which can be accessed o
 
 
 [Couchbase Server]: https://www.couchbase.com/
-[Node.js SDK]: https://docs.couchbase.com/nodejs-sdk/current/hello-world/overview.html
-[Express]: https://expressjs.com/
-[Node.js]: https://nodejs.org/
+[.NET SDK]: https://docs.couchbase.com/dotnet-sdk/current/hello-world/overview.html
+[ASP.NET]: https://dotnet.microsoft.com/apps/aspnet
 [Swagger]: https://swagger.io/resources/open-api/
 [Vue]: https://vuejs.org/
 [Bootstrap]: https://getbootstrap.com/

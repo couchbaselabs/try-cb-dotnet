@@ -47,7 +47,7 @@ namespace try_cb_dotnet
             services.Configure<AppSettings>(appSettingsSection);
 
             // configure custom services
-            services.AddSingleton<ICouchbaseService>(new CouchbaseService());
+            services.AddSingleton<ICouchbaseService, CouchbaseService>();
             services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<IAuthTokenService, AuthTokenService>();
             services.AddSingleton<IFlightService, FlightService>();
