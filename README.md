@@ -37,15 +37,8 @@ You can access the backend API on http://localhost:8080/, the UI on
 http://localhost:8081/ and Couchbase Server at http://localhost:8091/
 
     ❯ docker-compose up
-    Docker Compose is now in the Docker CLI, try `docker compose up`
 
     Creating network "try-cb-dotnet_default" with the default driver
-    Pulling db (couchbase/server-sandbox:7.0.0-beta)...
-    ...
-    Building backend
-    ...
-    Building frontend
-    ...
     Creating couchbase-sandbox-7.0.0-beta ... done
     Creating try-cb-api                   ... done
     Creating try-cb-fe                    ... done
@@ -53,36 +46,42 @@ http://localhost:8081/ and Couchbase Server at http://localhost:8091/
     couchbase-sandbox-7.0.0-beta | Starting Couchbase Server -- Web UI available at http://<ip>:8091
     couchbase-sandbox-7.0.0-beta | and logs available in /opt/couchbase/var/lib/couchbase/logs
     couchbase-sandbox-7.0.0-beta | Configuring Couchbase Server.  Please wait (~60 sec)...
+    couchbase-sandbox-7.0.0-beta | Configuration completed!
     try-cb-api  | wait-for-couchbase: checking http://db:8091/pools/default/buckets/travel-sample/
     try-cb-api  | wait-for-couchbase: polling for '.scopes | map(.name) | contains(["inventory", "
-    try-cb-fe   | wait-for-it: waiting 400 seconds for backend:8080
-    try-cb-api  | wait-for-couchbase: ...
-    couchbase-sandbox-7.0.0-beta | Configuration completed!
-    couchbase-sandbox-7.0.0-beta | Couchbase Admin UI: http://localhost:8091
-    couchbase-sandbox-7.0.0-beta | Login credentials: Administrator / password
     try-cb-api  | wait-for-couchbase: checking http://db:8094/api/cfg
     try-cb-api  | wait-for-couchbase: polling for '.status == "ok"'
+    couchbase-sandbox-7.0.0-beta | Couchbase Admin UI: http://localhost:8091
+    couchbase-sandbox-7.0.0-beta | Login credentials: Administrator / password
     try-cb-api  | wait-for-couchbase: checking http://db:8094/api/index/hotels-index
     try-cb-api  | wait-for-couchbase: polling for '.status == "ok"'
     try-cb-api  | wait-for-couchbase: Failure
     try-cb-api  | wait-for-couchbase: Creating hotels-index...
     try-cb-api  | wait-for-couchbase: checking http://db:8094/api/index/hotels-index/count
+    try-cb-fe   | wait-for-it: waiting for backend:8080 without a timeout
     try-cb-api  | wait-for-couchbase: polling for '.count >= 917'
     try-cb-api  | wait-for-couchbase: ...
-    ...
     try-cb-api  | wait-for-couchbase: checking http://db:9102/api/v1/stats
     try-cb-api  | wait-for-couchbase: polling for '.indexer.indexer_state == "Active"'
     try-cb-api  | wait-for-couchbase: polling for '. | keys | contains(["travel-sample:def_airport
     try-cb-api  | wait-for-couchbase: polling for '. | del(.indexer) | del(.["travel-sample:def_na
+    try-cb-api  | wait-for-couchbase: value is currently:
+    try-cb-api  | false
+    try-cb-api  | wait-for-couchbase: ...
     try-cb-api  | wait-for-couchbase: polling for '. | del(.indexer) | map(.num_pending_requests =
-    try-cb-api  | Connecting to backend Couchbase server db with Administrator/password
-    try-cb-api  | Example app listening on port 8080!
-    try-cb-fe   | wait-for-it: backend:8080 is available after 121 seconds
+    try-cb-api  | warn: Microsoft.AspNetCore.DataProtection.Repositories.FileSystemXmlRepository[60]
+    try-cb-api  |       Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+    try-cb-api  | Hosting environment: Development
+    try-cb-api  | Content root path: /app/try-cb-dotnet
+    try-cb-api  | Now listening on: http://[::]:8080
+    try-cb-api  | Application started. Press Ctrl+C to shut down.
+    try-cb-fe   | wait-for-it: backend:8080 is available after 96 seconds
     try-cb-fe   |
     try-cb-fe   | > try-cb-frontend-v2@0.1.0 serve
     try-cb-fe   | > vue-cli-service serve --port 8081
     try-cb-fe   |
-    try-cb-fe   |  INFO  Starting development server...
+    try-cb-fe   |   App running at:
+    try-cb-fe   |   - Local:   http://localhost:8081/
 
 You should then be able to browse the UI, search for US airports and get flight
 route information.
@@ -100,7 +99,6 @@ services yourself.
 As the provided `docker-compose.yml` sets up dependencies between the services,
 to make startup as smooth and automatic as possible, we also provide an
 alternative `mix-and-match.yml`. We'll look at a few useful scenarios here.
-
 
 ### Bring your own database
 
@@ -126,6 +124,18 @@ With a running Couchbase Server, you can pass the database details in:
 The Docker image will run the same checks as usual, and also create the
 `hotels-index` if it does not already exist.
 
+### Setting the environment variables via `launchSettings.json`
+
+Instead of setting the `CB_*` variables on the command-line, you can configure them within the ASP.NET configuration file
+`try-cb-dotnet/Properties/launchSettings.json`, modifying the `environmentVariables` section clause, for example:
+
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://+:8080",
+        "CB_HOST": "10.144.211.101",
+        "CB_USER": "Administrator",
+        "CB_PSWD": "password"
+      },
 
 ### Running the .NET API application manually
 
@@ -162,7 +172,6 @@ Finally, if you want to see how the sample frontend Vue application works with y
 run it with:
 
     docker-compose -f mix-and-match.yml up frontend
-
 
 ### Running the front-end manually
 
