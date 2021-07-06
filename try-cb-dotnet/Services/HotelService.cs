@@ -16,7 +16,7 @@ namespace try_cb_dotnet.Services
 {
     public interface IHotelService
     {
-        Task<IEnumerable<dynamic>> FindHotel(string location, string description);
+        Task<(IEnumerable<dynamic>, string[])> FindHotel(string location, string description);
     }
 
     public class HotelService : IHotelService
@@ -30,7 +30,7 @@ namespace try_cb_dotnet.Services
             _appSettings = appSettings.Value;
         }
 
-        public async Task<IEnumerable<dynamic>> FindHotel(string description, string location)
+        public async Task<(IEnumerable<dynamic>, string[])> FindHotel(string description, string location)
         {
             var query = new ConjunctionQuery();
 
@@ -64,19 +64,25 @@ namespace try_cb_dotnet.Services
 
             var hotels = new List<dynamic>();
 
+            var cols = new string[] {
+                "name",         //0
+                "description",  //1
+                "address",      //2
+                "city",         //3
+                "state",        //4
+                "country"       //5
+            };
+
+            var lookupInSspec =
+                from col in cols
+                select LookupInSpec.Get(col);
+
             foreach (var row in result)
             {
                 var fragment = await _couchbaseService.HotelCollection.LookupInAsync(
                     row.Id,
-                    new List<LookupInSpec>
-                    {
-                        LookupInSpec.Get("name"),         //0
-                        LookupInSpec.Get("description"),  //1
-                        LookupInSpec.Get("address"),      //2
-                        LookupInSpec.Get("city"),         //3
-                        LookupInSpec.Get("state"),        //4
-                        LookupInSpec.Get("country")       //5
-                    });
+                    lookupInSspec
+                );
 
                 var address = string.Join(", ", new []
                 {
@@ -94,7 +100,11 @@ namespace try_cb_dotnet.Services
                 });
             }
 
-            return hotels;
+            var context = new string[] {
+                $"FTS search - scoped to: inventory.hotel within fields {String.Join(", ", cols)}\n{query.Export()}"
+            };
+
+            return (hotels, context);
         }
     }
 }

@@ -20,8 +20,8 @@ namespace try_cb_dotnet.Controllers
         [HttpGet("{description?}/{location?}")]
         public async Task<ActionResult> GetHotels(string description, string location)
         {
-            var hotels = await _hotelService.FindHotel(description, location);
-            return Ok(new Result(hotels));
+            var (hotels, context) = await _hotelService.FindHotel(description, location);
+            return Ok(new Result(hotels, context));
         }
     }
 }

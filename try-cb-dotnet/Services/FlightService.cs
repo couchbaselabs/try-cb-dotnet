@@ -69,7 +69,9 @@ namespace try_cb_dotnet.Services
 
             if (fromAirport == null || toAirport == null)
             {
-                return (null, new string[] { "One or more airports was invalid", ctx1 });
+                return (
+                    null,
+                    new string[] { "One of the specified airports is invalid.", ctx1 });
             }
 
             var fromCoordinate = new GeoCoordinate((double)fromAirport.lat, (double)fromAirport.lon);
@@ -99,10 +101,13 @@ namespace try_cb_dotnet.Services
 
             if (flightQueryResult.MetaData.Status != QueryStatus.Success)
             {
-                return (null, new string[] { "Second query failed:", ctx2 });
+                return (
+                    null,
+                    new string[] { "Second query failed:", ctx2 });
             }
 
             var flights = await flightQueryResult.Rows.ToListAsync();
+
             foreach (var flight in flights)
             {
                 flight.FlightTime = flightTime;

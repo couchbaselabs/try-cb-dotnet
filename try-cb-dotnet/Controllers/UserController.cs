@@ -33,8 +33,12 @@ namespace try_cb_dotnet.Controllers
             await _userService.CreateUser(tenant, username, model.Password, model.Expiry);
 
             var data = new {
-                token = _authTokenService.CreateToken(tenant, username)};
-            return Accepted(new Result(data));
+                token = _authTokenService.CreateToken(tenant, username)
+            };
+            var context = new string[] {
+                $"KV insert - scoped to {tenant}.users: document {username}"
+            };
+            return Accepted(new Result(data, context));
         }
 
         [HttpPost("login")]
@@ -43,11 +47,17 @@ namespace try_cb_dotnet.Controllers
             var user = await _userService.GetAndAuthenticateUser(tenant, model.Username, model.Password);
             if (user == null)
             {
-                return BadRequest("Invalid username / password");
+                return Unauthorized("Invalid username / password");
             }
 
-            var data = new {token = _authTokenService.CreateToken(tenant, user.Username)};
-            return Ok(new Result(data));
+            var data = new {
+                token = _authTokenService.CreateToken(tenant, user.Username),
+
+            };
+            var context = new string[] {
+                $"KV get - scoped to {tenant}.users: for password field in document {user}"
+            };
+            return Ok(new Result(data, context));
         }
 
         [HttpGet("{username}/flights")]
@@ -64,7 +74,11 @@ namespace try_cb_dotnet.Controllers
                 return BadRequest("Invalid username");
             }
 
-            return Ok(new Result(user.Flights));
+            var context = new string[] {
+                $"KV get - scoped to {tenant}.user: for {user.Flights.Count} bookings in document {username}"
+            };
+
+            return Ok(new Result(user.Flights, context));
         }
 
         [HttpPut("{username}/flights")]
@@ -95,7 +109,14 @@ namespace try_cb_dotnet.Controllers
 
             await _userService.UpdateUser(tenant, user);
 
-            return Accepted(new Result(model.Flights));
+            return Accepted(
+                new Result(
+                    new { added = model.Flights },
+                    new string[] {
+                        $"KV mutateIn - scoped to {tenant}.users: for bookings subdocument field in document {username}"
+                    }
+                )
+            );
         }
     }
 }
