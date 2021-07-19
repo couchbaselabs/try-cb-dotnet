@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Couchbase.Services.Query;
+using Couchbase.Query;
 using Microsoft.Extensions.Options;
 using try_cb_dotnet.Models;
 using try_cb_dotnet.Helpers;
@@ -28,7 +28,7 @@ namespace try_cb_dotnet.Services
 
         public async Task<(IEnumerable<Airport>, string[])> GetAirports(string search)
         {
-            var q = "SELECT airportname FROM `travel-sample` WHERE ";
+            var q = "SELECT airportname FROM `travel-sample`.inventory.airport WHERE ";
 
             if (search.Length == 3)        // Is an faa code
             {
@@ -44,29 +44,24 @@ namespace try_cb_dotnet.Services
                 search = char.ToUpper(search[0]) + search.Substring(1) + '%';
             }
 
-            var queryString = q.Replace("$1", search);
-
             var airportsResult = await _couchbaseService.Cluster.QueryAsync<Airport>(
                 q,
-                parameters => parameters.Add(search),
-                options => options.UseStreaming(false)
+                options => options.Parameter(search)
             );
 
-            if (airportsResult.Status != QueryStatus.Success)
+            if (airportsResult.MetaData.Status != QueryStatus.Success)
             {
                 Console.WriteLine(airportsResult.Errors.OfType<string>());
                 return (null, new string[] { "Query Failed." });
             }
 
-            var airports = new List<Airport>();
-            foreach (var airport in airportsResult)
-            {
-                airports.Add(airport);
-            }
+            var airports = await airportsResult.Rows.ToListAsync();
 
-            Console.WriteLine(airports);
+            var context = new string[] {
+                $"N1QL query - scoped to inventory: {q}; -- {search}"
+            };
 
-            return (airports, new string[] { queryString });
+            return (airports, context);
         }
     }
 }

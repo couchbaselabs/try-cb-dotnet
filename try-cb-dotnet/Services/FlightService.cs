@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Couchbase.Services.Query;
+using Couchbase.Query;
 using Microsoft.Extensions.Options;
 using try_cb_dotnet.Models;
 using try_cb_dotnet.Helpers;
@@ -32,38 +32,30 @@ namespace try_cb_dotnet.Services
         {
             var dayOfWeek = (int)leaveDate.DayOfWeek + 1; // Get weekday number
 
-            var airportQueryResult = await _couchbaseService.Cluster.QueryAsync<dynamic>(
+            String q1 =
                 "SELECT faa AS fromAirport, geo.lat, geo.lon " +
-                "FROM `travel-sample` " +
+                "FROM `travel-sample`.inventory.airport " +
                 "WHERE airportname = $1 " +
                 "UNION " +
                 "SELECT faa AS toAirport, geo.lat, geo.lon " +
-                "FROM `travel-sample` " +
-                "WHERE airportname = $2;",
-                parameters => parameters.Add(from)
-                    .Add(to),
-                options => options.UseStreaming(false)
+                "FROM `travel-sample`.inventory.airport " +
+                "WHERE airportname = $2;";
+
+            var airportQueryResult = await _couchbaseService.Cluster.QueryAsync<dynamic>(
+                q1,
+                options => options.Parameter(from).Parameter(to)
             );
 
-            var ctx1 = "SELECT faa AS fromAirport, geo.lat, geo.lon " +
-                "FROM `travel-sample` " +
-                "WHERE airportname = $1 " +
-                "UNION " +
-                "SELECT faa AS toAirport, geo.lat, geo.lon " +
-                "FROM `travel-sample` " +
-                "WHERE airportname = $2;"
-                .Replace("$1", from)
-                .Replace("$2", to);
+            var ctx1 = $"N1QL query - scoped to inventory.airport: {q1}; -- {from}, {to}";
 
-
-            if (airportQueryResult.Status != QueryStatus.Success)
+            if (airportQueryResult.MetaData.Status != QueryStatus.Success)
             {
                 return (null, new string[] { "First query failed:", ctx1 });
             }
 
             dynamic fromAirport = null, toAirport = null;
 
-            foreach (var row in airportQueryResult)
+            await foreach (var row in airportQueryResult)
             {
                 if (row.fromAirport != null)
                 {
@@ -77,7 +69,9 @@ namespace try_cb_dotnet.Services
 
             if (fromAirport == null || toAirport == null)
             {
-                return (null, new string[] { "One or more airports was invalid", ctx1 });
+                return (
+                    null,
+                    new string[] { "One of the specified airports is invalid.", ctx1 });
             }
 
             var fromCoordinate = new GeoCoordinate((double)fromAirport.lat, (double)fromAirport.lon);
@@ -85,41 +79,39 @@ namespace try_cb_dotnet.Services
             var distance = fromCoordinate.GetDistanceTo(toCoordinate);
             var flightTime = Math.Round(distance / _appSettings.AverageFlightSpeed, 2);
 
-            var qTemplate = "SELECT a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment " +
-                "FROM `travel-sample` AS r " +
+            var q2 = "SELECT a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment " +
+                "FROM `travel-sample`.inventory.route AS r " +
                 "UNNEST r.schedule AS s " +
-                "JOIN `travel-sample` AS a ON KEYS r.airlineid " +
+                "JOIN `travel-sample`.inventory.airline AS a ON KEYS r.airlineid " +
                 "WHERE r.sourceairport = $1 " +
                 "AND r.destinationairport = $2 " +
                 "AND s.day = $3 " +
                 "ORDER BY a.name ASC;";
 
             var flightQueryResult = await _couchbaseService.Cluster.QueryAsync<Route>(
-                qTemplate,
-                parameters => parameters
-                    .Add((string) fromAirport.fromAirport)
-                    .Add((string) toAirport.toAirport)
-                    .Add(dayOfWeek),
-                options => options.UseStreaming(false)
+                q2,
+                options => options
+                    .Parameter(fromAirport.fromAirport)
+                    .Parameter(toAirport.toAirport)
+                    .Parameter(dayOfWeek)
             );
 
-            var ctx2 = qTemplate
-                .Replace("$1", (string)fromAirport.fromAirport)
-                .Replace("$2", (string)toAirport.toAirport)
-                .Replace("$3", dayOfWeek.ToString());
+            var ctx2 = $"N1QL query - scoped to inventory: {q2}; -- {fromAirport.fromAirport}, {toAirport.toAirport}, {dayOfWeek.ToString()}";
 
-            if (flightQueryResult.Status != QueryStatus.Success)
+
+            if (flightQueryResult.MetaData.Status != QueryStatus.Success)
             {
-                return (null, new string[] { "Second query failed:", ctx2 });
+                return (
+                    null,
+                    new string[] { "Second query failed:", ctx2 });
             }
 
-            var flights = new List<Route>();
-            foreach (var flight in flightQueryResult)
+            var flights = await flightQueryResult.Rows.ToListAsync();
+
+            foreach (var flight in flights)
             {
                 flight.FlightTime = flightTime;
                 flight.Price = Random.Next(2000);
-
-                flights.Add(flight);
             }
 
             return (flights, new string[] { ctx1, ctx2 });

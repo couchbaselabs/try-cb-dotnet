@@ -7,7 +7,7 @@ using try_cb_dotnet.Services;
 namespace try_cb_dotnet.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/hotels")]
     public class HotelController : ControllerBase
     {
         private readonly IHotelService _hotelService;
@@ -18,10 +18,10 @@ namespace try_cb_dotnet.Controllers
         }
 
         [HttpGet("{description?}/{location?}")]
-        public async Task<ActionResult> GetFlights(string description, string location)
+        public async Task<ActionResult> GetHotels(string description, string location)
         {
-            var hotels = await _hotelService.FindHotel(description, location);
-            return Ok(new Result(hotels));
+            var (hotels, context) = await _hotelService.FindHotel(description, location);
+            return Ok(new Result(hotels, context));
         }
     }
 }

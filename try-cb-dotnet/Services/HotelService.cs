@@ -2,20 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Couchbase.Services.Query;
+using Couchbase.Query;
 using Microsoft.Extensions.Options;
 using try_cb_dotnet.Models;
 using try_cb_dotnet.Helpers;
 using Couchbase;
-using Couchbase.Services.Search;
-using Couchbase.Services.Search.Queries.Simple;
-using Couchbase.Services.Search.Queries.Compound;
+using Couchbase.Search;
+using Couchbase.Search.Queries.Simple;
+using Couchbase.Search.Queries.Compound;
+using Couchbase.KeyValue;
 
 namespace try_cb_dotnet.Services
 {
     public interface IHotelService
     {
-        Task<IEnumerable<dynamic>> FindHotel(string location, string description);
+        Task<(IEnumerable<dynamic>, string[])> FindHotel(string location, string description);
     }
 
     public class HotelService : IHotelService
@@ -29,7 +30,7 @@ namespace try_cb_dotnet.Services
             _appSettings = appSettings.Value;
         }
 
-        public async Task<IEnumerable<dynamic>> FindHotel(string description, string location)
+        public async Task<(IEnumerable<dynamic>, string[])> FindHotel(string description, string location)
         {
             var query = new ConjunctionQuery();
 
@@ -50,34 +51,40 @@ namespace try_cb_dotnet.Services
                     new PhraseQuery(location).Field("country")
                 ));
             }
-            var Q = new SearchQuery { Query = query };
+            // // uncomment next line to show representation of the query in JSON
+            // Console.WriteLine(query.Export());
 
-            var queryString = (Q).ToJson();
+            var opts = new SearchOptions().Limit(100);
 
-            var opts = new SearchOptions();
-            //opts.Limit(100);
-
-            // TODO: this still returns nothing every time
-            // Wireshark claims wrong URL is being hit (just ://IP:8094, no endpoint)
             var result = await _couchbaseService.Cluster.SearchQueryAsync(
-                "hotels",
-                Q,
+                "hotels-index",
+                query,
                 opts
             );
 
             var hotels = new List<dynamic>();
 
+            var cols = new string[] {
+                "name",         //0
+                "description",  //1
+                "address",      //2
+                "city",         //3
+                "state",        //4
+                "country"       //5
+            };
+
+            var lookupInSspec =
+                from col in cols
+                select LookupInSpec.Get(col);
+
             foreach (var row in result)
             {
-                var fragment = await _couchbaseService.DefaultCollection.LookupInAsync(row.Id,
-                    ops => ops.Get("name")   //0
-                    .Get("description")      //1
-                    .Get("address")          //2
-                    .Get("city")             //3
-                    .Get("state")            //4
-                    .Get("country"));        //5
+                var fragment = await _couchbaseService.HotelCollection.LookupInAsync(
+                    row.Id,
+                    lookupInSspec
+                );
 
-                var address = string.Join(", ", new[]
+                var address = string.Join(", ", new []
                 {
                     fragment.ContentAs<string>(2),
                     fragment.ContentAs<string>(3),
@@ -93,7 +100,11 @@ namespace try_cb_dotnet.Services
                 });
             }
 
-            return hotels;
+            var context = new string[] {
+                $"FTS search - scoped to: inventory.hotel within fields {String.Join(", ", cols)}\n{query.Export()}"
+            };
+
+            return (hotels, context);
         }
     }
 }

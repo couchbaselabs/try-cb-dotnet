@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ using try_cb_dotnet.Services;
 namespace try_cb_dotnet.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/tenants/{tenant}/user")]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -20,58 +21,75 @@ namespace try_cb_dotnet.Controllers
         }
 
         [HttpPost("signup")]
-        public async Task<ActionResult> SignUp([FromBody] LoginModel model)
+        public async Task<ActionResult> SignUp(string tenant, LoginModel model)
         {
-            if (await _userService.UserExists(model.Username))
+            string username = model.Username;
+
+            if (await _userService.UserExists(tenant, username))
             {
-                return Conflict($"Username '{model.Username}' already exists");
+                return Conflict($"Username '{username}' already exists");
             }
 
-            await _userService.CreateUser(model.Username, model.Password, model.Expiry);
+            await _userService.CreateUser(tenant, username, model.Password, model.Expiry);
 
-            var data = new {token = _authTokenService.CreateToken(model.Username)};
-            return Accepted(new Result(data));
+            var data = new {
+                token = _authTokenService.CreateToken(tenant, username)
+            };
+            var context = new string[] {
+                $"KV insert - scoped to {tenant}.users: document {username}"
+            };
+            return Accepted(new Result(data, context));
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult> Login([FromBody] LoginModel model)
+        public async Task<ActionResult> Login(string tenant, [FromBody] LoginModel model)
         {
-            var user = await _userService.GetAndAuthenticateUser(model.Username, model.Password);
+            var user = await _userService.GetAndAuthenticateUser(tenant, model.Username, model.Password);
             if (user == null)
             {
-                return BadRequest("Invalid username / password");
+                return Unauthorized("Invalid username / password");
             }
 
-            var data = new {token = _authTokenService.CreateToken(user.Username)};
-            return Ok(new Result(data));
+            var data = new {
+                token = _authTokenService.CreateToken(tenant, user.Username),
+
+            };
+            var context = new string[] {
+                $"KV get - scoped to {tenant}.users: for password field in document {user}"
+            };
+            return Ok(new Result(data, context));
         }
 
         [HttpGet("{username}/flights")]
-        public async Task<ActionResult> GetFlightsForUser(string username)
+        public async Task<ActionResult> GetFlightsForUser(string tenant, string username)
         {
-            if (!_authTokenService.VerifyToken(Request.Headers["Authorization"], username))
+            if (!_authTokenService.VerifyToken(Request.Headers["Authorization"], tenant, username))
             {
                 return Unauthorized();
             }
 
-            var user = await _userService.GetUser(username);
+            var user = await _userService.GetUser(tenant, username);
             if (user == null)
             {
                 return BadRequest("Invalid username");
             }
 
-            return Ok(new Result(user.Flights));
+            var context = new string[] {
+                $"KV get - scoped to {tenant}.user: for {user.Flights.Count} bookings in document {username}"
+            };
+
+            return Ok(new Result(user.Flights, context));
         }
 
-        [HttpPost("{username}/flights")]
-        public async Task<ActionResult> BookFlightsForUser(string username, BookFlightModel model)
+        [HttpPut("{username}/flights")]
+        public async Task<ActionResult> BookFlightsForUser(string tenant, string username, BookFlightModel model)
         {
-            if (!_authTokenService.VerifyToken(Request.Headers["Authorization"], username))
+            if (!_authTokenService.VerifyToken(Request.Headers["Authorization"], tenant, username))
             {
                 return Unauthorized();
             }
 
-            var user = await _userService.GetUser(username);
+            var user = await _userService.GetUser(tenant, username);
             if (user == null)
             {
                 return BadRequest("Invalid username");
@@ -89,9 +107,16 @@ namespace try_cb_dotnet.Controllers
 
             user.Flights.AddRange(model.Flights);
 
-            await _userService.UpdateUser(user);
+            await _userService.UpdateUser(tenant, user);
 
-            return Accepted(new Result(model.Flights));
+            return Accepted(
+                new Result(
+                    new { added = model.Flights },
+                    new string[] {
+                        $"KV mutateIn - scoped to {tenant}.users: for bookings subdocument field in document {username}"
+                    }
+                )
+            );
         }
     }
 }

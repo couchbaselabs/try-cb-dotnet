@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using try_cb_dotnet.Models;
@@ -7,7 +8,7 @@ using try_cb_dotnet.Services;
 namespace try_cb_dotnet.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/flightPaths")]
     public class FlightPathsController : ControllerBase
     {
         private readonly IFlightService _flightService;
@@ -25,7 +26,11 @@ namespace try_cb_dotnet.Controllers
                 return BadRequest("Missing / invalid arguments.");
             }
 
-            if (!DateTime.TryParse(leave, out var leaveDate))
+            if (!DateTime.TryParse(
+                    leave,
+                    new CultureInfo("en-US"), // we accept US `mm/dd/yyyy` format
+                    DateTimeStyles.None,
+                    out var leaveDate))
             {
                 return BadRequest("Unable to parse leave date");
             }

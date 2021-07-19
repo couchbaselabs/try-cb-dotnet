@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,11 +9,11 @@ namespace try_cb_dotnet.Services
 {
     public interface IUserService
     {
-        Task<bool> UserExists(string username);
-        Task<User> CreateUser(string username, string password, uint expiry);
-        Task<User> GetUser(string username);
-        Task<User> GetAndAuthenticateUser(string username, string password);
-        Task UpdateUser(User user);
+        Task<bool> UserExists(string tenant, string username);
+        Task<User> CreateUser(string tenant, string username, string password, uint expiry);
+        Task<User> GetUser(string tenant, string username);
+        Task<User> GetAndAuthenticateUser(string tenant, string username, string password);
+        Task UpdateUser(string tenant, User user);
     }
 
     public class UserService : IUserService
@@ -24,13 +25,16 @@ namespace try_cb_dotnet.Services
             _couchbaseService = couchbaseService;
         }
 
-        public async Task<bool> UserExists(string username)
+        public async Task<bool> UserExists(string tenant, string username)
         {
-            var result = await _couchbaseService.DefaultCollection.ExistsAsync($"user::{username}", new Couchbase.ExistsOptions());
+            var userCollection = await _couchbaseService.TenantCollection(tenant, "users");
+            var result = await userCollection.ExistsAsync(
+                $"user::{username}",
+                new Couchbase.KeyValue.ExistsOptions());
             return result.Exists;
         }
 
-        public async Task<User> CreateUser(string username, string password, uint expiry)
+        public async Task<User> CreateUser(string tenant, string username, string password, uint expiry)
         {
             var user = new User
             {
@@ -40,7 +44,8 @@ namespace try_cb_dotnet.Services
 
             try
             {
-                await _couchbaseService.DefaultCollection.InsertAsync($"user::{username}", user, new Couchbase.InsertOptions());
+                var userCollection = await _couchbaseService.TenantCollection(tenant, "users");
+                await userCollection.InsertAsync($"user::{username}", user, new Couchbase.KeyValue.InsertOptions());
             }
             catch
             {
@@ -50,11 +55,12 @@ namespace try_cb_dotnet.Services
             return user;
         }
 
-        public async Task<User> GetUser(string username)
+        public async Task<User> GetUser(string tenant, string username)
         {
             try
             {
-                var result =  await _couchbaseService.DefaultCollection.GetAsync($"user::{username}", new Couchbase.GetOptions());
+                var userCollection = await _couchbaseService.TenantCollection(tenant, "users");
+                var result =  await userCollection.GetAsync($"user::{username}", new Couchbase.KeyValue.GetOptions());
                 return result.ContentAs<User>();
             }
             catch
@@ -63,25 +69,31 @@ namespace try_cb_dotnet.Services
             }
         }
 
-        public async Task<User> GetAndAuthenticateUser(string username, string password)
+        public async Task<User> GetAndAuthenticateUser(string tenant, string username, string password)
         {
-            var user = await GetUser(username);
+            var user = await GetUser(tenant, username);
             if (user == null)
             {
+                Console.WriteLine("User not found!");
                 return null;
             }
 
             if (user.Password != CalculateMd5Hash(password))
             {
+                Console.WriteLine("User password wrong");
                 return null;
             }
 
             return user;
         }
 
-        public async Task UpdateUser(User user)
+        public async Task UpdateUser(string tenant, User user)
         {
-            await _couchbaseService.DefaultCollection.ReplaceAsync($"user::{user.Username}", user, new Couchbase.ReplaceOptions());
+            var userCollection = await _couchbaseService.TenantCollection(tenant, "users");
+            await userCollection.ReplaceAsync(
+                $"user::{user.Username}",
+                user,
+                new Couchbase.KeyValue.ReplaceOptions());
         }
 
         private static string CalculateMd5Hash(string password)

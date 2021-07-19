@@ -1,16 +1,17 @@
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace try_cb_dotnet.Models
 {
     public class LoginModel
     {
-        [JsonProperty("user")]
+        [JsonPropertyName("user")]
         public string Username { get; set; }
 
-        [JsonProperty("password")]
+        [JsonPropertyName("password")]
         public string Password { get; set; }
 
-        [JsonProperty("expiry")]
+        [JsonPropertyName("expiry")]
         public uint Expiry { get; set; }
     }
 }
