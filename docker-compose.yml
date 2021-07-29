@@ -27,7 +27,7 @@ services:
       entrypoint: ["wait-for-it", "backend:8080", "--timeout=0", "--", "npm", "run", "serve"]
 
   db:
-    image: couchbase/server-sandbox:7.0.0-beta
+    image: couchbase/server-sandbox:7.0.0
     ports:
       - "8091-8095:8091-8095"
       - "11210:11210"
@@ -45,4 +45,4 @@ services:
       interval: 20s
       timeout: 20s
       retries: 2
-    container_name: couchbase-sandbox-7.0.0-beta
+    container_name: couchbase-sandbox-7.0.0

@@ -3,9 +3,9 @@
 
 set -e
 
-CB_HOST="${CB_HOST:-db}"
-CB_USER="${CB_USER:-Administrator}"
-CB_PSWD="${CB_PSWD:-password}"
+export CB_HOST="${CB_HOST:-db}"
+export CB_USER="${CB_USER:-Administrator}"
+export CB_PSWD="${CB_PSWD:-password}"
 
 
 #### Utility Functions ####
