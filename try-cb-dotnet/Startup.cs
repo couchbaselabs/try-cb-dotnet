@@ -73,6 +73,8 @@ namespace try_cb_dotnet
             });
 
             app.UseAuthorization();
+            
+            app.UseDefaultFiles();
             app.UseStaticFiles();
 
             app.UseEndpoints(endpoints =>
