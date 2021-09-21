@@ -38,7 +38,7 @@ namespace try_cb_dotnet.Controllers
             var context = new string[] {
                 $"KV insert - scoped to {tenant}.users: document {username}"
             };
-            return Accepted(new Result(data, context));
+            return Created("", new Result(data, context));
         }
 
         [HttpPost("login")]
@@ -73,9 +73,14 @@ namespace try_cb_dotnet.Controllers
             {
                 return BadRequest("Invalid username");
             }
+            
+            if (user.Flights == null)
+            {
+                user.Flights = new List<Flight>();
+            }
 
             var context = new string[] {
-                $"KV get - scoped to {tenant}.user: for {user.Flights.Count} bookings in document {username}"
+                $"KV get - scoped to {tenant}.users: for {user.Flights.Count} bookings in document {username}"
             };
 
             return Ok(new Result(user.Flights, context));
@@ -109,11 +114,11 @@ namespace try_cb_dotnet.Controllers
 
             await _userService.UpdateUser(tenant, user);
 
-            return Accepted(
+            return Ok(
                 new Result(
                     new { added = model.Flights },
                     new string[] {
-                        $"KV mutateIn - scoped to {tenant}.users: for bookings subdocument field in document {username}"
+                        $"KV update - scoped to {tenant}.users: for bookings subdocument field in document {username}"
                     }
                 )
             );
