@@ -45,10 +45,10 @@ namespace try_cb_dotnet.Services
             if (!string.IsNullOrEmpty(location) && location != "*")
             {
                 query.And(new DisjunctionQuery(
-                    new PhraseQuery(location).Field("address"),
-                    new PhraseQuery(location).Field("city"),
-                    new PhraseQuery(location).Field("state"),
-                    new PhraseQuery(location).Field("country")
+                    new MatchQuery(location).Field("address"),
+                    new MatchQuery(location).Field("city"),
+                    new MatchQuery(location).Field("state"),
+                    new MatchQuery(location).Field("country")
                 ));
             }
             // // uncomment next line to show representation of the query in JSON
