@@ -7,22 +7,22 @@ namespace try_cb_dotnet.Models
     public class Hotel
     {
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [JsonPropertyName("description")]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         [JsonPropertyName("address")]
-        public string Address { get; set; }
+        public string Address { get; set; } = string.Empty;
 
         [JsonPropertyName("city")]
-        public string City { get; set; }
+        public string City { get; set; } = string.Empty;
 
         [JsonPropertyName("state")]
-        public string State { get; set; }
+        public string State { get; set; } = string.Empty;
 
         [JsonPropertyName("country")]
-        public string Country { get; set; }
+        public string Country { get; set; } = string.Empty;
 
         [JsonPropertyName("type")]
         public string Type => "hotel";

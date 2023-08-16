@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -9,7 +10,7 @@ namespace try_cb_dotnet.Models
         public Result(dynamic data, params string[] contexts)
         {
             Data = data;
-            Context = contexts ?? new string[] {};
+            Context = contexts ?? Array.Empty<string> ();
         }
 
         [JsonPropertyName("data")]

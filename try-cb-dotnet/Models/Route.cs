@@ -6,22 +6,22 @@ namespace try_cb_dotnet.Models
     public class Route
     {
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [JsonPropertyName("flight")]
-        public string Flight { get; set; }
+        public string Flight { get; set; } = string.Empty;
 
         [JsonPropertyName("utc")]
-        public string Time { get; set; }
+        public string Time { get; set; } = string.Empty;
 
         [JsonPropertyName("sourceairport")]
-        public string SourceAirport { get; set; }
+        public string SourceAirport { get; set; } = string.Empty;
 
         [JsonPropertyName("destinationairport")]
-        public string DestinationAirport { get; set; }
+        public string DestinationAirport { get; set; } = string.Empty;
 
         [JsonPropertyName("equipment")]
-        public string Equipment { get; set; }
+        public string Equipment { get; set; } = string.Empty;
 
         [JsonPropertyName("flighttime")]
         public double FlightTime { get; set; }

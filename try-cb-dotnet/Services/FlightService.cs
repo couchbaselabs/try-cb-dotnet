@@ -48,7 +48,7 @@ namespace try_cb_dotnet.Services
 
             var ctx1 = $"N1QL query - scoped to inventory.airport: {q1}; -- {from}, {to}";
 
-            if (airportQueryResult.MetaData.Status != QueryStatus.Success)
+            if (airportQueryResult?.MetaData?.Status != QueryStatus.Success)
             {
                 return (null, new string[] { "First query failed:", ctx1 });
             }

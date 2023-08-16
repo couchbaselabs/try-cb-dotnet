@@ -1,17 +1,18 @@
 version: "3.9"
-
 services:
   backend:
-    build: .
+    build: ./try-cb-dotnet
     depends_on:
-      db:
+      couchbase-server:
         condition: service_healthy
     ports:
       - 8080:8080
     environment:
-      - CB_HOST
-      - CB_USER
-      - CB_PSWD
+      - CB_HOST=couchbase-server
+      - CB_USER=Administrator
+      - CB_PSWD=P@ssw0rd12
+    networks:
+      - workshop
     volumes:
       - .:/app
     container_name: try-cb-api
@@ -23,36 +24,52 @@ services:
           condition: service_started
       ports:
         - 8081:8081
+      networks:
+        - workshop
       container_name: try-cb-fe
       entrypoint: ["wait-for-it", "backend:8080", "--timeout=0", "--", "npm", "run", "serve"]
 
-  db:
-    image: couchbase/server-sandbox:7.0.0
+  couchbase-server:
+    build: ./couchbase-server
     ports:
-      - "8091-8095:8091-8095"
-      - "11210:11210"
-      - "9102:9102"
+      - 8091-8096:8091-8096
+      - 11210:11210
+      - 9102:9102
     expose:
-      - "8091"
-      - "8092"
-      - "8093"
-      - "8094"
-      - "8095"
-      - "9102"
-      - "11210"
+      - 8091
+      - 8092
+      - 8093
+      - 8094
+      - 8095
+      - 9102
+      - 11210
+    environment:  
+      - CLUSTER_NAME=couchbase-demo
+      - COUCHBASE_ADMINISTRATOR_USERNAME=Administrator
+      - COUCHBASE_ADMINISTRATOR_PASSWORD=P@ssw0rd12
+      - COUCHBASE_BUCKET_RAMSIZE=512
+      - COUCHBASE_RBAC_USERNAME=admin
+      - COUCHBASE_RBAC_PASSWORD=P@ssw0rd12
+      - COUCHBASE_RBAC_NAME=admin
+      - COUCHBASE_RAM_SIZE=2048
+      - COUCHBASE_EVENTING_RAM_SIZE=512
+      - COUCHBASE_INDEX_RAM_SIZE=512
+      - COUCHBASE_FTS_RAM_SIZE=512
+    hostname: couchbase-server
+    container_name: try-cb-couchbase-server
+    working_dir: /opt/couchbase
+    stdin_open: true
+    tty: true      
+    networks:
+      - workshop
+    entrypoint: [""]
+    command: sh -c "/opt/couchbase/init/init-cbserver.sh"
     healthcheck: # checks couchbase server is up
       test: ["CMD", "curl", "-v", "http://localhost:8091/pools"]
       interval: 20s
       timeout: 20s
       retries: 2
-    container_name: couchbase-sandbox-7.0.0
 
-  test:
-    build: "https://github.com/couchbaselabs/try-cb-test.git#main"
-    depends_on:
-      - backend
-    environment:
-      BACKEND_BASE_URL: http://backend:8080
-    entrypoint: ["wait-for-it", "backend:8080", "--timeout=400", "--strict", "--", "bats", "travel-sample-backend.bats"]
-    profiles:
-      - test
+networks:
+  workshop:
+    driver: bridge

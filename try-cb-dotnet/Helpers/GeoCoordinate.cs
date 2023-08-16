@@ -225,13 +225,30 @@ namespace try_cb_dotnet.Helpers
         public double Altitude { get; set; }
 
         /// <summary>
+        ///     Determines if a specified GeoCoordinate is equal to the current GeoCoordinate, based solely on latitude and
+        ///     longitude.
+        /// </summary>
+        /// <returns>
+        ///     true, if the GeoCoordinate objects are equal; otherwise, false.
+        /// </returns>
+        /// <param name="obj">The object to compare the GeoCoordinate to.</param>
+        public override bool Equals(object? obj)
+        {
+            if (obj is GeoCoordinate objCheck)
+            {
+                return Equals(objCheck);
+            }
+            return false;
+        }
+        
+        /// <summary>
         ///     Determines if the GeoCoordinate object is equivalent to the parameter, based solely on latitude and longitude.
         /// </summary>
         /// <returns>
         ///     true if the GeoCoordinate objects are equal; otherwise, false.
         /// </returns>
         /// <param name="other">The GeoCoordinate object to compare to the calling object.</param>
-        public bool Equals(GeoCoordinate other)
+        public bool Equals(GeoCoordinate? other)
         {
             if (ReferenceEquals(other, null))
                 return false;
@@ -310,19 +327,6 @@ namespace try_cb_dotnet.Helpers
         public override int GetHashCode()
         {
             return Latitude.GetHashCode() ^ Longitude.GetHashCode();
-        }
-
-        /// <summary>
-        ///     Determines if a specified GeoCoordinate is equal to the current GeoCoordinate, based solely on latitude and
-        ///     longitude.
-        /// </summary>
-        /// <returns>
-        ///     true, if the GeoCoordinate objects are equal; otherwise, false.
-        /// </returns>
-        /// <param name="obj">The object to compare the GeoCoordinate to.</param>
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as GeoCoordinate);
         }
 
         /// <summary>

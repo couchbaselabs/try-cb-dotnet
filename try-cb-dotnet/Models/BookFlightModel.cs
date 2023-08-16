@@ -6,7 +6,6 @@ namespace try_cb_dotnet.Models
 {
     public class BookFlightModel
     {
-        [JsonPropertyName("flights")]
-        public List<Flight> Flights { get; set; }
+        [JsonPropertyName("flights")] public List<Flight> Flights { get; set; } = new ();
     }
 }
