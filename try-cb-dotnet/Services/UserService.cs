@@ -78,7 +78,7 @@ namespace try_cb_dotnet.Services
                 return null;
             }
 
-            if (user.Password != CalculateMd5Hash(password))
+            if (user.Password != password)
             {
                 Console.WriteLine("User password wrong");
                 return null;

@@ -33,7 +33,7 @@ To launch the full application, simply run this command from a terminal:
 We have tested the travel-sample apps with 4.5 GB RAM configured in Docker's Preferences... -> Resources -> Memory.
 When you run the application for the first time, it will pull/build the relevant docker images, so it might take a bit of time.
 
-This will start the .NET backend, Couchbase Server 7.0.0 and the Vue frontend app.
+This will start the .NET backend, Couchbase Server 7.2.0 and the Vue frontend app.
 
 You can access the backend API on http://localhost:8080/, the UI on
 http://localhost:8081/ and Couchbase Server at http://localhost:8091/
@@ -105,7 +105,7 @@ alternative `mix-and-match.yml`. We'll look at a few useful scenarios here.
 ### Bring your own database
 
 If you wish to run this application against your own configuration of Couchbase
-Server, you will need version 7.0.0 or later with the `travel-sample`
+Server, you will need version 7.2.0 or later with the `travel-sample`
 bucket setup.
 
 > **_NOTE:_** if you are not using Docker to start up the API server, or the

@@ -53,7 +53,7 @@ if ! [ -f "$FILE" ]; then
   sleep 2s 
 
   # create indexes using the FTS REST API  
-  /opt/couchbase/bin/curl -XPUT -v http://localhost:8094/api/index/hotelsIndex \
+  /opt/couchbase/bin/curl -XPUT -v http://localhost:8094/api/index/hotels-index \
   -u $COUCHBASE_ADMINISTRATOR_USERNAME:$COUCHBASE_ADMINISTRATOR_PASSWORD \
   -H 'content-type: application/json' \
   -d \

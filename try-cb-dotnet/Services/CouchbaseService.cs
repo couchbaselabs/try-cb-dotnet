@@ -31,7 +31,7 @@ namespace try_cb_dotnet.Services
             // TODO: get these variables via DI, possibly overriding config in appsettings.json
             var CB_HOST = Environment.GetEnvironmentVariable("CB_HOST").DefaultIfEmpty("localhost");
             var CB_USER = Environment.GetEnvironmentVariable("CB_USER").DefaultIfEmpty("Administrator");
-            var CB_PSWD = Environment.GetEnvironmentVariable("CB_PSWD").DefaultIfEmpty("password");
+            var CB_PSWD = Environment.GetEnvironmentVariable("CB_PSWD").DefaultIfEmpty("P@ssw0rd12");
 
             Console.WriteLine(
                 $"Connecting to couchbase://{CB_HOST} with {CB_USER} / {CB_PSWD}");
