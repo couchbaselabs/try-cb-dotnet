@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Couchbase;
+using Couchbase.Extensions.DependencyInjection;
 using Couchbase.KeyValue;
 
 
@@ -26,22 +27,15 @@ namespace try_cb_dotnet.Services
         public IBucket TravelSampleBucket { get; private set; }
         public ICouchbaseCollection HotelCollection { get; private set; }
 
-        public CouchbaseService()
+        public CouchbaseService(IClusterProvider clusterProvider)
         {
-            // TODO: get these variables via DI, possibly overriding config in appsettings.json
-            var CB_HOST = Environment.GetEnvironmentVariable("CB_HOST").DefaultIfEmpty("localhost");
-            var CB_USER = Environment.GetEnvironmentVariable("CB_USER").DefaultIfEmpty("Administrator");
-            var CB_PSWD = Environment.GetEnvironmentVariable("CB_PSWD").DefaultIfEmpty("password");
+            Console.WriteLine($"Connecting to couchbase");
 
-            Console.WriteLine(
-                $"Connecting to couchbase://{CB_HOST} with {CB_USER} / {CB_PSWD}");
-
-            try {
-                var task = Task.Run(async () => {
-                    var cluster = await Couchbase.Cluster.ConnectAsync(
-                        $"couchbase://{CB_HOST}",
-                        CB_USER,
-                        CB_PSWD);
+            try
+            {
+                var task = Task.Run(async () =>
+                {
+                    var cluster = await clusterProvider.GetClusterAsync();
 
                     Cluster = cluster;
                     TravelSampleBucket = await Cluster.BucketAsync("travel-sample");
@@ -50,7 +44,8 @@ namespace try_cb_dotnet.Services
                 });
                 task.Wait();
             }
-            catch (AggregateException ae) {
+            catch (AggregateException ae)
+            {
                 ae.Handle((x) => throw x);
             }
         }
