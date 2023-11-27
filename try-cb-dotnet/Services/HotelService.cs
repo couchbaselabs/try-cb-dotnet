@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Couchbase.Query;
 using Microsoft.Extensions.Options;
-using try_cb_dotnet.Models;
 using try_cb_dotnet.Helpers;
-using Couchbase;
 using Couchbase.Search;
 using Couchbase.Search.Queries.Simple;
 using Couchbase.Search.Queries.Compound;
